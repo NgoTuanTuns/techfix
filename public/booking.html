@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Đặt lịch sửa laptop, điện thoại, tablet tại TechFix. Kỹ thuật viên gọi xác nhận trong 30 phút, báo giá sơ bộ qua điện thoại, miễn phí gửi yêu cầu."
+    />
+    <title>Đặt lịch sửa chữa trong 2 phút | TechFix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("tf-theme");
+          if (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            t = "dark";
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        document.documentElement.classList.add("js");
+      })();
+    </script>
+    <script src="js/motion.js" defer></script>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="wrap">
+        <div class="hotline">
+          Hotline: <span>1900 6363</span> — hỗ trợ mỗi ngày, 7:30 – 21:00
+        </div>
+        <div class="topbar-links">
+          <a href="contact.html">12 cửa hàng tại TP.HCM</a
+          ><a href="login.html">Đăng nhập</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="index.html"
+          ><span class="logo-badge">T</span>
+          <img
+            src="../assets/logo-removebg-preview.png"
+            alt=""
+            class="logo-img"
+          />
+        </a>
+        <nav class="main-nav">
+          <a href="index.html">Trang chủ</a>
+          <a href="booking.html" class="active">Đặt lịch</a>
+          <a href="dashboard.html">Đơn của tôi</a>
+          <a href="contact.html">Liên hệ</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-header wrap">
+      <h1>Đặt lịch sửa chữa</h1>
+      <p>
+        Điền thông tin bên dưới, kỹ thuật viên sẽ gọi xác nhận trong 30 phút và
+        báo giá sơ bộ qua điện thoại. Bạn không cần mang máy đến mới biết chi
+        phí.
+      </p>
+    </div>
+
+    <section style="padding-top: 28px">
+      <div class="wrap" style="max-width: 720px">
+        <div class="steps-indicator">
+          <span class="done"></span><span class="active"></span><span></span>
+        </div>
+
+        <div class="selected-pkg" id="selected-pkg">
+          <div class="sp-info">
+            Bạn đang chọn gói: <span class="sp-label" id="sp-label"></span> —
+            <span class="sp-price" id="sp-price"></span>
+          </div>
+          <a href="booking.html">Đổi gói khác</a>
+        </div>
+
+        <div
+          id="account-info"
+          style="
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            color: var(--ink-soft);
+            margin-bottom: 18px;
+          "
+        >
+          Đang kiểm tra đăng nhập...
+        </div>
+
+        <form class="form-card" id="booking-form">
+          <h3
+            style="
+              font-family: var(--font-display);
+              margin-bottom: 18px;
+              font-weight: 700;
+            "
+          >
+            Bước 1: Chọn loại thiết bị cần sửa
+          </h3>
+
+          <div class="device-picker">
+            <label class="device-option"
+              ><input type="radio" name="device" value="laptop" checked />
+              <div class="glyph">LT</div>
+              <span class="label">Laptop</span></label
+            >
+            <label class="device-option"
+              ><input type="radio" name="device" value="phone" />
+              <div class="glyph">ĐT</div>
+              <span class="label">Điện thoại</span></label
+            >
+            <label class="device-option"
+              ><input type="radio" name="device" value="tablet" />
+              <div class="glyph">TB</div>
+              <span class="label">Tablet</span></label
+            >
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="brand">Hãng thiết bị</label>
+              <select id="brand" name="brand">
+                <option>Apple</option>
+                <option>Samsung</option>
+                <option>Dell</option>
+                <option>Asus</option>
+                <option>Lenovo</option>
+                <option>Khác</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="model">Model hoặc đời máy</label>
+              <input
+                type="text"
+                id="model"
+                name="model"
+                placeholder="Ví dụ: MacBook Air M2"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="issue"
+              >Mô tả tình trạng máy <span class="req">*</span></label
+            >
+            <textarea
+              id="issue"
+              name="issue"
+              placeholder="Ví dụ: Máy không lên nguồn sau khi bị đổ nước, đèn báo pin vẫn sáng."
+            ></textarea>
+            <div class="hint">
+              Mô tả càng chi tiết, báo giá sơ bộ qua điện thoại càng chính xác.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="photo">Ảnh thiết bị (không bắt buộc)</label>
+            <input type="file" id="photo" name="photo" accept="image/*" />
+          </div>
+
+          <h3
+            style="
+              font-family: var(--font-display);
+              margin: 26px 0 18px;
+              font-weight: 700;
+            "
+          >
+            Bước 2: Hình thức nhận máy
+          </h3>
+
+          <div class="field">
+            <label for="method">Hình thức tiếp nhận</label>
+            <select id="method" name="method">
+              <option>Mang trực tiếp đến cửa hàng</option>
+              <option>
+                Nhận máy tận nơi (nội thành, phí vận chuyển 20.000đ)
+              </option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="time">Thời gian mong muốn</label
+            ><input type="datetime-local" id="time" name="time" />
+          </div>
+
+          <input type="hidden" id="service-slug" name="service" value="" />
+
+          <button type="submit" class="btn btn-primary btn-block">
+            Gửi yêu cầu đặt lịch
+          </button>
+          <p class="hint" style="text-align: center; margin-top: 12px">
+            Gửi yêu cầu hoàn toàn miễn phí. Bạn chưa cần thanh toán bất kỳ khoản
+            nào.
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <footer class="site-footer" style="padding-top: 0">
+      <div class="footer-legal">
+        <div class="wrap">
+          <span
+            >© 2026 TechFix. Đồ án môn học, không phải doanh nghiệp thật.</span
+          >
+          <span>109 Đường ABC, Quận 10, TP.HCM. Hotline: 1900 6363</span>
+        </div>
+      </div>
+    </footer>
+
+    <div class="float-contact">
+      <a
+        href="tel:19006363"
+        class="float-btn call"
+        title="Gọi hotline 1900 6363"
+        >☎</a
+      >
+      <a href="#" class="float-btn zalo" title="Nhắn tin qua Zalo">Zalo</a>
+      <a href="#" class="float-btn msg" title="Nhắn Messenger">Mess</a>
+    </div>
+
+    <script>
+      // Bắt buộc đăng nhập mới được đặt lịch — kiểm tra ngay khi vào trang,
+      // tránh để khách điền hết form rồi mới bị từ chối lúc submit.
+      (async function checkLoginOrRedirect() {
+        try {
+          var res = await fetch("../api/me.php");
+          var raw = await res.text();
+          var result = tryExtractJson(raw); // hàm khai báo bên dưới, nhưng được hoist nên gọi trước vẫn chạy được
+
+          if (!result || !result.success) {
+            window.location.href = "login.html?next=booking.html";
+            return;
+          }
+
+          var info = document.getElementById("account-info");
+          info.textContent =
+            "Đặt lịch với tài khoản: " + result.data.full_name + " — " + result.data.phone;
+        } catch (err) {
+          // Không gọi được server -> vẫn đưa về đăng nhập, an toàn hơn để lọt vào form
+          window.location.href = "login.html?next=booking.html";
+        }
+      })();
+
+      var SERVICES = {
+        "ve-sinh-tan-nhiet": {
+          device: "laptop",
+          label: "Vệ sinh và tra keo tản nhiệt",
+          price: "99.000đ",
+        },
+        "sua-laptop": {
+          device: "laptop",
+        },
+
+        "thay-ban-phim": {
+          device: "laptop",
+          label: "Thay bàn phím laptop",
+          price: "Từ 250.000đ",
+        },
+        "thay-man-hinh-laptop": {
+          device: "laptop",
+          label: "Thay màn hình laptop",
+          price: "Từ 1.200.000đ",
+        },
+        "cai-win": {
+          device: "laptop",
+          label: "Cài lại Windows và driver",
+          price: "150.000đ",
+        },
+        "sua-dien-thoai": {
+          device: "phone",
+        },
+
+        "ep-kinh": {
+          device: "phone",
+          label: "Ép kính mặt trước điện thoại",
+          price: "Từ 350.000đ",
+        },
+        "thay-pin-dt": {
+          device: "phone",
+          label: "Thay pin điện thoại chính hãng",
+          price: "Từ 450.000đ",
+        },
+        "sua-chan-sac": {
+          device: "phone",
+          label: "Sửa lỗi chân sạc",
+          price: "Từ 200.000đ",
+        },
+        "xu-ly-vao-nuoc": {
+          device: "phone",
+          label: "Xử lý máy vào nước, không lên nguồn",
+          price: "Miễn phí kiểm tra",
+        },
+        "sua-tablet": {
+          device: "tablet",
+        },
+
+        "thay-man-hinh-tablet": {
+          device: "tablet",
+          label: "Thay màn hình cảm ứng tablet",
+          price: "Từ 1.500.000đ",
+        },
+        "thay-pin-tablet": {
+          device: "tablet",
+          label: "Thay pin tablet",
+          price: "Từ 550.000đ",
+        },
+        "thay-cong-sac-tablet": {
+          device: "tablet",
+          label: "Thay cổng sạc tablet",
+          price: "Từ 300.000đ",
+        },
+        "sua-loi-phan-mem": {
+          device: "tablet",
+          label: "Sửa lỗi phần mềm, treo logo",
+          price: "Từ 150.000đ",
+        },
+      };
+
+      (function prefillFromPackage() {
+        var params = new URLSearchParams(window.location.search);
+        var svc = params.get("service");
+        if (!svc || !SERVICES[svc]) return;
+        var info = SERVICES[svc];
+
+        var radio = document.querySelector(
+          'input[name="device"][value="' + info.device + '"]',
+        );
+        if (radio) radio.checked = true;
+
+        document.getElementById("service-slug").value = svc;
+
+        // Một số entry (sua-laptop, sua-dien-thoai, sua-tablet) chỉ có device,
+        // không có label/price — bỏ qua phần banner trong trường hợp đó.
+        if (!info.label) return;
+
+        var issue = document.getElementById("issue");
+        if (issue && !issue.value)
+          issue.value = "Tôi muốn đặt gói: " + info.label;
+
+        document.getElementById("sp-label").textContent = info.label;
+        document.getElementById("sp-price").textContent = info.price || "";
+        document.getElementById("selected-pkg").classList.add("show");
+      })();
+
+      function setFormLoading(form, loading) {
+        var btn = form.querySelector('button[type="submit"]');
+        if (!btn) return;
+        if (loading) {
+          btn.dataset.originalText = btn.textContent;
+          btn.textContent = "Đang gửi...";
+          btn.disabled = true;
+        } else {
+          btn.textContent = btn.dataset.originalText || btn.textContent;
+          btn.disabled = false;
+        }
+      }
+
+      // Cố gắng trích phần JSON trong response, kể cả khi PHP lỡ in thêm chữ thừa phía trước.
+      function tryExtractJson(raw) {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          var start = raw.indexOf("{");
+          var end = raw.lastIndexOf("}");
+          if (start !== -1 && end !== -1 && end > start) {
+            try {
+              return JSON.parse(raw.slice(start, end + 1));
+            } catch (e2) {
+              return null;
+            }
+          }
+          return null;
+        }
+      }
+
+      document
+        .getElementById("booking-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var form = e.target;
+          var formData = new FormData(form); // gom mọi input theo name, kể cả file ảnh
+
+          setFormLoading(form, true);
+          try {
+            // Nếu booking.html nằm cùng cấp index.html (không phải thư mục con),
+            // đổi lại thành "api/create_order.php" (bỏ "../").
+            var res = await fetch("../api/create_order.php", {
+              method: "POST",
+              body: formData,
+            });
+
+            var raw = await res.text();
+            var result = tryExtractJson(raw);
+
+            if (!result) {
+              console.error("Response không phải JSON hợp lệ (status " + res.status + "):", raw);
+              alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+              return;
+            }
+
+            if (result.success) {
+              alert(
+                "Đặt lịch thành công! Mã đơn của bạn: " +
+                  result.data.order_code +
+                  "\nThợ sẽ gọi xác nhận trong 30 phút.",
+              );
+              window.location.href = "index.html";
+            } else {
+              alert(result.message || "Đặt lịch thất bại, vui lòng thử lại.");
+            }
+          } catch (networkErr) {
+            console.error(networkErr);
+            alert("Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.");
+          } finally {
+            setFormLoading(form, false);
+          }
+        });
+    </script>
+  </body>
+</html>

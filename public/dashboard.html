@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Theo dõi tiến độ, lịch sử sửa chữa và quản lý tài khoản của bạn tại TechFix."
+    />
+    <title>Đơn của tôi — TechFix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("tf-theme");
+          if (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            t = "dark";
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        document.documentElement.classList.add("js");
+      })();
+    </script>
+    <script src="../js/motion.js" defer></script>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="wrap">
+        <div class="hotline">Hotline: <span>1900 6363</span></div>
+        <div class="topbar-links">
+          <a href="contact.html">12 cửa hàng tại TP.HCM</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="index.html"
+          ><span class="logo-badge">T</span>
+          <img src="assets/logo-removebg-preview.png" alt="" class="logo-img" />
+        </a>
+        <nav class="main-nav">
+          <a href="index.html">Trang chủ</a><a href="booking.html">Đặt lịch</a
+          ><a href="dashboard.html" class="active">Đơn của tôi</a
+          ><a href="contact.html">Liên hệ</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-header wrap">
+      <h1 id="greeting">Chào bạn 👋</h1>
+      <p>Theo dõi tiến độ, lịch sử sửa chữa và quản lý tài khoản của bạn tại TechFix.</p>
+    </div>
+
+    <section style="padding-top: 20px">
+      <div class="wrap dash-layout">
+        <aside class="dash-side">
+          <div class="profile">
+            <div class="avatar" id="avatar">...</div>
+            <div>
+              <div id="profile-name" style="font-weight: 700; font-size: 0.92rem">
+                Đang tải...
+              </div>
+              <div id="profile-phone" style="font-size: 0.8rem; color: var(--ink-soft)">
+                &nbsp;
+              </div>
+            </div>
+          </div>
+          <nav>
+            <a href="#" class="active" data-panel="orders">Đơn sửa chữa</a>
+            <a href="#" data-panel="account">Thông tin tài khoản</a>
+            <a href="#" data-panel="payments">Lịch sử thanh toán</a>
+            <a href="contact.html">Đánh giá dịch vụ</a>
+            <a href="#" id="nav-logout">Đăng xuất</a>
+          </nav>
+        </aside>
+
+        <div>
+          <!-- Tab: Đơn sửa chữa -->
+          <div id="panel-orders">
+            <div id="orders-container">
+              <div class="order-card" id="orders-loading">
+                <p style="color: var(--ink-soft); font-size: 0.9rem">Đang tải danh sách đơn...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Thông tin tài khoản -->
+          <div id="panel-account" style="display: none">
+            <form class="form-card" id="account-form" style="max-width: 460px">
+              <div class="field">
+                <label for="acc-name">Họ và tên</label>
+                <input type="text" id="acc-name" required />
+              </div>
+              <div class="field">
+                <label for="acc-phone">Số điện thoại</label>
+                <input type="tel" id="acc-phone" required />
+              </div>
+              <div class="divider-row">Đổi mật khẩu (bỏ qua nếu không muốn đổi)</div>
+              <div class="field">
+                <label for="acc-current-pass">Mật khẩu hiện tại</label>
+                <input type="password" id="acc-current-pass" placeholder="Chỉ cần điền khi đổi mật khẩu" />
+              </div>
+              <div class="field">
+                <label for="acc-new-pass">Mật khẩu mới</label>
+                <input type="password" id="acc-new-pass" placeholder="Tối thiểu 8 ký tự" />
+              </div>
+              <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </form>
+          </div>
+
+          <!-- Tab: Lịch sử thanh toán -->
+          <div id="panel-payments" style="display: none">
+            <div id="payments-container">
+              <div class="order-card">
+                <p style="color: var(--ink-soft); font-size: 0.9rem">Đang tải...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="float-contact">
+      <a
+        href="tel:19006363"
+        class="float-btn call"
+        title="Gọi hotline 1900 6363"
+        >☎</a
+      >
+      <a href="#" class="float-btn zalo" title="Nhắn tin qua Zalo">Zalo</a>
+    </div>
+
+    <script>
+      // ---------- Helpers dùng chung ----------
+      function tryExtractJson(raw) {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          var start = raw.indexOf("{");
+          var end = raw.lastIndexOf("}");
+          if (start !== -1 && end !== -1 && end > start) {
+            try {
+              return JSON.parse(raw.slice(start, end + 1));
+            } catch (e2) {
+              return null;
+            }
+          }
+          return null;
+        }
+      }
+
+      function getInitials(fullName) {
+        var parts = fullName.trim().split(/\s+/);
+        var first = parts[0] ? parts[0][0] : "";
+        var last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+        return (first + last).toUpperCase();
+      }
+
+      function formatDate(mysqlDatetime) {
+        if (!mysqlDatetime) return "—";
+        var d = new Date(mysqlDatetime.replace(" ", "T"));
+        if (isNaN(d.getTime())) return mysqlDatetime;
+        var dd = String(d.getDate()).padStart(2, "0");
+        var mm = String(d.getMonth() + 1).padStart(2, "0");
+        return dd + "/" + mm + "/" + d.getFullYear();
+      }
+
+      function formatDateTime(mysqlDatetime) {
+        if (!mysqlDatetime) return "—";
+        var d = new Date(mysqlDatetime.replace(" ", "T"));
+        if (isNaN(d.getTime())) return mysqlDatetime;
+        var dd = String(d.getDate()).padStart(2, "0");
+        var mm = String(d.getMonth() + 1).padStart(2, "0");
+        var hh = String(d.getHours()).padStart(2, "0");
+        var mi = String(d.getMinutes()).padStart(2, "0");
+        return hh + ":" + mi + " " + dd + "/" + mm + "/" + d.getFullYear();
+      }
+
+      function formatMoney(n) {
+        if (n === null || n === undefined) return null;
+        return Number(n).toLocaleString("vi-VN") + "đ";
+      }
+
+      function setFormLoading(form, loading) {
+        var btn = form.querySelector('button[type="submit"]');
+        if (!btn) return;
+        if (loading) {
+          btn.dataset.originalText = btn.textContent;
+          btn.textContent = "Đang lưu...";
+          btn.disabled = true;
+        } else {
+          btn.textContent = btn.dataset.originalText || btn.textContent;
+          btn.disabled = false;
+        }
+      }
+
+      // ---------- Trạng thái đơn: badge + bước stepper ----------
+      var STATUS_META = {
+        received:           { badgeClass: "badge-received", text: "Đã tiếp nhận",   step: 1 },
+        diagnosing:         { badgeClass: "badge-received", text: "Đang chẩn đoán", step: 2 },
+        awaiting_approval:  { badgeClass: "badge-progress", text: "Chờ duyệt giá",  step: 2 },
+        repairing:          { badgeClass: "badge-progress", text: "Đang sửa chữa",  step: 3 },
+        completed:          { badgeClass: "badge-done",     text: "Hoàn tất",       step: 4 },
+        cancelled:          { badgeClass: "",               text: "Đã huỷ",         step: 0 },
+      };
+      var STEP_LABELS = ["Tiếp nhận", "Chẩn đoán", "Đang sửa", "Bàn giao"];
+
+      function renderTracker(currentStep) {
+        var html = "";
+        for (var i = 1; i <= 4; i++) {
+          var cls = "tracker-step";
+          var circleContent = i;
+          if (i < currentStep) { cls += " complete"; circleContent = "✓"; }
+          else if (i === currentStep) { cls += " current"; }
+          html +=
+            '<div class="' + cls + '">' +
+              '<div class="circle">' + circleContent + "</div>" +
+              '<div class="label">' + STEP_LABELS[i - 1] + "</div>" +
+            "</div>";
+        }
+        return html;
+      }
+
+      function renderOrderCard(order) {
+        var meta = STATUS_META[order.status] || { badgeClass: "", text: order.status, step: 0 };
+        var deviceLabel = (order.brand + " " + (order.model || "")).trim();
+
+        var badgeHtml;
+        if (order.status === "cancelled") {
+          badgeHtml = '<span class="badge" style="background:#FBE3E0;color:#B3261E;">Đã huỷ</span>';
+        } else {
+          badgeHtml = '<span class="badge ' + meta.badgeClass + '">' + meta.text + "</span>";
+        }
+
+        var trackerHtml = order.status === "cancelled"
+          ? ""
+          : '<div class="tracker">' + renderTracker(meta.step) + "</div>";
+
+        var cost = formatMoney(order.final_cost) || formatMoney(order.estimated_cost);
+        var costLine = cost
+          ? "Chi phí: <strong style=\"color:var(--ink)\">" + cost + "</strong>."
+          : "Đang chờ kỹ thuật viên báo giá.";
+
+        return (
+          '<div class="order-card">' +
+            '<div class="order-card-top">' +
+              "<div>" +
+                "<h3>" + deviceLabel + " — #" + order.order_code + "</h3>" +
+                '<div class="meta">Lỗi: ' + order.issue_description +
+                  ". Gửi ngày " + formatDate(order.received_at) + ".</div>" +
+              "</div>" +
+              badgeHtml +
+            "</div>" +
+            trackerHtml +
+            '<p style="margin-top:18px;font-size:0.88rem;color:var(--ink-soft);">' + costLine + "</p>" +
+          "</div>"
+        );
+      }
+
+      function renderOrders(orders) {
+        var container = document.getElementById("orders-container");
+        if (!orders.length) {
+          container.innerHTML =
+            '<div class="order-card">' +
+              '<p style="color:var(--ink-soft);font-size:0.9rem;">Bạn chưa có đơn sửa chữa nào.</p>' +
+              '<a href="booking.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;">Đặt lịch ngay</a>' +
+            "</div>";
+          return;
+        }
+        container.innerHTML = orders.map(renderOrderCard).join("");
+      }
+
+      // ---------- Lịch sử thanh toán ----------
+      var METHOD_LABELS = { cash: "Tiền mặt", bank_transfer: "Chuyển khoản", momo: "MoMo" };
+
+      function renderPaymentCard(p) {
+        var deviceLabel = (p.brand + " " + (p.model || "")).trim();
+        return (
+          '<div class="order-card">' +
+            '<div class="order-card-top">' +
+              "<div>" +
+                "<h3>" + deviceLabel + " — #" + p.order_code + "</h3>" +
+                '<div class="meta">Thanh toán lúc ' + formatDateTime(p.paid_at) +
+                  " qua " + (METHOD_LABELS[p.method] || p.method) + "</div>" +
+              "</div>" +
+              '<span class="badge badge-done">' + formatMoney(p.amount) + "</span>" +
+            "</div>" +
+          "</div>"
+        );
+      }
+
+      function renderPayments(payments) {
+        var container = document.getElementById("payments-container");
+        if (!payments.length) {
+          container.innerHTML =
+            '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Chưa có giao dịch thanh toán nào.</p></div>';
+          return;
+        }
+        container.innerHTML = payments.map(renderPaymentCard).join("");
+      }
+
+      var paymentsLoaded = false;
+      async function loadPaymentsIfNeeded() {
+        if (paymentsLoaded) return;
+        try {
+          var res = await fetch("../api/get_payments.php");
+          var raw = await res.text();
+          var result = tryExtractJson(raw);
+
+          if (!result || !result.success) {
+            document.getElementById("payments-container").innerHTML =
+              '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không tải được lịch sử thanh toán.</p></div>';
+            return;
+          }
+          renderPayments(result.data);
+          paymentsLoaded = true;
+        } catch (err) {
+          document.getElementById("payments-container").innerHTML =
+            '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không kết nối được tới máy chủ.</p></div>';
+        }
+      }
+
+      // ---------- Chuyển tab ----------
+      function switchPanel(name) {
+        ["orders", "account", "payments"].forEach(function (p) {
+          document.getElementById("panel-" + p).style.display = p === name ? "" : "none";
+        });
+        document.querySelectorAll('.dash-side nav a[data-panel]').forEach(function (a) {
+          a.classList.toggle("active", a.dataset.panel === name);
+        });
+        if (name === "payments") loadPaymentsIfNeeded();
+      }
+
+      document.querySelectorAll('.dash-side nav a[data-panel]').forEach(function (a) {
+        a.addEventListener("click", function (e) {
+          e.preventDefault();
+          switchPanel(a.dataset.panel);
+        });
+      });
+
+      // ---------- Tải trang: kiểm tra đăng nhập + tải thông tin + đơn hàng ----------
+      var currentUser = null;
+
+      (async function init() {
+        try {
+          var meRes = await fetch("../api/me.php");
+          var meRaw = await meRes.text();
+          var meResult = tryExtractJson(meRaw);
+
+          if (!meResult || !meResult.success) {
+            window.location.href = "login.html?next=dashboard.html";
+            return;
+          }
+
+          currentUser = meResult.data;
+          document.getElementById("greeting").textContent = "Chào " + currentUser.full_name + " 👋";
+          document.getElementById("profile-name").textContent = currentUser.full_name;
+          document.getElementById("profile-phone").textContent = currentUser.phone;
+          document.getElementById("avatar").textContent = getInitials(currentUser.full_name);
+
+          // Prefill form tài khoản luôn, để mở tab là có sẵn, không cần gọi thêm API
+          document.getElementById("acc-name").value = currentUser.full_name;
+          document.getElementById("acc-phone").value = currentUser.phone;
+        } catch (err) {
+          window.location.href = "login.html?next=dashboard.html";
+          return;
+        }
+
+        try {
+          var ordersRes = await fetch("../api/get_orders.php");
+          var ordersRaw = await ordersRes.text();
+          var ordersResult = tryExtractJson(ordersRaw);
+
+          if (!ordersResult || !ordersResult.success) {
+            document.getElementById("orders-container").innerHTML =
+              '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không tải được danh sách đơn. Vui lòng thử lại sau.</p></div>';
+            return;
+          }
+          renderOrders(ordersResult.data);
+        } catch (err) {
+          document.getElementById("orders-container").innerHTML =
+            '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không kết nối được tới máy chủ.</p></div>';
+        }
+      })();
+
+      // ---------- Submit form tài khoản ----------
+      document.getElementById("account-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var form = e.target;
+        var formData = new FormData();
+        formData.append("full_name", document.getElementById("acc-name").value);
+        formData.append("phone", document.getElementById("acc-phone").value);
+        formData.append("current_password", document.getElementById("acc-current-pass").value);
+        formData.append("new_password", document.getElementById("acc-new-pass").value);
+
+        setFormLoading(form, true);
+        try {
+          var res = await fetch("../api/update_profile.php", { method: "POST", body: formData });
+          var raw = await res.text();
+          var result = tryExtractJson(raw);
+
+          if (!result) {
+            alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+            return;
+          }
+
+          if (result.success) {
+            alert("Đã lưu thay đổi.");
+            currentUser.full_name = result.data.full_name;
+            currentUser.phone = result.data.phone;
+            document.getElementById("greeting").textContent = "Chào " + currentUser.full_name + " 👋";
+            document.getElementById("profile-name").textContent = currentUser.full_name;
+            document.getElementById("profile-phone").textContent = currentUser.phone;
+            document.getElementById("avatar").textContent = getInitials(currentUser.full_name);
+            document.getElementById("acc-current-pass").value = "";
+            document.getElementById("acc-new-pass").value = "";
+          } else {
+            alert(result.message || "Cập nhật thất bại, vui lòng thử lại.");
+          }
+        } catch (err) {
+          alert("Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.");
+        } finally {
+          setFormLoading(form, false);
+        }
+      });
+
+      // ---------- Đăng xuất thật ----------
+      document.getElementById("nav-logout").addEventListener("click", async function (e) {
+        e.preventDefault();
+        try {
+          await fetch("../api/logout.php");
+        } catch (err) {
+          // Dù gọi API lỗi vẫn cứ chuyển về trang đăng nhập cho an toàn
+        }
+        window.location.href = "login.html";
+      });
+    </script>
+  </body>
+</html>

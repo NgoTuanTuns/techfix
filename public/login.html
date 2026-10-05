@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Đăng nhập hoặc tạo tài khoản TechFix để đặt lịch và theo dõi tiến độ sửa chữa."
+    />
+    <title>Đăng nhập hoặc tạo tài khoản | TechFix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("tf-theme");
+          if (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            t = "dark";
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        document.documentElement.classList.add("js");
+      })();
+    </script>
+    <script src="../js/motion.js" defer></script>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="wrap">
+        <div class="hotline">Hotline: <span>1900 6363</span></div>
+        <div class="topbar-links">
+          <a href="contact.html">12 cửa hàng tại TP.HCM</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="index.html"
+          ><span class="logo-badge">T</span> Tech<span class="fix">Fix</span></a
+        >
+        <nav class="main-nav">
+          <a href="index.html">Trang chủ</a><a href="booking.html">Đặt lịch</a
+          ><a href="contact.html">Liên hệ</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button
+            type="button"
+            id="tab-login"
+            class="active"
+            onclick="switchTab('login')"
+          >
+            Đăng nhập
+          </button>
+          <button
+            type="button"
+            id="tab-register"
+            onclick="switchTab('register')"
+          >
+            Đăng ký
+          </button>
+        </div>
+
+        <div class="form-card">
+          <div id="panel-login" class="auth-panel active">
+            <form id="login-form">
+              <div class="field">
+                <label for="l-phone">Số điện thoại</label
+                ><input
+                  type="tel"
+                  id="l-phone"
+                  placeholder="09xx xxx xxx"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="l-pass">Mật khẩu</label
+                ><input
+                  type="password"
+                  id="l-pass"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 18px;
+                  font-size: 0.85rem;
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-weight: 400;
+                  "
+                  ><input type="checkbox" style="width: auto" /> Ghi nhớ đăng
+                  nhập</label
+                >
+                <a href="#" style="color: var(--primary); font-weight: 600"
+                  >Quên mật khẩu?</a
+                >
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                Đăng nhập
+              </button>
+            </form>
+          </div>
+
+          <div id="panel-register" class="auth-panel">
+            <form id="register-form">
+              <div class="field">
+                <label for="r-name">Họ và tên</label
+                ><input
+                  type="text"
+                  id="r-name"
+                  placeholder="Nguyễn Văn A"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="r-phone">Số điện thoại</label
+                ><input
+                  type="tel"
+                  id="r-phone"
+                  placeholder="09xx xxx xxx"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="r-pass">Mật khẩu</label
+                ><input
+                  type="password"
+                  id="r-pass"
+                  placeholder="Tối thiểu 8 ký tự"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="r-pass2">Nhập lại mật khẩu</label
+                ><input type="password" id="r-pass2" required />
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                Tạo tài khoản
+              </button>
+            </form>
+          </div>
+
+          <div class="divider-row">hoặc</div>
+          <button type="button" class="btn btn-outline btn-block">
+            Tiếp tục với Google
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="float-contact">
+      <a
+        href="tel:19006363"
+        class="float-btn call"
+        title="Gọi hotline 1900 6363"
+        >☎</a
+      >
+      <a href="#" class="float-btn zalo" title="Nhắn tin qua Zalo">Zalo</a>
+    </div>
+
+    <script>
+      function switchTab(name) {
+        document
+          .getElementById("tab-login")
+          .classList.toggle("active", name === "login");
+        document
+          .getElementById("tab-register")
+          .classList.toggle("active", name === "register");
+        document
+          .getElementById("panel-login")
+          .classList.toggle("active", name === "login");
+        document
+          .getElementById("panel-register")
+          .classList.toggle("active", name === "register");
+      }
+
+      function setFormLoading(form, loading) {
+        var btn = form.querySelector('button[type="submit"]');
+        if (!btn) return;
+        if (loading) {
+          btn.dataset.originalText = btn.textContent;
+          btn.textContent = "Đang xử lý...";
+          btn.disabled = true;
+        } else {
+          btn.textContent = btn.dataset.originalText || btn.textContent;
+          btn.disabled = false;
+        }
+      }
+
+      // Cố gắng tìm và parse phần JSON bên trong response, kể cả khi PHP
+      // lỡ in thêm Warning/Notice phía trước (dính noise nhưng JSON vẫn còn nguyên).
+      function tryExtractJson(raw) {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          var start = raw.indexOf("{");
+          var end = raw.lastIndexOf("}");
+          if (start !== -1 && end !== -1 && end > start) {
+            try {
+              return JSON.parse(raw.slice(start, end + 1));
+            } catch (e2) {
+              return null;
+            }
+          }
+          return null;
+        }
+      }
+
+      async function submitAuthForm(form, url, fields) {
+        var formData = new FormData();
+        Object.keys(fields).forEach(function (key) {
+          formData.append(key, document.getElementById(fields[key]).value);
+        });
+
+        setFormLoading(form, true);
+        try {
+          var res = await fetch(url, { method: "POST", body: formData });
+          var raw = await res.text();
+          var result = tryExtractJson(raw);
+
+          if (!result) {
+            // Không trích được message cụ thể nào — chỉ lúc này mới hiện câu chung chung.
+            console.error("Response không parse được:", raw);
+            alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+            return;
+          }
+
+          if (result.success) {
+            window.location.href = "dashboard.html";
+          } else {
+            // Luôn ưu tiên hiện đúng message cụ thể server trả về
+            alert(result.message || "Thao tác thất bại, vui lòng thử lại.");
+          }
+        } catch (networkErr) {
+          // Chỉ rơi vào đây khi THỰC SỰ không gọi tới được server
+          console.error(networkErr);
+          alert(
+            "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",
+          );
+        } finally {
+          setFormLoading(form, false);
+        }
+      }
+
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          submitAuthForm(e.target, "../api/login.php", {
+            phone: "l-phone",
+            password: "l-pass",
+          });
+        });
+
+      document
+        .getElementById("register-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          submitAuthForm(e.target, "../api/register.php", {
+            full_name: "r-name",
+            phone: "r-phone",
+            password: "r-pass",
+            password2: "r-pass2",
+          });
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quản trị đơn — TechFix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("tf-theme");
+          if (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            t = "dark";
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        document.documentElement.classList.add("js");
+      })();
+    </script>
+    <script src="js/motion.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="index.html"
+          ><span class="logo-badge">T</span> Tech<span class="fix">Fix</span></a
+        >
+        <nav class="main-nav">
+          <a href="#">Bảng điều khiển</a
+          ><a href="admin.html" class="active">Đơn sửa chữa</a
+          ><a href="#">Kho linh kiện</a><a href="#">Kỹ thuật viên</a>
+          <a href="login.html" class="nav-cta">Đăng xuất</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-header wrap">
+      <h1>Chào buổi sáng, chị Lan 👋</h1>
+      <p>
+        Cửa hàng hiện có 18 đơn đang mở, trong đó 5 đơn đang chờ khách duyệt
+        giá.
+      </p>
+    </div>
+
+    <section style="padding-top: 20px">
+      <div class="wrap">
+        <div class="stat-row">
+          <div class="stat-box">
+            <div class="n">18</div>
+            <div class="l">Đơn đang mở</div>
+          </div>
+          <div class="stat-box">
+            <div class="n">5</div>
+            <div class="l">Chờ khách duyệt giá</div>
+          </div>
+          <div class="stat-box">
+            <div class="n">9</div>
+            <div class="l">Đang sửa chữa</div>
+          </div>
+          <div class="stat-box">
+            <div class="n">42</div>
+            <div class="l">Hoàn tất trong tháng</div>
+          </div>
+        </div>
+
+        <div class="admin-toolbar">
+          <div class="admin-filters">
+            <div class="chip active">Tất cả</div>
+            <div class="chip">Đã tiếp nhận</div>
+            <div class="chip">Đang sửa</div>
+            <div class="chip">Chờ duyệt giá</div>
+            <div class="chip">Hoàn tất</div>
+          </div>
+          <input
+            type="search"
+            placeholder="Tìm theo mã đơn hoặc tên khách hàng"
+            style="
+              padding: 9px 14px;
+              border: 1px solid var(--line);
+              border-radius: 7px;
+              width: 260px;
+              background: #fff;
+            "
+          />
+        </div>
+
+        <div class="table-scroll">
+          <table class="orders">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Thiết bị</th>
+                <th>Lỗi</th>
+                <th>Kỹ thuật viên</th>
+                <th>Trạng thái</th>
+                <th>Giá</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#TF-2214</td>
+                <td>Minh Anh</td>
+                <td>MacBook Air M2</td>
+                <td>Không lên nguồn</td>
+                <td>Anh Tuấn</td>
+                <td><span class="badge badge-progress">Đang sửa</span></td>
+                <td>850.000đ</td>
+                <td class="row-actions">
+                  <button class="icon-btn">✎</button
+                  ><button class="icon-btn">⋮</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#TF-2231</td>
+                <td>Hải Đăng</td>
+                <td>iPad Gen 9</td>
+                <td>Cổng sạc lỏng</td>
+                <td>Chưa phân công</td>
+                <td><span class="badge badge-received">Đã tiếp nhận</span></td>
+                <td>—</td>
+                <td class="row-actions">
+                  <button class="icon-btn">✎</button
+                  ><button class="icon-btn">⋮</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#TF-2229</td>
+                <td>Thu Trang</td>
+                <td>Samsung S23</td>
+                <td>Vỡ kính lưng</td>
+                <td>Chị Lan</td>
+                <td>
+                  <span class="badge badge-progress">Chờ khách duyệt giá</span>
+                </td>
+                <td>420.000đ</td>
+                <td class="row-actions">
+                  <button class="icon-btn">✎</button
+                  ><button class="icon-btn">⋮</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#TF-2198</td>
+                <td>Minh Anh</td>
+                <td>iPhone 13</td>
+                <td>Vỡ màn hình</td>
+                <td>Anh Tuấn</td>
+                <td><span class="badge badge-done">Hoàn tất</span></td>
+                <td>650.000đ</td>
+                <td class="row-actions">
+                  <button class="icon-btn">✎</button
+                  ><button class="icon-btn">⋮</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#TF-2190</td>
+                <td>Quốc Bảo</td>
+                <td>Dell XPS 13</td>
+                <td>Bàn phím liệt phím</td>
+                <td>Chị Lan</td>
+                <td><span class="badge badge-done">Hoàn tất</span></td>
+                <td>380.000đ</td>
+                <td class="row-actions">
+                  <button class="icon-btn">✎</button
+                  ><button class="icon-btn">⋮</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      document.querySelectorAll(".chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          document
+            .querySelectorAll(".chip")
+            .forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>
