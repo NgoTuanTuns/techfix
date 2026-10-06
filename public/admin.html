@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/admin-extra.css" />
     <script>
       (function () {
         try {
@@ -22,7 +23,7 @@
         document.documentElement.classList.add("js");
       })();
     </script>
-    <script src="js/motion.js" defer></script>
+    <script src="../js/motion.js" defer></script>
   </head>
   <body>
     <header class="site-header">
@@ -31,53 +32,54 @@
           ><span class="logo-badge">T</span> Tech<span class="fix">Fix</span></a
         >
         <nav class="main-nav">
-          <a href="#">Bảng điều khiển</a
+          <a href="admin-dashboard.html">Bảng điều khiển</a
           ><a href="admin.html" class="active">Đơn sửa chữa</a
-          ><a href="#">Kho linh kiện</a><a href="#">Kỹ thuật viên</a>
-          <a href="login.html" class="nav-cta">Đăng xuất</a>
+          ><a href="admin-inventory.html">Kho linh kiện</a
+          ><a href="admin-technicians.html">Kỹ thuật viên</a>
+          <a href="login.html" id="nav-logout" class="nav-cta">Đăng xuất</a>
         </nav>
       </div>
     </header>
 
     <div class="page-header wrap">
-      <h1>Chào buổi sáng, chị Lan 👋</h1>
-      <p>
-        Cửa hàng hiện có 18 đơn đang mở, trong đó 5 đơn đang chờ khách duyệt
-        giá.
-      </p>
+      <h1 id="greeting">Chào bạn 👋</h1>
+      <p id="greeting-sub">Đang tải số liệu cửa hàng...</p>
     </div>
 
     <section style="padding-top: 20px">
       <div class="wrap">
         <div class="stat-row">
           <div class="stat-box">
-            <div class="n">18</div>
+            <div class="n" id="stat-open">—</div>
             <div class="l">Đơn đang mở</div>
           </div>
           <div class="stat-box">
-            <div class="n">5</div>
+            <div class="n" id="stat-awaiting">—</div>
             <div class="l">Chờ khách duyệt giá</div>
           </div>
           <div class="stat-box">
-            <div class="n">9</div>
+            <div class="n" id="stat-repairing">—</div>
             <div class="l">Đang sửa chữa</div>
           </div>
           <div class="stat-box">
-            <div class="n">42</div>
+            <div class="n" id="stat-completed">—</div>
             <div class="l">Hoàn tất trong tháng</div>
           </div>
         </div>
 
         <div class="admin-toolbar">
           <div class="admin-filters">
-            <div class="chip active">Tất cả</div>
-            <div class="chip">Đã tiếp nhận</div>
-            <div class="chip">Đang sửa</div>
-            <div class="chip">Chờ duyệt giá</div>
-            <div class="chip">Hoàn tất</div>
+            <div class="chip active" data-status="all">Tất cả</div>
+            <div class="chip" data-status="received">Đã tiếp nhận</div>
+            <div class="chip" data-status="repairing">Đang sửa</div>
+            <div class="chip" data-status="awaiting_approval">
+              Chờ duyệt giá
+            </div>
+            <div class="chip" data-status="completed">Hoàn tất</div>
           </div>
           <input
             type="search"
+            id="order-search"
             placeholder="Tìm theo mã đơn hoặc tên khách hàng"
             style="
               padding: 9px 14px;
@@ -89,8 +91,13 @@
           />
         </div>
 
-        <div class="table-scroll">
-          <table class="orders">
+        <div class="scroll-hint" id="scroll-hint" hidden>
+          <button type="button" class="btn btn-outline btn-sm" id="scroll-price">
+            Xem cột giá →
+          </button>
+        </div>
+        <div class="table-scroll" id="table-scroll">
+          <table class="orders orders-compact">
             <thead>
               <tr>
                 <th>Mã đơn</th>
@@ -99,76 +106,22 @@
                 <th>Lỗi</th>
                 <th>Kỹ thuật viên</th>
                 <th>Trạng thái</th>
-                <th>Giá</th>
+                <th>Giá ước tính</th>
+                <th>Giá cuối</th>
                 <th></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="orders-tbody">
               <tr>
-                <td>#TF-2214</td>
-                <td>Minh Anh</td>
-                <td>MacBook Air M2</td>
-                <td>Không lên nguồn</td>
-                <td>Anh Tuấn</td>
-                <td><span class="badge badge-progress">Đang sửa</span></td>
-                <td>850.000đ</td>
-                <td class="row-actions">
-                  <button class="icon-btn">✎</button
-                  ><button class="icon-btn">⋮</button>
-                </td>
-              </tr>
-              <tr>
-                <td>#TF-2231</td>
-                <td>Hải Đăng</td>
-                <td>iPad Gen 9</td>
-                <td>Cổng sạc lỏng</td>
-                <td>Chưa phân công</td>
-                <td><span class="badge badge-received">Đã tiếp nhận</span></td>
-                <td>—</td>
-                <td class="row-actions">
-                  <button class="icon-btn">✎</button
-                  ><button class="icon-btn">⋮</button>
-                </td>
-              </tr>
-              <tr>
-                <td>#TF-2229</td>
-                <td>Thu Trang</td>
-                <td>Samsung S23</td>
-                <td>Vỡ kính lưng</td>
-                <td>Chị Lan</td>
-                <td>
-                  <span class="badge badge-progress">Chờ khách duyệt giá</span>
-                </td>
-                <td>420.000đ</td>
-                <td class="row-actions">
-                  <button class="icon-btn">✎</button
-                  ><button class="icon-btn">⋮</button>
-                </td>
-              </tr>
-              <tr>
-                <td>#TF-2198</td>
-                <td>Minh Anh</td>
-                <td>iPhone 13</td>
-                <td>Vỡ màn hình</td>
-                <td>Anh Tuấn</td>
-                <td><span class="badge badge-done">Hoàn tất</span></td>
-                <td>650.000đ</td>
-                <td class="row-actions">
-                  <button class="icon-btn">✎</button
-                  ><button class="icon-btn">⋮</button>
-                </td>
-              </tr>
-              <tr>
-                <td>#TF-2190</td>
-                <td>Quốc Bảo</td>
-                <td>Dell XPS 13</td>
-                <td>Bàn phím liệt phím</td>
-                <td>Chị Lan</td>
-                <td><span class="badge badge-done">Hoàn tất</span></td>
-                <td>380.000đ</td>
-                <td class="row-actions">
-                  <button class="icon-btn">✎</button
-                  ><button class="icon-btn">⋮</button>
+                <td
+                  colspan="9"
+                  style="
+                    text-align: center;
+                    color: var(--ink-soft);
+                    padding: 24px;
+                  "
+                >
+                  Đang tải danh sách đơn...
                 </td>
               </tr>
             </tbody>
@@ -178,14 +131,504 @@
     </section>
 
     <script>
-      document.querySelectorAll(".chip").forEach((chip) => {
-        chip.addEventListener("click", () => {
-          document
-            .querySelectorAll(".chip")
-            .forEach((c) => c.classList.remove("active"));
+      // ---------- Helpers dùng chung ----------
+      function tryExtractJson(raw) {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          var start = raw.indexOf("{");
+          var end = raw.lastIndexOf("}");
+          if (start !== -1 && end !== -1 && end > start) {
+            try {
+              return JSON.parse(raw.slice(start, end + 1));
+            } catch (e2) {
+              return null;
+            }
+          }
+          return null;
+        }
+      }
+
+      function formatMoney(n) {
+        if (n === null || n === undefined) return null;
+        return Number(n).toLocaleString("vi-VN") + "đ";
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement("div");
+        div.textContent = str == null ? "" : str;
+        return div.innerHTML;
+      }
+
+      var STATUS_OPTIONS = [
+        { value: "received", label: "Đã tiếp nhận" },
+        { value: "diagnosing", label: "Đang chẩn đoán" },
+        { value: "awaiting_approval", label: "Chờ duyệt giá" },
+        { value: "repairing", label: "Đang sửa chữa" },
+        { value: "completed", label: "Hoàn tất" },
+        { value: "cancelled", label: "Đã huỷ" },
+      ];
+      var STATUS_BADGE_CLASS = {
+        received: "badge-received",
+        diagnosing: "badge-received",
+        awaiting_approval: "badge-progress",
+        repairing: "badge-progress",
+        completed: "badge-done",
+        cancelled: "",
+      };
+
+      var allOrders = [];
+      var technicians = [];
+      var currentFilter = "all";
+      var currentSearch = "";
+
+      // ---------- Render bảng ----------
+      function statusSelectHtml(order) {
+        var opts = STATUS_OPTIONS.map(function (o) {
+          var sel = o.value === order.status ? " selected" : "";
+          return (
+            '<option value="' +
+            o.value +
+            '"' +
+            sel +
+            ">" +
+            o.label +
+            "</option>"
+          );
+        }).join("");
+        return (
+          '<select class="status-select ' +
+          (STATUS_BADGE_CLASS[order.status] || "") +
+          '" ' +
+          'data-order-id="' +
+          order.id +
+          '" style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
+          opts +
+          "</select>"
+        );
+      }
+
+      function technicianSelectHtml(order) {
+        var opts = '<option value="">— Chưa phân công —</option>';
+        opts += technicians
+          .map(function (t) {
+            var sel =
+              String(t.id) === String(order.technician_id) ? " selected" : "";
+            return (
+              '<option value="' +
+              t.id +
+              '"' +
+              sel +
+              ">" +
+              escapeHtml(t.full_name) +
+              "</option>"
+            );
+          })
+          .join("");
+        return (
+          '<select class="technician-select" data-order-id="' +
+          order.id +
+          '" ' +
+          'style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
+          opts +
+          "</select>"
+        );
+      }
+
+      // Đơn đã hoàn tất mà chưa có giá cuối thì đánh dấu đỏ để không bị bỏ sót
+      function priceState(order, field) {
+        var missing =
+          field === "final_cost" &&
+          order.status === "completed" &&
+          (order[field] === null ||
+            order[field] === undefined ||
+            order[field] === "");
+        return {
+          missing: missing,
+          text: missing ? "Chưa nhập" : formatMoney(order[field]) || "—",
+        };
+      }
+
+      // Giá cuối chỉ được nhập khi đơn đã hoàn tất
+      var LOCKED_TITLE = "Chỉ nhập được giá cuối khi đơn đã hoàn tất";
+      function isPriceLocked(order, field) {
+        return field === "final_cost" && order.status !== "completed";
+      }
+
+      function priceCellHtml(order, field) {
+        var st = priceState(order, field);
+        var isFinal = field === "final_cost";
+        var locked = isPriceLocked(order, field);
+        var title = locked
+          ? LOCKED_TITLE
+          : isFinal
+            ? "Sửa giá cuối"
+            : "Sửa giá ước tính";
+        return (
+          "<td>" +
+          '<div class="price-cell' +
+          (st.missing ? " missing" : "") +
+          '" data-price-cell="' +
+          order.id +
+          ":" +
+          field +
+          '">' +
+          "<span>" +
+          st.text +
+          "</span>" +
+          '<button class="icon-btn" data-edit-price="' +
+          order.id +
+          '" data-field="' +
+          field +
+          '"' +
+          (locked ? " disabled" : "") +
+          ' title="' +
+          title +
+          '" aria-label="' +
+          title +
+          '">✎</button>' +
+          "</div></td>"
+        );
+      }
+
+      function refreshPriceCell(order, field) {
+        var cell = document.querySelector(
+          '[data-price-cell="' + order.id + ":" + field + '"]',
+        );
+        if (!cell) return;
+        var st = priceState(order, field);
+        cell.classList.toggle("missing", st.missing);
+        cell.querySelector("span").textContent = st.text;
+        var btn = cell.querySelector("[data-edit-price]");
+        if (btn) {
+          var locked = isPriceLocked(order, field);
+          btn.disabled = locked;
+          btn.title = btn.ariaLabel = locked
+            ? LOCKED_TITLE
+            : field === "final_cost"
+              ? "Sửa giá cuối"
+              : "Sửa giá ước tính";
+        }
+      }
+
+      function renderRow(order) {
+        var deviceLabel = escapeHtml(
+          (order.brand + " " + (order.model || "")).trim(),
+        );
+        return (
+          "<tr>" +
+          "<td>#" +
+          escapeHtml(order.order_code) +
+          "</td>" +
+          "<td>" +
+          escapeHtml(order.customer_name) +
+          "</td>" +
+          "<td>" +
+          deviceLabel +
+          "</td>" +
+          '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' +
+          escapeHtml(order.issue_description) +
+          '">' +
+          escapeHtml(order.issue_description) +
+          "</td>" +
+          "<td>" +
+          technicianSelectHtml(order) +
+          "</td>" +
+          "<td>" +
+          statusSelectHtml(order) +
+          "</td>" +
+          priceCellHtml(order, "estimated_cost") +
+          priceCellHtml(order, "final_cost") +
+          '<td class="row-actions">' +
+          '<button class="icon-btn" data-more="' +
+          order.id +
+          '" title="Khác">⋮</button>' +
+          "</td>" +
+          "</tr>"
+        );
+      }
+
+      function matchesFilter(order) {
+        if (currentFilter !== "all" && order.status !== currentFilter)
+          return false;
+        if (currentSearch) {
+          var haystack = (
+            order.order_code +
+            " " +
+            order.customer_name
+          ).toLowerCase();
+          if (haystack.indexOf(currentSearch.toLowerCase()) === -1)
+            return false;
+        }
+        return true;
+      }
+
+      function renderTable() {
+        var tbody = document.getElementById("orders-tbody");
+        var filtered = allOrders.filter(matchesFilter);
+
+        if (!filtered.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không có đơn nào khớp.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = filtered.map(renderRow).join("");
+        attachRowHandlers();
+      }
+
+      function renderStats() {
+        var open = allOrders.filter(function (o) {
+          return o.status !== "completed" && o.status !== "cancelled";
+        }).length;
+        var awaiting = allOrders.filter(function (o) {
+          return o.status === "awaiting_approval";
+        }).length;
+        var repairing = allOrders.filter(function (o) {
+          return o.status === "repairing";
+        }).length;
+
+        var now = new Date();
+        var completedThisMonth = allOrders.filter(function (o) {
+          if (o.status !== "completed" || !o.completed_at) return false;
+          var d = new Date(o.completed_at.replace(" ", "T"));
+          return (
+            d.getMonth() === now.getMonth() &&
+            d.getFullYear() === now.getFullYear()
+          );
+        }).length;
+
+        document.getElementById("stat-open").textContent = open;
+        document.getElementById("stat-awaiting").textContent = awaiting;
+        document.getElementById("stat-repairing").textContent = repairing;
+        document.getElementById("stat-completed").textContent =
+          completedThisMonth;
+
+        document.getElementById("greeting-sub").textContent =
+          "Cửa hàng hiện có " +
+          open +
+          " đơn đang mở, trong đó " +
+          awaiting +
+          " đơn đang chờ khách duyệt giá.";
+      }
+
+      // ---------- Lưu thay đổi ----------
+      async function saveOrderField(orderId, fields) {
+        var formData = new FormData();
+        formData.append("order_id", orderId);
+        Object.keys(fields).forEach(function (k) {
+          formData.append(k, fields[k]);
+        });
+
+        try {
+          var res = await fetch("../api/update_order_status.php", {
+            method: "POST",
+            body: formData,
+          });
+          var raw = await res.text();
+          var result = tryExtractJson(raw);
+
+          if (!result || !result.success) {
+            alert(
+              (result && result.message) || "Lưu thất bại, vui lòng thử lại.",
+            );
+            return false;
+          }
+          return true;
+        } catch (err) {
+          alert(
+            "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",
+          );
+          return false;
+        }
+      }
+
+      function attachRowHandlers() {
+        document.querySelectorAll(".status-select").forEach(function (sel) {
+          sel.addEventListener("change", async function () {
+            var orderId = sel.dataset.orderId;
+            var newStatus = sel.value;
+            var ok = await saveOrderField(orderId, { status: newStatus });
+            if (ok) {
+              var order = allOrders.find(function (o) {
+                return String(o.id) === String(orderId);
+              });
+              if (order) {
+                order.status = newStatus;
+                if (newStatus === "completed")
+                  order.completed_at = new Date().toISOString();
+                refreshPriceCell(order, "final_cost");
+              }
+              sel.className =
+                "status-select " + (STATUS_BADGE_CLASS[newStatus] || "");
+              renderStats();
+            }
+          });
+        });
+
+        document.querySelectorAll(".technician-select").forEach(function (sel) {
+          sel.addEventListener("change", async function () {
+            var orderId = sel.dataset.orderId;
+            var ok = await saveOrderField(orderId, {
+              technician_id: sel.value,
+            });
+            if (ok) {
+              var order = allOrders.find(function (o) {
+                return String(o.id) === String(orderId);
+              });
+              if (order) order.technician_id = sel.value;
+            }
+          });
+        });
+
+        document.querySelectorAll("[data-edit-price]").forEach(function (btn) {
+          btn.addEventListener("click", async function () {
+            var orderId = btn.dataset.editPrice;
+            var order = allOrders.find(function (o) {
+              return String(o.id) === String(orderId);
+            });
+            if (!order) return;
+
+            var fieldName = btn.dataset.field;
+            var isFinal = fieldName === "final_cost";
+            if (isPriceLocked(order, fieldName)) {
+              alert(LOCKED_TITLE + ". Hãy chuyển trạng thái sang \"Hoàn tất\" trước.");
+              return;
+            }
+            var current = order[fieldName];
+            var label = isFinal
+              ? "Nhập giá cuối cùng (đ):"
+              : "Nhập giá ước tính (đ):";
+
+            var input = prompt(label, current == null ? "" : current);
+            if (input === null || input.trim() === "") return;
+            var num = parseInt(input.replace(/\D/g, ""), 10);
+            if (isNaN(num) || num < 0) {
+              alert("Giá không hợp lệ");
+              return;
+            }
+
+            var fields = {};
+            fields[fieldName] = num;
+            var ok = await saveOrderField(orderId, fields);
+            if (ok) {
+              order[fieldName] = num;
+              refreshPriceCell(order, fieldName);
+            }
+          });
+        });
+
+        document.querySelectorAll("[data-more]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            alert(
+              "Xem chi tiết / lịch sử đơn — tính năng đang được phát triển.",
+            );
+          });
+        });
+      }
+
+      // ---------- Filter chip + tìm kiếm ----------
+      document.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          document.querySelectorAll(".chip").forEach(function (c) {
+            c.classList.remove("active");
+          });
           chip.classList.add("active");
+          currentFilter = chip.dataset.status;
+          renderTable();
         });
       });
+
+      document
+        .getElementById("order-search")
+        .addEventListener("input", function (e) {
+          currentSearch = e.target.value;
+          renderTable();
+        });
+
+      // ---------- Tải trang: kiểm tra quyền admin + tải dữ liệu ----------
+      (async function init() {
+        try {
+          var meRes = await fetch("../api/me.php");
+          var meRaw = await meRes.text();
+          var meResult = tryExtractJson(meRaw);
+
+          if (!meResult || !meResult.success) {
+            window.location.href = "login.html?next=admin.html";
+            return;
+          }
+          if (meResult.data.role !== "admin") {
+            alert("Tài khoản của bạn không có quyền truy cập trang quản trị.");
+            window.location.href = "dashboard.html";
+            return;
+          }
+
+          document.getElementById("greeting").textContent =
+            "Chào " + meResult.data.full_name + " 👋";
+        } catch (err) {
+          window.location.href = "login.html?next=admin.html";
+          return;
+        }
+
+        try {
+          var ordersRes = await fetch("../api/get_all_orders.php");
+          var ordersRaw = await ordersRes.text();
+          var ordersResult = tryExtractJson(ordersRaw);
+
+          var techRes = await fetch("../api/get_technicians.php");
+          var techRaw = await techRes.text();
+          var techResult = tryExtractJson(techRaw);
+
+          if (!ordersResult || !ordersResult.success) {
+            document.getElementById("orders-tbody").innerHTML =
+              '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không tải được danh sách đơn.</td></tr>';
+            return;
+          }
+
+          allOrders = ordersResult.data;
+          technicians = techResult && techResult.success ? techResult.data : [];
+
+          renderStats();
+          renderTable();
+        } catch (err) {
+          document.getElementById("orders-tbody").innerHTML =
+            '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không kết nối được tới máy chủ.</td></tr>';
+        }
+      })();
+
+      // ---------- Đăng xuất thật ----------
+      document
+        .getElementById("nav-logout")
+        .addEventListener("click", async function (e) {
+          e.preventDefault();
+          try {
+            await fetch("../api/logout.php");
+          } catch (err) {}
+          window.location.href = "login.html";
+        });
+    
+      // Nút "Xem cột giá": chỉ hiện khi bảng còn rộng hơn khung hiển thị
+      (function () {
+        var box = document.getElementById("table-scroll");
+        var hint = document.getElementById("scroll-hint");
+        var btn = document.getElementById("scroll-price");
+        function check() {
+          var overflow = box.scrollWidth > box.clientWidth + 4;
+          var atEnd = box.scrollLeft + box.clientWidth >= box.scrollWidth - 4;
+          hint.hidden = !overflow;
+          btn.textContent = atEnd ? "← Về đầu bảng" : "Xem cột giá →";
+        }
+        btn.addEventListener("click", function () {
+          var atEnd = box.scrollLeft + box.clientWidth >= box.scrollWidth - 4;
+          box.scrollTo({ left: atEnd ? 0 : box.scrollWidth, behavior: "smooth" });
+        });
+        box.addEventListener("scroll", check);
+        window.addEventListener("resize", check);
+        new MutationObserver(check).observe(
+          document.getElementById("orders-tbody"),
+          { childList: true },
+        );
+        check();
+      })();
     </script>
   </body>
 </html>

@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kho linh kiện — TechFix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/admin-extra.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("tf-theme");
+          if (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            t = "dark";
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        document.documentElement.classList.add("js");
+      })();
+    </script>
+    <script src="../js/motion.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="index.html"
+          ><span class="logo-badge">T</span> Tech<span class="fix">Fix</span></a
+        >
+        <nav class="main-nav">
+          <a href="admin-dashboard.html">Bảng điều khiển</a>
+          <a href="admin.html">Đơn sửa chữa</a>
+          <a href="admin-inventory.html" class="active">Kho linh kiện</a>
+          <a href="admin-technicians.html">Kỹ thuật viên</a>
+          <a href="#" id="nav-logout" class="nav-cta">Đăng xuất</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-header wrap">
+      <h1>Kho linh kiện</h1>
+      <p id="page-sub">Đang tải tồn kho...</p>
+    </div>
+
+    <section style="padding-top: 20px">
+      <div class="wrap">
+        <div class="stat-row">
+          <div class="stat-box">
+            <div class="n" id="stat-skus">—</div>
+            <div class="l">Mã linh kiện</div>
+          </div>
+          <div class="stat-box">
+            <div class="n" id="stat-low">—</div>
+            <div class="l">Sắp hết hàng</div>
+          </div>
+          <div class="stat-box">
+            <div class="n" id="stat-out">—</div>
+            <div class="l">Đã hết hàng</div>
+          </div>
+          <div class="stat-box">
+            <div class="n" id="stat-value">—</div>
+            <div class="l">Giá trị tồn kho (đ)</div>
+          </div>
+        </div>
+
+        <div class="admin-toolbar">
+          <div class="admin-filters">
+            <button type="button" class="chip active" data-state="all">
+              Tất cả
+            </button>
+            <button type="button" class="chip" data-state="low">Sắp hết</button>
+            <button type="button" class="chip" data-state="out">
+              Hết hàng
+            </button>
+          </div>
+          <input
+            type="search"
+            id="part-search"
+            aria-label="Tìm linh kiện"
+            placeholder="Tìm theo tên hoặc thiết bị tương thích"
+          />
+        </div>
+
+        <div class="table-scroll">
+          <table class="orders">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Linh kiện</th>
+                <th>Tồn kho</th>
+                <th>Giá nhập</th>
+                <th>Tình trạng</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="parts-tbody">
+              <tr>
+                <td colspan="6" class="empty">Đang tải kho linh kiện...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <script src="../js/admin-common.js"></script>
+    <script>
+      /* Bảng inventory: part_id, name, compatible_with, quantity, unit_cost
+         GET  ../api/get_parts.php          -> {success, data:[{id, name, compatible_with, quantity, unit_cost}]}
+         POST ../api/update_part_stock.php  (part_id, quantity) -> {success, message} */
+      var LOW_STOCK = 3; // tồn <= ngưỡng này thì báo "Sắp hết" (bảng chưa có cột ngưỡng riêng)
+      var parts = [];
+      var filter = "all";
+      var query = "";
+      var LABEL = { ok: "Đủ hàng", low: "Sắp hết", out: "Hết hàng" };
+      var BADGE = { ok: "badge-done", low: "badge-progress", out: "badge-out" };
+
+      function stateOf(p) {
+        if (Number(p.quantity) <= 0) return "out";
+        if (Number(p.quantity) <= LOW_STOCK) return "low";
+        return "ok";
+      }
+
+      function renderStats() {
+        var low = parts.filter(function (p) {
+          return stateOf(p) === "low";
+        }).length;
+        var out = parts.filter(function (p) {
+          return stateOf(p) === "out";
+        }).length;
+        var value = parts.reduce(function (s, p) {
+          return s + Number(p.quantity) * Number(p.unit_cost || 0);
+        }, 0);
+        document.getElementById("stat-skus").textContent = parts.length;
+        document.getElementById("stat-low").textContent = low;
+        document.getElementById("stat-out").textContent = out;
+        document.getElementById("stat-value").textContent =
+          TF.shortMoney(value);
+        document.getElementById("page-sub").textContent =
+          low + out === 0
+            ? "Tất cả linh kiện đều đủ hàng."
+            : low +
+              out +
+              " linh kiện cần nhập thêm, trong đó " +
+              out +
+              " món đã hết.";
+      }
+
+      function rowHtml(p) {
+        var s = stateOf(p);
+        var pct = Math.min(
+          100,
+          Math.round((p.quantity / (LOW_STOCK * 2)) * 100),
+        );
+        return (
+          "<tr><td>#" +
+          p.id +
+          "</td>" +
+          "<td>" +
+          TF.esc(p.name) +
+          (p.compatible_with
+            ? '<div class="cell-sub">Tương thích: ' +
+              TF.esc(p.compatible_with) +
+              "</div>"
+            : "") +
+          "</td>" +
+          '<td><div class="stock"><b>' +
+          Number(p.quantity) +
+          '</b><div class="bar-track">' +
+          '<div class="bar-fill ' +
+          (s === "ok" ? "olive" : "warn") +
+          '" data-w="' +
+          pct +
+          '"></div></div></div></td>' +
+          "<td>" +
+          (TF.formatMoney(p.unit_cost) || "—") +
+          "</td>" +
+          '<td><span class="badge ' +
+          BADGE[s] +
+          '">' +
+          LABEL[s] +
+          "</span></td>" +
+          '<td class="row-actions">' +
+          '<button class="icon-btn" data-adj="' +
+          p.id +
+          '" data-d="-1" title="Xuất 1 cái" aria-label="Giảm 1">−</button>' +
+          '<button class="icon-btn" data-adj="' +
+          p.id +
+          '" data-d="1" title="Nhập 1 cái" aria-label="Tăng 1">+</button>' +
+          '<button class="icon-btn" data-set="' +
+          p.id +
+          '" title="Nhập số lượng" aria-label="Sửa số lượng">✎</button>' +
+          "</td></tr>"
+        );
+      }
+
+      function renderTable() {
+        var tbody = document.getElementById("parts-tbody");
+        var q = query.trim().toLowerCase();
+        var rows = parts.filter(function (p) {
+          if (filter !== "all" && stateOf(p) !== filter) return false;
+          return (
+            !q ||
+            (p.name + " " + (p.compatible_with || ""))
+              .toLowerCase()
+              .indexOf(q) !== -1
+          );
+        });
+        if (!rows.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="6" class="empty">Không có linh kiện nào khớp.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(rowHtml).join("");
+        TF.growBars(tbody);
+      }
+
+      async function setQuantity(id, qty) {
+        var p = parts.find(function (x) {
+          return String(x.id) === String(id);
+        });
+        if (!p || qty < 0) return;
+        var r = await TF.post("../api/update_part_stock.php", {
+          id: id,
+          quantity: qty,
+        });
+        if (!r.success) {
+          TF.toast(r.message || "Lưu thất bại, vui lòng thử lại.", true);
+          return;
+        }
+        p.quantity = qty;
+        renderStats();
+        renderTable();
+        TF.toast("Đã cập nhật tồn kho: " + p.name);
+      }
+
+      document
+        .getElementById("parts-tbody")
+        .addEventListener("click", function (e) {
+          var adj = e.target.closest("[data-adj]");
+          var set = e.target.closest("[data-set]");
+          if (adj) {
+            var p = parts.find(function (x) {
+              return String(x.id) === adj.dataset.adj;
+            });
+            if (p)
+              setQuantity(
+                adj.dataset.adj,
+                Math.max(0, Number(p.quantity) + Number(adj.dataset.d)),
+              );
+          } else if (set) {
+            var q = parts.find(function (x) {
+              return String(x.id) === set.dataset.set;
+            });
+            if (!q) return;
+            var input = prompt("Số lượng tồn của " + q.name + ":", q.quantity);
+            if (input === null || input.trim() === "") return;
+            var n = parseInt(input.replace(/\D/g, ""), 10);
+            if (isNaN(n)) {
+              TF.toast("Số lượng không hợp lệ", true);
+              return;
+            }
+            setQuantity(set.dataset.set, n);
+          }
+        });
+
+      document.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          document.querySelectorAll(".chip").forEach(function (c) {
+            c.classList.remove("active");
+          });
+          chip.classList.add("active");
+          filter = chip.dataset.state;
+          renderTable();
+        });
+      });
+      document
+        .getElementById("part-search")
+        .addEventListener("input", function (e) {
+          query = e.target.value;
+          renderTable();
+        });
+
+      (async function () {
+        var user = await TF.guard("admin-inventory.html");
+        if (!user) return;
+        var res = await TF.get("../api/get_parts.php");
+        if (!res || !res.success) {
+          document.getElementById("page-sub").textContent =
+            "Không tải được kho linh kiện.";
+          document.getElementById("parts-tbody").innerHTML =
+            '<tr><td colspan="6" class="empty">Không tải được dữ liệu. Kiểm tra api/get_parts.php và bảng inventory trong cơ sở dữ liệu.</td></tr>';
+          return;
+        }
+        parts = res.data;
+        renderStats();
+        if (!parts.length) {
+          document.getElementById("page-sub").textContent = "Kho đang trống.";
+          document.getElementById("parts-tbody").innerHTML =
+            '<tr><td colspan="6" class="empty">Chưa có linh kiện nào. Thêm dữ liệu vào bảng inventory để bắt đầu theo dõi tồn kho.</td></tr>';
+          return;
+        }
+        renderTable();
+      })();
+    </script>
+  </body>
+</html>

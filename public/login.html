@@ -245,7 +245,13 @@
           }
 
           if (result.success) {
-            window.location.href = "dashboard.html";
+            var role = result.data && result.data.role;
+            if (role === "admin") {
+              window.location.href = "admin.html";
+            } else {
+              var params = new URLSearchParams(window.location.search);
+              window.location.href = params.get("next") || "dashboard.html";
+            }
           } else {
             // Luôn ưu tiên hiện đúng message cụ thể server trả về
             alert(result.message || "Thao tác thất bại, vui lòng thử lại.");
