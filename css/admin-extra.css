@@ -261,3 +261,86 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+/* ô thao tác cuối dòng: giữ là table-cell để thẳng hàng và đường kẻ không bị lệch */
+.orders td.row-actions {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: right;
+  white-space: nowrap;
+}
+.orders td.row-actions .icon-btn {
+  vertical-align: middle;
+}
+.orders td.row-actions .icon-btn + .icon-btn {
+  margin-left: 6px;
+}
+
+/* bảng chi tiết đơn */
+.od-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  overflow-y: auto;
+}
+.od-dialog {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--r-card);
+  padding: 24px;
+  box-shadow: var(--shadow-2);
+}
+.od-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.od-head h3 {
+  flex: 1;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.od-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.od-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.od-label {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+.od-value {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.od-issue {
+  padding-top: 16px;
+}
+.od-issue p {
+  margin-top: 4px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+@media (max-width: 520px) {
+  .od-grid {
+    grid-template-columns: 1fr;
+  }
+}

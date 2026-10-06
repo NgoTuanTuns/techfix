@@ -442,6 +442,123 @@
         }
       }
 
+
+      // ---------- Bảng chi tiết đơn ----------
+      var detailOverlay = null;
+      var detailOpener = null;
+
+      function fmtDate(v) {
+        if (!v) return "—";
+        var d = new Date(String(v).replace(" ", "T"));
+        return isNaN(d.getTime()) ? escapeHtml(v) : d.toLocaleString("vi-VN");
+      }
+
+      function closeOrderDetail() {
+        if (!detailOverlay) return;
+        detailOverlay.remove();
+        detailOverlay = null;
+        document.removeEventListener("keydown", detailKeyHandler);
+        document.body.style.overflow = "";
+        if (detailOpener) detailOpener.focus();
+      }
+
+      function detailKeyHandler(e) {
+        if (e.key === "Escape") closeOrderDetail();
+      }
+
+      function detailRow(label, valueHtml) {
+        return (
+          '<div class="od-item"><span class="od-label">' +
+          label +
+          '</span><span class="od-value">' +
+          valueHtml +
+          "</span></div>"
+        );
+      }
+
+      function openOrderDetail(orderId, opener) {
+        var order = allOrders.find(function (o) {
+          return String(o.id) === String(orderId);
+        });
+        if (!order) return;
+        closeOrderDetail();
+        detailOpener = opener || null;
+
+        var statusOpt = STATUS_OPTIONS.find(function (o) {
+          return o.value === order.status;
+        });
+        var techName =
+          order.technician_name ||
+          (
+            technicians.find(function (t) {
+              return String(t.id) === String(order.technician_id);
+            }) || {}
+          ).full_name;
+        var device = (order.brand + " " + (order.model || "")).trim();
+        var finalText =
+          order.status === "completed" || Number(order.final_cost) > 0
+            ? formatMoney(order.final_cost) || "Chưa nhập"
+            : "—";
+
+        var rows =
+          detailRow("Khách hàng", escapeHtml(order.customer_name) || "—") +
+          detailRow("Thiết bị", escapeHtml(device) || "—") +
+          detailRow(
+            "Kỹ thuật viên",
+            techName ? escapeHtml(techName) : "Chưa phân công",
+          ) +
+          detailRow("Ngày tiếp nhận", fmtDate(order.received_at)) +
+          detailRow("Ngày hoàn tất", fmtDate(order.completed_at)) +
+          detailRow(
+            "Giá ước tính",
+            formatMoney(order.estimated_cost) || "—",
+          ) +
+          detailRow("Giá cuối", finalText);
+
+        // Các trường tuỳ chọn: chỉ hiện nếu API có trả về
+        [
+          ["customer_phone", "Số điện thoại"],
+          ["phone", "Số điện thoại"],
+          ["customer_email", "Email"],
+          ["email", "Email"],
+          ["address", "Địa chỉ"],
+          ["service_type", "Dịch vụ"],
+          ["note", "Ghi chú"],
+        ].forEach(function (f) {
+          if (order[f[0]]) rows += detailRow(f[1], escapeHtml(order[f[0]]));
+        });
+
+        detailOverlay = document.createElement("div");
+        detailOverlay.className = "od-overlay";
+        detailOverlay.innerHTML =
+          '<div class="od-dialog" role="dialog" aria-modal="true" aria-labelledby="od-title">' +
+          '<div class="od-head"><h3 id="od-title">Đơn #' +
+          escapeHtml(order.order_code) +
+          "</h3>" +
+          '<span class="badge ' +
+          (STATUS_BADGE_CLASS[order.status] || "") +
+          '">' +
+          (statusOpt ? statusOpt.label : escapeHtml(order.status)) +
+          "</span>" +
+          '<button type="button" class="icon-btn od-close" aria-label="Đóng">✕</button></div>' +
+          '<div class="od-grid">' +
+          rows +
+          "</div>" +
+          '<div class="od-issue"><span class="od-label">Mô tả lỗi</span>' +
+          "<p>" +
+          (escapeHtml(order.issue_description) || "—") +
+          "</p></div></div>";
+
+        detailOverlay.addEventListener("click", function (e) {
+          if (e.target === detailOverlay || e.target.closest(".od-close"))
+            closeOrderDetail();
+        });
+        document.body.appendChild(detailOverlay);
+        document.body.style.overflow = "hidden";
+        document.addEventListener("keydown", detailKeyHandler);
+        detailOverlay.querySelector(".od-close").focus();
+      }
+
       function attachRowHandlers() {
         document.querySelectorAll(".status-select").forEach(function (sel) {
           sel.addEventListener("change", async function () {
@@ -519,9 +636,7 @@
 
         document.querySelectorAll("[data-more]").forEach(function (btn) {
           btn.addEventListener("click", function () {
-            alert(
-              "Xem chi tiết / lịch sử đơn — tính năng đang được phát triển.",
-            );
+            openOrderDetail(btn.dataset.more, btn);
           });
         });
       }
