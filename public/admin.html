@@ -28,9 +28,9 @@
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="logo" href="index.html"
-          ><span class="logo-badge">T</span> Tech<span class="fix">Fix</span></a
-        >
+        <a class="logo" href="index.html">
+          <img src="../assets/logo.png" alt="" class="logo-icon" />
+        </a>
         <nav class="main-nav">
           <a href="admin-dashboard.html">Bảng điều khiển</a
           ><a href="admin.html" class="active">Đơn sửa chữa</a
@@ -92,7 +92,11 @@
         </div>
 
         <div class="scroll-hint" id="scroll-hint" hidden>
-          <button type="button" class="btn btn-outline btn-sm" id="scroll-price">
+          <button
+            type="button"
+            class="btn btn-outline btn-sm"
+            id="scroll-price"
+          >
             Xem cột giá →
           </button>
         </div>
@@ -442,7 +446,6 @@
         }
       }
 
-
       // ---------- Bảng chi tiết đơn ----------
       var detailOverlay = null;
       var detailOpener = null;
@@ -509,10 +512,7 @@
           ) +
           detailRow("Ngày tiếp nhận", fmtDate(order.received_at)) +
           detailRow("Ngày hoàn tất", fmtDate(order.completed_at)) +
-          detailRow(
-            "Giá ước tính",
-            formatMoney(order.estimated_cost) || "—",
-          ) +
+          detailRow("Giá ước tính", formatMoney(order.estimated_cost) || "—") +
           detailRow("Giá cuối", finalText);
 
         // Các trường tuỳ chọn: chỉ hiện nếu API có trả về
@@ -608,7 +608,9 @@
             var fieldName = btn.dataset.field;
             var isFinal = fieldName === "final_cost";
             if (isPriceLocked(order, fieldName)) {
-              alert(LOCKED_TITLE + ". Hãy chuyển trạng thái sang \"Hoàn tất\" trước.");
+              alert(
+                LOCKED_TITLE + '. Hãy chuyển trạng thái sang "Hoàn tất" trước.',
+              );
               return;
             }
             var current = order[fieldName];
@@ -720,7 +722,7 @@
           } catch (err) {}
           window.location.href = "login.html";
         });
-    
+
       // Nút "Xem cột giá": chỉ hiện khi bảng còn rộng hơn khung hiển thị
       (function () {
         var box = document.getElementById("table-scroll");
@@ -734,7 +736,10 @@
         }
         btn.addEventListener("click", function () {
           var atEnd = box.scrollLeft + box.clientWidth >= box.scrollWidth - 4;
-          box.scrollTo({ left: atEnd ? 0 : box.scrollWidth, behavior: "smooth" });
+          box.scrollTo({
+            left: atEnd ? 0 : box.scrollWidth,
+            behavior: "smooth",
+          });
         });
         box.addEventListener("scroll", check);
         window.addEventListener("resize", check);

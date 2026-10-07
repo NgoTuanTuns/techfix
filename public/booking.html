@@ -43,13 +43,8 @@
 
     <header class="site-header">
       <div class="wrap">
-        <a class="logo" href="index.html"
-          ><span class="logo-badge">T</span>
-          <img
-            src="../assets/logo-removebg-preview.png"
-            alt=""
-            class="logo-img"
-          />
+        <a class="logo" href="index.html">
+          <img src="../assets/logo.png" alt="" class="logo-icon" />
         </a>
         <nav class="main-nav">
           <a href="index.html">Trang chủ</a>
@@ -245,7 +240,10 @@
 
           var info = document.getElementById("account-info");
           info.textContent =
-            "Đặt lịch với tài khoản: " + result.data.full_name + " — " + result.data.phone;
+            "Đặt lịch với tài khoản: " +
+            result.data.full_name +
+            " — " +
+            result.data.phone;
         } catch (err) {
           // Không gọi được server -> vẫn đưa về đăng nhập, an toàn hơn để lọt vào form
           window.location.href = "login.html?next=booking.html";
@@ -404,7 +402,10 @@
             var result = tryExtractJson(raw);
 
             if (!result) {
-              console.error("Response không phải JSON hợp lệ (status " + res.status + "):", raw);
+              console.error(
+                "Response không phải JSON hợp lệ (status " + res.status + "):",
+                raw,
+              );
               alert("Có lỗi xảy ra, vui lòng thử lại sau.");
               return;
             }
@@ -421,7 +422,9 @@
             }
           } catch (networkErr) {
             console.error(networkErr);
-            alert("Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.");
+            alert(
+              "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",
+            );
           } finally {
             setFormLoading(form, false);
           }

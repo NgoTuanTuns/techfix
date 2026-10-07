@@ -40,9 +40,8 @@
 
     <header class="site-header">
       <div class="wrap">
-        <a class="logo" href="index.html"
-          ><span class="logo-badge">T</span>
-          <img src="assets/logo-removebg-preview.png" alt="" class="logo-img" />
+        <a class="logo" href="index.html">
+          <img src="../assets/logo.png" alt="" class="logo-icon" />
         </a>
         <nav class="main-nav">
           <a href="index.html">Trang chủ</a><a href="booking.html">Đặt lịch</a
@@ -54,7 +53,10 @@
 
     <div class="page-header wrap">
       <h1 id="greeting">Chào bạn 👋</h1>
-      <p>Theo dõi tiến độ, lịch sử sửa chữa và quản lý tài khoản của bạn tại TechFix.</p>
+      <p>
+        Theo dõi tiến độ, lịch sử sửa chữa và quản lý tài khoản của bạn tại
+        TechFix.
+      </p>
     </div>
 
     <section style="padding-top: 20px">
@@ -63,10 +65,16 @@
           <div class="profile">
             <div class="avatar" id="avatar">...</div>
             <div>
-              <div id="profile-name" style="font-weight: 700; font-size: 0.92rem">
+              <div
+                id="profile-name"
+                style="font-weight: 700; font-size: 0.92rem"
+              >
                 Đang tải...
               </div>
-              <div id="profile-phone" style="font-size: 0.8rem; color: var(--ink-soft)">
+              <div
+                id="profile-phone"
+                style="font-size: 0.8rem; color: var(--ink-soft)"
+              >
                 &nbsp;
               </div>
             </div>
@@ -85,7 +93,9 @@
           <div id="panel-orders">
             <div id="orders-container">
               <div class="order-card" id="orders-loading">
-                <p style="color: var(--ink-soft); font-size: 0.9rem">Đang tải danh sách đơn...</p>
+                <p style="color: var(--ink-soft); font-size: 0.9rem">
+                  Đang tải danh sách đơn...
+                </p>
               </div>
             </div>
           </div>
@@ -101,16 +111,28 @@
                 <label for="acc-phone">Số điện thoại</label>
                 <input type="tel" id="acc-phone" required />
               </div>
-              <div class="divider-row">Đổi mật khẩu (bỏ qua nếu không muốn đổi)</div>
+              <div class="divider-row">
+                Đổi mật khẩu (bỏ qua nếu không muốn đổi)
+              </div>
               <div class="field">
                 <label for="acc-current-pass">Mật khẩu hiện tại</label>
-                <input type="password" id="acc-current-pass" placeholder="Chỉ cần điền khi đổi mật khẩu" />
+                <input
+                  type="password"
+                  id="acc-current-pass"
+                  placeholder="Chỉ cần điền khi đổi mật khẩu"
+                />
               </div>
               <div class="field">
                 <label for="acc-new-pass">Mật khẩu mới</label>
-                <input type="password" id="acc-new-pass" placeholder="Tối thiểu 8 ký tự" />
+                <input
+                  type="password"
+                  id="acc-new-pass"
+                  placeholder="Tối thiểu 8 ký tự"
+                />
               </div>
-              <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+              <button type="submit" class="btn btn-primary">
+                Lưu thay đổi
+              </button>
             </form>
           </div>
 
@@ -118,7 +140,9 @@
           <div id="panel-payments" style="display: none">
             <div id="payments-container">
               <div class="order-card">
-                <p style="color: var(--ink-soft); font-size: 0.9rem">Đang tải...</p>
+                <p style="color: var(--ink-soft); font-size: 0.9rem">
+                  Đang tải...
+                </p>
               </div>
             </div>
           </div>
@@ -202,12 +226,28 @@
 
       // ---------- Trạng thái đơn: badge + bước stepper ----------
       var STATUS_META = {
-        received:           { badgeClass: "badge-received", text: "Đã tiếp nhận",   step: 1 },
-        diagnosing:         { badgeClass: "badge-received", text: "Đang chẩn đoán", step: 2 },
-        awaiting_approval:  { badgeClass: "badge-progress", text: "Chờ duyệt giá",  step: 2 },
-        repairing:          { badgeClass: "badge-progress", text: "Đang sửa chữa",  step: 3 },
-        completed:          { badgeClass: "badge-done",     text: "Hoàn tất",       step: 4 },
-        cancelled:          { badgeClass: "",               text: "Đã huỷ",         step: 0 },
+        received: {
+          badgeClass: "badge-received",
+          text: "Đã tiếp nhận",
+          step: 1,
+        },
+        diagnosing: {
+          badgeClass: "badge-received",
+          text: "Đang chẩn đoán",
+          step: 2,
+        },
+        awaiting_approval: {
+          badgeClass: "badge-progress",
+          text: "Chờ duyệt giá",
+          step: 2,
+        },
+        repairing: {
+          badgeClass: "badge-progress",
+          text: "Đang sửa chữa",
+          step: 3,
+        },
+        completed: { badgeClass: "badge-done", text: "Hoàn tất", step: 4 },
+        cancelled: { badgeClass: "", text: "Đã huỷ", step: 0 },
       };
       var STEP_LABELS = ["Tiếp nhận", "Chẩn đoán", "Đang sửa", "Bàn giao"];
 
@@ -216,49 +256,80 @@
         for (var i = 1; i <= 4; i++) {
           var cls = "tracker-step";
           var circleContent = i;
-          if (i < currentStep) { cls += " complete"; circleContent = "✓"; }
-          else if (i === currentStep) { cls += " current"; }
+          if (i < currentStep) {
+            cls += " complete";
+            circleContent = "✓";
+          } else if (i === currentStep) {
+            cls += " current";
+          }
           html +=
-            '<div class="' + cls + '">' +
-              '<div class="circle">' + circleContent + "</div>" +
-              '<div class="label">' + STEP_LABELS[i - 1] + "</div>" +
+            '<div class="' +
+            cls +
+            '">' +
+            '<div class="circle">' +
+            circleContent +
+            "</div>" +
+            '<div class="label">' +
+            STEP_LABELS[i - 1] +
+            "</div>" +
             "</div>";
         }
         return html;
       }
 
       function renderOrderCard(order) {
-        var meta = STATUS_META[order.status] || { badgeClass: "", text: order.status, step: 0 };
+        var meta = STATUS_META[order.status] || {
+          badgeClass: "",
+          text: order.status,
+          step: 0,
+        };
         var deviceLabel = (order.brand + " " + (order.model || "")).trim();
 
         var badgeHtml;
         if (order.status === "cancelled") {
-          badgeHtml = '<span class="badge" style="background:#FBE3E0;color:#B3261E;">Đã huỷ</span>';
+          badgeHtml =
+            '<span class="badge" style="background:#FBE3E0;color:#B3261E;">Đã huỷ</span>';
         } else {
-          badgeHtml = '<span class="badge ' + meta.badgeClass + '">' + meta.text + "</span>";
+          badgeHtml =
+            '<span class="badge ' +
+            meta.badgeClass +
+            '">' +
+            meta.text +
+            "</span>";
         }
 
-        var trackerHtml = order.status === "cancelled"
-          ? ""
-          : '<div class="tracker">' + renderTracker(meta.step) + "</div>";
+        var trackerHtml =
+          order.status === "cancelled"
+            ? ""
+            : '<div class="tracker">' + renderTracker(meta.step) + "</div>";
 
-        var cost = formatMoney(order.final_cost) || formatMoney(order.estimated_cost);
+        var cost =
+          formatMoney(order.final_cost) || formatMoney(order.estimated_cost);
         var costLine = cost
-          ? "Chi phí: <strong style=\"color:var(--ink)\">" + cost + "</strong>."
+          ? 'Chi phí: <strong style="color:var(--ink)">' + cost + "</strong>."
           : "Đang chờ kỹ thuật viên báo giá.";
 
         return (
           '<div class="order-card">' +
-            '<div class="order-card-top">' +
-              "<div>" +
-                "<h3>" + deviceLabel + " — #" + order.order_code + "</h3>" +
-                '<div class="meta">Lỗi: ' + order.issue_description +
-                  ". Gửi ngày " + formatDate(order.received_at) + ".</div>" +
-              "</div>" +
-              badgeHtml +
-            "</div>" +
-            trackerHtml +
-            '<p style="margin-top:18px;font-size:0.88rem;color:var(--ink-soft);">' + costLine + "</p>" +
+          '<div class="order-card-top">' +
+          "<div>" +
+          "<h3>" +
+          deviceLabel +
+          " — #" +
+          order.order_code +
+          "</h3>" +
+          '<div class="meta">Lỗi: ' +
+          order.issue_description +
+          ". Gửi ngày " +
+          formatDate(order.received_at) +
+          ".</div>" +
+          "</div>" +
+          badgeHtml +
+          "</div>" +
+          trackerHtml +
+          '<p style="margin-top:18px;font-size:0.88rem;color:var(--ink-soft);">' +
+          costLine +
+          "</p>" +
           "</div>"
         );
       }
@@ -268,8 +339,8 @@
         if (!orders.length) {
           container.innerHTML =
             '<div class="order-card">' +
-              '<p style="color:var(--ink-soft);font-size:0.9rem;">Bạn chưa có đơn sửa chữa nào.</p>' +
-              '<a href="booking.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;">Đặt lịch ngay</a>' +
+            '<p style="color:var(--ink-soft);font-size:0.9rem;">Bạn chưa có đơn sửa chữa nào.</p>' +
+            '<a href="booking.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;">Đặt lịch ngay</a>' +
             "</div>";
           return;
         }
@@ -277,20 +348,33 @@
       }
 
       // ---------- Lịch sử thanh toán ----------
-      var METHOD_LABELS = { cash: "Tiền mặt", bank_transfer: "Chuyển khoản", momo: "MoMo" };
+      var METHOD_LABELS = {
+        cash: "Tiền mặt",
+        bank_transfer: "Chuyển khoản",
+        momo: "MoMo",
+      };
 
       function renderPaymentCard(p) {
         var deviceLabel = (p.brand + " " + (p.model || "")).trim();
         return (
           '<div class="order-card">' +
-            '<div class="order-card-top">' +
-              "<div>" +
-                "<h3>" + deviceLabel + " — #" + p.order_code + "</h3>" +
-                '<div class="meta">Thanh toán lúc ' + formatDateTime(p.paid_at) +
-                  " qua " + (METHOD_LABELS[p.method] || p.method) + "</div>" +
-              "</div>" +
-              '<span class="badge badge-done">' + formatMoney(p.amount) + "</span>" +
-            "</div>" +
+          '<div class="order-card-top">' +
+          "<div>" +
+          "<h3>" +
+          deviceLabel +
+          " — #" +
+          p.order_code +
+          "</h3>" +
+          '<div class="meta">Thanh toán lúc ' +
+          formatDateTime(p.paid_at) +
+          " qua " +
+          (METHOD_LABELS[p.method] || p.method) +
+          "</div>" +
+          "</div>" +
+          '<span class="badge badge-done">' +
+          formatMoney(p.amount) +
+          "</span>" +
+          "</div>" +
           "</div>"
         );
       }
@@ -329,20 +413,25 @@
       // ---------- Chuyển tab ----------
       function switchPanel(name) {
         ["orders", "account", "payments"].forEach(function (p) {
-          document.getElementById("panel-" + p).style.display = p === name ? "" : "none";
+          document.getElementById("panel-" + p).style.display =
+            p === name ? "" : "none";
         });
-        document.querySelectorAll('.dash-side nav a[data-panel]').forEach(function (a) {
-          a.classList.toggle("active", a.dataset.panel === name);
-        });
+        document
+          .querySelectorAll(".dash-side nav a[data-panel]")
+          .forEach(function (a) {
+            a.classList.toggle("active", a.dataset.panel === name);
+          });
         if (name === "payments") loadPaymentsIfNeeded();
       }
 
-      document.querySelectorAll('.dash-side nav a[data-panel]').forEach(function (a) {
-        a.addEventListener("click", function (e) {
-          e.preventDefault();
-          switchPanel(a.dataset.panel);
+      document
+        .querySelectorAll(".dash-side nav a[data-panel]")
+        .forEach(function (a) {
+          a.addEventListener("click", function (e) {
+            e.preventDefault();
+            switchPanel(a.dataset.panel);
+          });
         });
-      });
 
       // ---------- Tải trang: kiểm tra đăng nhập + tải thông tin + đơn hàng ----------
       var currentUser = null;
@@ -359,10 +448,15 @@
           }
 
           currentUser = meResult.data;
-          document.getElementById("greeting").textContent = "Chào " + currentUser.full_name + " 👋";
-          document.getElementById("profile-name").textContent = currentUser.full_name;
-          document.getElementById("profile-phone").textContent = currentUser.phone;
-          document.getElementById("avatar").textContent = getInitials(currentUser.full_name);
+          document.getElementById("greeting").textContent =
+            "Chào " + currentUser.full_name + " 👋";
+          document.getElementById("profile-name").textContent =
+            currentUser.full_name;
+          document.getElementById("profile-phone").textContent =
+            currentUser.phone;
+          document.getElementById("avatar").textContent = getInitials(
+            currentUser.full_name,
+          );
 
           // Prefill form tài khoản luôn, để mở tab là có sẵn, không cần gọi thêm API
           document.getElementById("acc-name").value = currentUser.full_name;
@@ -390,56 +484,79 @@
       })();
 
       // ---------- Submit form tài khoản ----------
-      document.getElementById("account-form").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        var form = e.target;
-        var formData = new FormData();
-        formData.append("full_name", document.getElementById("acc-name").value);
-        formData.append("phone", document.getElementById("acc-phone").value);
-        formData.append("current_password", document.getElementById("acc-current-pass").value);
-        formData.append("new_password", document.getElementById("acc-new-pass").value);
+      document
+        .getElementById("account-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var form = e.target;
+          var formData = new FormData();
+          formData.append(
+            "full_name",
+            document.getElementById("acc-name").value,
+          );
+          formData.append("phone", document.getElementById("acc-phone").value);
+          formData.append(
+            "current_password",
+            document.getElementById("acc-current-pass").value,
+          );
+          formData.append(
+            "new_password",
+            document.getElementById("acc-new-pass").value,
+          );
 
-        setFormLoading(form, true);
-        try {
-          var res = await fetch("../api/update_profile.php", { method: "POST", body: formData });
-          var raw = await res.text();
-          var result = tryExtractJson(raw);
+          setFormLoading(form, true);
+          try {
+            var res = await fetch("../api/update_profile.php", {
+              method: "POST",
+              body: formData,
+            });
+            var raw = await res.text();
+            var result = tryExtractJson(raw);
 
-          if (!result) {
-            alert("Có lỗi xảy ra, vui lòng thử lại sau.");
-            return;
+            if (!result) {
+              alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+              return;
+            }
+
+            if (result.success) {
+              alert("Đã lưu thay đổi.");
+              currentUser.full_name = result.data.full_name;
+              currentUser.phone = result.data.phone;
+              document.getElementById("greeting").textContent =
+                "Chào " + currentUser.full_name + " 👋";
+              document.getElementById("profile-name").textContent =
+                currentUser.full_name;
+              document.getElementById("profile-phone").textContent =
+                currentUser.phone;
+              document.getElementById("avatar").textContent = getInitials(
+                currentUser.full_name,
+              );
+              document.getElementById("acc-current-pass").value = "";
+              document.getElementById("acc-new-pass").value = "";
+            } else {
+              alert(result.message || "Cập nhật thất bại, vui lòng thử lại.");
+            }
+          } catch (err) {
+            alert(
+              "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",
+            );
+          } finally {
+            setFormLoading(form, false);
           }
-
-          if (result.success) {
-            alert("Đã lưu thay đổi.");
-            currentUser.full_name = result.data.full_name;
-            currentUser.phone = result.data.phone;
-            document.getElementById("greeting").textContent = "Chào " + currentUser.full_name + " 👋";
-            document.getElementById("profile-name").textContent = currentUser.full_name;
-            document.getElementById("profile-phone").textContent = currentUser.phone;
-            document.getElementById("avatar").textContent = getInitials(currentUser.full_name);
-            document.getElementById("acc-current-pass").value = "";
-            document.getElementById("acc-new-pass").value = "";
-          } else {
-            alert(result.message || "Cập nhật thất bại, vui lòng thử lại.");
-          }
-        } catch (err) {
-          alert("Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.");
-        } finally {
-          setFormLoading(form, false);
-        }
-      });
+        });
 
       // ---------- Đăng xuất thật ----------
-      document.getElementById("nav-logout").addEventListener("click", async function (e) {
-        e.preventDefault();
-        try {
-          await fetch("../api/logout.php");
-        } catch (err) {
-          // Dù gọi API lỗi vẫn cứ chuyển về trang đăng nhập cho an toàn
-        }
-        window.location.href = "login.html";
-      });
+      document
+        .getElementById("nav-logout")
+        .addEventListener("click", async function (e) {
+          e.preventDefault();
+          try {
+            await fetch("../api/logout.php");
+          } catch (err) {
+            // Dù gọi API lỗi vẫn cứ chuyển về trang đăng nhập cho an toàn
+          }
+          window.location.href = "login.html";
+        });
     </script>
   </body>
 </html>

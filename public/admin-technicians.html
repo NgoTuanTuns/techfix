@@ -28,9 +28,9 @@
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="logo" href="index.html"
-          ><span class="logo-badge">T</span> Tech<span class="fix">Fix</span></a
-        >
+        <a class="logo" href="index.html">
+          <img src="../assets/logo.png" alt="" class="logo-icon" />
+        </a>
         <nav class="main-nav">
           <a href="admin-dashboard.html">Bảng điều khiển</a>
           <a href="admin.html">Đơn sửa chữa</a>
@@ -73,7 +73,9 @@
 
         <div class="panel">
           <h3>Đơn chưa phân công</h3>
-          <p class="panel-sub">Chọn kỹ thuật viên để giao đơn, hệ thống lưu ngay.</p>
+          <p class="panel-sub">
+            Chọn kỹ thuật viên để giao đơn, hệ thống lưu ngay.
+          </p>
           <ul class="todo-list" id="unassigned-list"></ul>
         </div>
       </div>
@@ -85,29 +87,44 @@
       var orders = [];
 
       function initials(name) {
-        var parts = String(name || "?").trim().split(/\s+/);
+        var parts = String(name || "?")
+          .trim()
+          .split(/\s+/);
         return parts[parts.length - 1].charAt(0).toUpperCase();
       }
 
       function techOptions() {
         return (
           '<option value="">Chọn kỹ thuật viên</option>' +
-          technicians.map(function (t) {
-            return '<option value="' + t.id + '">' + TF.esc(t.full_name) + "</option>";
-          }).join("")
+          technicians
+            .map(function (t) {
+              return (
+                '<option value="' +
+                t.id +
+                '">' +
+                TF.esc(t.full_name) +
+                "</option>"
+              );
+            })
+            .join("")
         );
       }
 
       function render() {
-        var open = orders.filter(function (o) { return TF.OPEN_STATUS(o.status); });
-        var unassigned = open.filter(function (o) { return !o.technician_id; });
+        var open = orders.filter(function (o) {
+          return TF.OPEN_STATUS(o.status);
+        });
+        var unassigned = open.filter(function (o) {
+          return !o.technician_id;
+        });
         var assigned = open.length - unassigned.length;
         var doneMonth = orders.filter(function (o) {
           return o.status === "completed" && TF.thisMonth(o.completed_at);
         });
 
         document.getElementById("stat-techs").textContent = technicians.length;
-        document.getElementById("stat-unassigned").textContent = unassigned.length;
+        document.getElementById("stat-unassigned").textContent =
+          unassigned.length;
         document.getElementById("stat-active").textContent = assigned;
         document.getElementById("stat-done").textContent = doneMonth.length;
         document.getElementById("page-sub").textContent = unassigned.length
@@ -121,70 +138,150 @@
             '<div class="empty">Chưa có kỹ thuật viên nào. Tạo tài khoản với vai trò technician để bắt đầu giao đơn.</div>';
         } else {
           var stats = technicians.map(function (t) {
-            var mine = orders.filter(function (o) { return String(o.technician_id) === String(t.id); });
+            var mine = orders.filter(function (o) {
+              return String(o.technician_id) === String(t.id);
+            });
             return {
               t: t,
-              open: mine.filter(function (o) { return TF.OPEN_STATUS(o.status); })
-                .sort(function (a, b) { return String(b.received_at).localeCompare(String(a.received_at)); }),
-              done: mine.filter(function (o) { return o.status === "completed" && TF.thisMonth(o.completed_at); }).length,
+              open: mine
+                .filter(function (o) {
+                  return TF.OPEN_STATUS(o.status);
+                })
+                .sort(function (a, b) {
+                  return String(b.received_at).localeCompare(
+                    String(a.received_at),
+                  );
+                }),
+              done: mine.filter(function (o) {
+                return o.status === "completed" && TF.thisMonth(o.completed_at);
+              }).length,
             };
           });
-          var max = Math.max.apply(null, stats.map(function (s) { return s.open.length; }).concat(1));
-          grid.innerHTML = stats.map(function (s) {
-            var list = s.open.slice(0, 3).map(function (o) {
-              var st = TF.STATUS[o.status] || { label: o.status, cls: "" };
-              return "<li><span>#" + TF.esc(o.order_code) + " · " + TF.esc(TF.deviceLabel(o)) + "</span>" +
-                '<span class="badge ' + st.cls + '">' + st.label + "</span></li>";
-            }).join("");
-            var more = s.open.length > 3 ? '<li class="cell-sub">và ' + (s.open.length - 3) + " đơn khác</li>" : "";
-            return '<article class="tech-card">' +
-              '<div class="tech-head"><div class="avatar">' + TF.esc(initials(s.t.full_name)) + "</div>" +
-              "<strong>" + TF.esc(s.t.full_name) + "</strong></div>" +
-              '<div class="tech-nums"><div><b>' + s.open.length + "</b>đang xử lý</div>" +
-              "<div><b>" + s.done + "</b>hoàn tất tháng này</div></div>" +
-              '<div class="bar-track" title="Mức độ bận so với người bận nhất"><div class="bar-fill" data-w="' + Math.round((s.open.length / max) * 100) + '"></div></div>' +
-              (s.open.length ? '<ul class="mini-orders">' + list + more + "</ul>" : '<p class="cell-sub">Hiện chưa có đơn nào.</p>') +
-              "</article>";
-          }).join("");
+          var max = Math.max.apply(
+            null,
+            stats
+              .map(function (s) {
+                return s.open.length;
+              })
+              .concat(1),
+          );
+          grid.innerHTML = stats
+            .map(function (s) {
+              var list = s.open
+                .slice(0, 3)
+                .map(function (o) {
+                  var st = TF.STATUS[o.status] || { label: o.status, cls: "" };
+                  return (
+                    "<li><span>#" +
+                    TF.esc(o.order_code) +
+                    " · " +
+                    TF.esc(TF.deviceLabel(o)) +
+                    "</span>" +
+                    '<span class="badge ' +
+                    st.cls +
+                    '">' +
+                    st.label +
+                    "</span></li>"
+                  );
+                })
+                .join("");
+              var more =
+                s.open.length > 3
+                  ? '<li class="cell-sub">và ' +
+                    (s.open.length - 3) +
+                    " đơn khác</li>"
+                  : "";
+              return (
+                '<article class="tech-card">' +
+                '<div class="tech-head"><div class="avatar">' +
+                TF.esc(initials(s.t.full_name)) +
+                "</div>" +
+                "<strong>" +
+                TF.esc(s.t.full_name) +
+                "</strong></div>" +
+                '<div class="tech-nums"><div><b>' +
+                s.open.length +
+                "</b>đang xử lý</div>" +
+                "<div><b>" +
+                s.done +
+                "</b>hoàn tất tháng này</div></div>" +
+                '<div class="bar-track" title="Mức độ bận so với người bận nhất"><div class="bar-fill" data-w="' +
+                Math.round((s.open.length / max) * 100) +
+                '"></div></div>' +
+                (s.open.length
+                  ? '<ul class="mini-orders">' + list + more + "</ul>"
+                  : '<p class="cell-sub">Hiện chưa có đơn nào.</p>') +
+                "</article>"
+              );
+            })
+            .join("");
           TF.growBars(grid);
         }
 
         // Danh sách đơn chưa phân công
         var ul = document.getElementById("unassigned-list");
         if (!unassigned.length) {
-          ul.innerHTML = '<li class="empty">Không còn đơn nào chưa phân công.</li>';
+          ul.innerHTML =
+            '<li class="empty">Không còn đơn nào chưa phân công.</li>';
           return;
         }
-        ul.innerHTML = unassigned.map(function (o) {
-          return "<li><div><div class=\"t\">#" + TF.esc(o.order_code) + " · " + TF.esc(o.customer_name) + "</div>" +
-            '<div class="m">' + TF.esc(TF.deviceLabel(o)) + " — " + TF.esc(o.issue_description) + "</div></div>" +
-            '<select data-assign="' + o.id + '" aria-label="Giao đơn ' + TF.esc(o.order_code) + '">' + techOptions() + "</select></li>";
-        }).join("");
+        ul.innerHTML = unassigned
+          .map(function (o) {
+            return (
+              '<li><div><div class="t">#' +
+              TF.esc(o.order_code) +
+              " · " +
+              TF.esc(o.customer_name) +
+              "</div>" +
+              '<div class="m">' +
+              TF.esc(TF.deviceLabel(o)) +
+              " — " +
+              TF.esc(o.issue_description) +
+              "</div></div>" +
+              '<select data-assign="' +
+              o.id +
+              '" aria-label="Giao đơn ' +
+              TF.esc(o.order_code) +
+              '">' +
+              techOptions() +
+              "</select></li>"
+            );
+          })
+          .join("");
       }
 
-      document.getElementById("unassigned-list").addEventListener("change", async function (e) {
-        var sel = e.target.closest("[data-assign]");
-        if (!sel || !sel.value) return;
-        sel.disabled = true;
-        var r = await TF.post("../api/update_order_status.php", {
-          order_id: sel.dataset.assign,
-          technician_id: sel.value,
+      document
+        .getElementById("unassigned-list")
+        .addEventListener("change", async function (e) {
+          var sel = e.target.closest("[data-assign]");
+          if (!sel || !sel.value) return;
+          sel.disabled = true;
+          var r = await TF.post("../api/update_order_status.php", {
+            order_id: sel.dataset.assign,
+            technician_id: sel.value,
+          });
+          if (!r.success) {
+            sel.disabled = false;
+            sel.value = "";
+            TF.toast(r.message || "Lưu thất bại, vui lòng thử lại.", true);
+            return;
+          }
+          var o = orders.find(function (x) {
+            return String(x.id) === sel.dataset.assign;
+          });
+          if (o) {
+            o.technician_id = sel.value;
+            var t = technicians.find(function (x) {
+              return String(x.id) === sel.value;
+            });
+            o.technician_name = t ? t.full_name : null;
+          }
+          render();
+          TF.toast(
+            "Đã giao đơn cho " +
+              (o && o.technician_name ? o.technician_name : "kỹ thuật viên"),
+          );
         });
-        if (!r.success) {
-          sel.disabled = false;
-          sel.value = "";
-          TF.toast(r.message || "Lưu thất bại, vui lòng thử lại.", true);
-          return;
-        }
-        var o = orders.find(function (x) { return String(x.id) === sel.dataset.assign; });
-        if (o) {
-          o.technician_id = sel.value;
-          var t = technicians.find(function (x) { return String(x.id) === sel.value; });
-          o.technician_name = t ? t.full_name : null;
-        }
-        render();
-        TF.toast("Đã giao đơn cho " + (o && o.technician_name ? o.technician_name : "kỹ thuật viên"));
-      });
 
       (async function () {
         var user = await TF.guard("admin-technicians.html");
@@ -193,9 +290,11 @@
           TF.get("../api/get_technicians.php"),
           TF.get("../api/get_all_orders.php"),
         ]);
-        var techRes = results[0], orderRes = results[1];
+        var techRes = results[0],
+          orderRes = results[1];
         if (!orderRes || !orderRes.success) {
-          document.getElementById("page-sub").textContent = "Không tải được dữ liệu.";
+          document.getElementById("page-sub").textContent =
+            "Không tải được dữ liệu.";
           document.getElementById("tech-grid").innerHTML =
             '<div class="empty">Không tải được danh sách đơn. Kiểm tra lại máy chủ rồi tải lại trang.</div>';
           return;

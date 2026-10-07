@@ -272,53 +272,11 @@ section {
   color: var(--persimmon);
   margin-left: -8px;
 }
-.logo-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px 10px 10px 4px;
-  background: var(--moss-ink);
-  color: var(--persimmon-lt);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  border: 1.5px solid var(--persimmon);
-  position: relative;
-  transition: transform var(--t-base) var(--ease-spring);
-}
-[data-theme="dark"] .logo-badge {
-  background: #eef0d6;
-  color: var(--persimmon);
-}
-.logo:hover .logo-badge {
-  transform: rotate(-6deg) scale(1.06);
-}
-/* chiếc lá nhỏ nhú ra từ huy hiệu */
-.logo-badge::after {
-  content: "";
-  position: absolute;
-  top: -7px;
-  right: -5px;
-  width: 11px;
-  height: 7px;
-  background: var(--olive);
-  border-radius: 0 100% 0 100%;
-  transform: rotate(-20deg);
-  transition: transform var(--t-base) var(--ease-spring);
-}
-.logo:hover .logo-badge::after {
-  transform: rotate(-45deg) scale(1.25);
-}
-.logo-img {
-  padding: 10px 6px 8px;
-  height: 52px;
+
+.logo-icon {
+  padding: 5px;
+  height: 100px;
   width: auto;
-}
-[data-theme="dark"] .logo-img {
-  filter: invert(1) hue-rotate(180deg) brightness(1.05);
 }
 
 .main-nav {

@@ -28,9 +28,9 @@
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="logo" href="index.html"
-          ><span class="logo-badge">T</span> Tech<span class="fix">Fix</span></a
-        >
+        <a class="logo" href="index.html">
+          <img src="../assets/logo.png" alt="" class="logo-icon" />
+        </a>
         <nav class="main-nav">
           <a href="admin-dashboard.html" class="active">Bảng điều khiển</a>
           <a href="admin.html">Đơn sửa chữa</a>
@@ -70,7 +70,9 @@
         <div class="split">
           <div class="panel">
             <h3>Đơn theo trạng thái</h3>
-            <p class="panel-sub">Tổng cộng <span id="total-orders">—</span> đơn.</p>
+            <p class="panel-sub">
+              Tổng cộng <span id="total-orders">—</span> đơn.
+            </p>
             <div id="status-bars"></div>
           </div>
 
@@ -111,9 +113,15 @@
         }
         var orders = res.data;
 
-        var open = orders.filter(function (o) { return TF.OPEN_STATUS(o.status); });
-        var awaiting = orders.filter(function (o) { return o.status === "awaiting_approval"; });
-        var unassigned = open.filter(function (o) { return !o.technician_id; });
+        var open = orders.filter(function (o) {
+          return TF.OPEN_STATUS(o.status);
+        });
+        var awaiting = orders.filter(function (o) {
+          return o.status === "awaiting_approval";
+        });
+        var unassigned = open.filter(function (o) {
+          return !o.technician_id;
+        });
         var doneMonth = orders.filter(function (o) {
           return o.status === "completed" && TF.thisMonth(o.completed_at);
         });
@@ -123,45 +131,100 @@
 
         document.getElementById("stat-open").textContent = open.length;
         document.getElementById("stat-awaiting").textContent = awaiting.length;
-        document.getElementById("stat-unassigned").textContent = unassigned.length;
-        document.getElementById("stat-revenue").textContent = TF.shortMoney(revenue);
+        document.getElementById("stat-unassigned").textContent =
+          unassigned.length;
+        document.getElementById("stat-revenue").textContent =
+          TF.shortMoney(revenue);
         document.getElementById("total-orders").textContent = orders.length;
         document.getElementById("greeting-sub").textContent =
-          "Tháng này cửa hàng đã hoàn tất " + doneMonth.length +
-          " đơn, còn " + open.length + " đơn đang mở.";
+          "Tháng này cửa hàng đã hoàn tất " +
+          doneMonth.length +
+          " đơn, còn " +
+          open.length +
+          " đơn đang mở.";
 
         // Thanh phân bổ theo trạng thái
         var counts = {};
-        orders.forEach(function (o) { counts[o.status] = (counts[o.status] || 0) + 1; });
-        var max = Math.max.apply(null, Object.keys(TF.STATUS).map(function (k) { return counts[k] || 0; }).concat(1));
+        orders.forEach(function (o) {
+          counts[o.status] = (counts[o.status] || 0) + 1;
+        });
+        var max = Math.max.apply(
+          null,
+          Object.keys(TF.STATUS)
+            .map(function (k) {
+              return counts[k] || 0;
+            })
+            .concat(1),
+        );
         var bars = document.getElementById("status-bars");
-        bars.innerHTML = Object.keys(TF.STATUS).map(function (k) {
-          var n = counts[k] || 0;
-          var tone = k === "completed" ? "olive" : k === "cancelled" ? "warn" : "";
-          return '<div class="bar-row"><span>' + TF.STATUS[k].label + '</span>' +
-            '<div class="bar-track"><div class="bar-fill ' + tone + '" data-w="' + Math.round((n / max) * 100) + '"></div></div>' +
-            "<b>" + n + "</b></div>";
-        }).join("");
+        bars.innerHTML = Object.keys(TF.STATUS)
+          .map(function (k) {
+            var n = counts[k] || 0;
+            var tone =
+              k === "completed" ? "olive" : k === "cancelled" ? "warn" : "";
+            return (
+              '<div class="bar-row"><span>' +
+              TF.STATUS[k].label +
+              "</span>" +
+              '<div class="bar-track"><div class="bar-fill ' +
+              tone +
+              '" data-w="' +
+              Math.round((n / max) * 100) +
+              '"></div></div>' +
+              "<b>" +
+              n +
+              "</b></div>"
+            );
+          })
+          .join("");
         TF.growBars(bars);
 
         // Danh sách cần xử lý: chờ duyệt giá (lâu nhất trước), rồi chưa phân công
-        var byOldest = function (a, b) { return String(a.received_at).localeCompare(String(b.received_at)); };
-        var todo = awaiting.slice().sort(byOldest).map(function (o) { return { o: o, tag: "Chờ duyệt giá", cls: "badge-progress" }; });
-        unassigned.filter(function (o) { return o.status !== "awaiting_approval"; })
+        var byOldest = function (a, b) {
+          return String(a.received_at).localeCompare(String(b.received_at));
+        };
+        var todo = awaiting
+          .slice()
           .sort(byOldest)
-          .forEach(function (o) { todo.push({ o: o, tag: "Chưa phân công", cls: "badge-received" }); });
+          .map(function (o) {
+            return { o: o, tag: "Chờ duyệt giá", cls: "badge-progress" };
+          });
+        unassigned
+          .filter(function (o) {
+            return o.status !== "awaiting_approval";
+          })
+          .sort(byOldest)
+          .forEach(function (o) {
+            todo.push({ o: o, tag: "Chưa phân công", cls: "badge-received" });
+          });
 
         var list = document.getElementById("todo");
         if (!todo.length) {
-          list.innerHTML = '<li class="empty">Không có đơn nào cần xử lý lúc này.</li>';
+          list.innerHTML =
+            '<li class="empty">Không có đơn nào cần xử lý lúc này.</li>';
           return;
         }
-        list.innerHTML = todo.slice(0, 6).map(function (x) {
-          var o = x.o;
-          return "<li><div><div class=\"t\">#" + TF.esc(o.order_code) + " · " + TF.esc(o.customer_name) + "</div>" +
-            '<div class="m">' + TF.esc(TF.deviceLabel(o)) + "</div></div>" +
-            '<span class="badge ' + x.cls + '">' + x.tag + "</span></li>";
-        }).join("");
+        list.innerHTML = todo
+          .slice(0, 6)
+          .map(function (x) {
+            var o = x.o;
+            return (
+              '<li><div><div class="t">#' +
+              TF.esc(o.order_code) +
+              " · " +
+              TF.esc(o.customer_name) +
+              "</div>" +
+              '<div class="m">' +
+              TF.esc(TF.deviceLabel(o)) +
+              "</div></div>" +
+              '<span class="badge ' +
+              x.cls +
+              '">' +
+              x.tag +
+              "</span></li>"
+            );
+          })
+          .join("");
       })();
     </script>
   </body>
