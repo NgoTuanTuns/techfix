@@ -1,7 +1,7 @@
 <?php
 /**
  * api/get_parts.php
- * Yêu cầu role = admin. Trả toàn bộ linh kiện trong bảng inventory.
+ * Yêu cầu role = admin hoặc technician. Trả toàn bộ linh kiện trong bảng inventory.
  * Trả JSON: {success: bool, data?: [{id, name, compatible_with, quantity, unit_cost}], message?: string}
  */
 
@@ -11,7 +11,7 @@ require __DIR__ . '/../includes/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-require_role('admin');
+require_any_role(['admin', 'technician']);
 
 try {
     $stmt = $pdo->query(

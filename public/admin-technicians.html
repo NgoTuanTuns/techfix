@@ -81,7 +81,7 @@
       </div>
     </section>
 
-    <script src="../js/admin-common.js"></script>
+    <script src="../js/admin-common.js?v=20261028b"></script>
     <script>
       var technicians = [];
       var orders = [];
@@ -284,7 +284,7 @@
         });
 
       (async function () {
-        var user = await TF.guard("admin-technicians.html");
+        var user = await TF.guard("admin-dashboard.html", ["admin"]);
         if (!user) return;
         var results = await Promise.all([
           TF.get("../api/get_technicians.php"),

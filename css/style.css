@@ -2144,6 +2144,77 @@ table.orders tbody tr:hover td {
   transform: rotate(-45deg);
   box-shadow: 0 6px 12px rgba(27, 43, 75, 0.25);
 }
+.map-link {
+  flex-direction: column;
+  gap: 5px;
+  text-decoration: none;
+  text-align: center;
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+}
+.map-link span {
+  position: relative;
+  margin-top: 28px;
+  color: var(--moss-ink);
+}
+.map-link small {
+  position: relative;
+  color: var(--accent-text);
+}
+.map-link:hover,
+.map-link:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+.map-embed {
+  display: block;
+  background: var(--card-matcha);
+}
+.map-embed::before {
+  display: none;
+}
+.map-embed iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: saturate(0.82) contrast(0.96);
+}
+.map-embed a {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 1;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  color: var(--accent-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.map-embed a:hover,
+.map-embed a:focus-visible {
+  background: var(--persimmon);
+  color: #fff;
+}
+.form-note {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.review-form {
+  max-width: 680px;
+  margin: 30px auto 0;
+  scroll-margin-top: 28px;
+}
+.review-grid + .review-form {
+  margin-top: 48px;
+}
+.review-cta {
+  white-space: nowrap;
+}
 .rating-summary {
   position: relative;
   display: flex;

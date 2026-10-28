@@ -1,7 +1,7 @@
 <?php
 /**
  * api/get_all_orders.php
- * Yêu cầu role = admin. Trả toàn bộ đơn sửa chữa (mọi khách hàng),
+ * Yêu cầu role = admin hoặc technician. Trả toàn bộ đơn sửa chữa,
  * kèm thông tin khách hàng + kỹ thuật viên phụ trách, để render bảng admin.
  * Trả JSON: {success: bool, data?: [...], message?: string}
  */
@@ -12,7 +12,7 @@ require __DIR__ . '/../includes/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-require_role('admin');
+require_any_role(['admin', 'technician']);
 
 try {
     $stmt = $pdo->query(

@@ -32,10 +32,14 @@
           <img src="../assets/logo.png" alt="" class="logo-icon" />
         </a>
         <nav class="main-nav">
-          <a href="admin-dashboard.html">Bảng điều khiển</a>
+          <a href="admin-dashboard.html" id="admin-dashboard-link"
+            >Bảng điều khiển</a
+          >
           <a href="admin.html">Đơn sửa chữa</a>
           <a href="admin-inventory.html" class="active">Kho linh kiện</a>
-          <a href="admin-technicians.html">Kỹ thuật viên</a>
+          <a href="admin-technicians.html" id="admin-technicians-link"
+            >Kỹ thuật viên</a
+          >
           <a href="#" id="nav-logout" class="nav-cta">Đăng xuất</a>
         </nav>
       </div>
@@ -107,7 +111,7 @@
       </div>
     </section>
 
-    <script src="../js/admin-common.js"></script>
+    <script src="../js/admin-common.js?v=20261028b"></script>
     <script>
       /* Bảng inventory: part_id, name, compatible_with, quantity, unit_cost
          GET  ../api/get_parts.php          -> {success, data:[{id, name, compatible_with, quantity, unit_cost}]}
@@ -286,8 +290,21 @@
         });
 
       (async function () {
-        var user = await TF.guard("admin-inventory.html");
+        var user = await TF.guard("admin-inventory.html", [
+          "admin",
+          "technician",
+        ]);
+
+        // Đặt kiểm tra !user lên đầu tiên để tránh lỗi TypeError
         if (!user) return;
+
+        if (user.role === "technician") {
+          document.getElementById("admin-dashboard-link").style.display =
+            "none";
+          document.getElementById("admin-technicians-link").style.display =
+            "none";
+        }
+
         var res = await TF.get("../api/get_parts.php");
         if (!res || !res.success) {
           document.getElementById("page-sub").textContent =

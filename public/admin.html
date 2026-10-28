@@ -32,11 +32,14 @@
           <img src="../assets/logo.png" alt="" class="logo-icon" />
         </a>
         <nav class="main-nav">
-          <a href="admin-dashboard.html">Bảng điều khiển</a
+          <a href="admin-dashboard.html" id="admin-dashboard-link"
+            >Bảng điều khiển</a
           ><a href="admin.html" class="active">Đơn sửa chữa</a
           ><a href="admin-inventory.html">Kho linh kiện</a
-          ><a href="admin-technicians.html">Kỹ thuật viên</a>
-          <a href="login.html" id="nav-logout" class="nav-cta">Đăng xuất</a>
+          ><a href="admin-technicians.html" id="admin-technicians-link"
+            >Kỹ thuật viên</a
+          >
+          <a href="#" id="nav-logout" class="nav-cta">Đăng xuất</a>
         </nav>
       </div>
     </header>
@@ -134,77 +137,36 @@
       </div>
     </section>
 
+    <!-- Nạp helper dùng chung -->
+    <script src="../js/admin-common.js?v=20261028b"></script>
     <script>
-      // ---------- Helpers dùng chung ----------
-      function tryExtractJson(raw) {
-        try {
-          return JSON.parse(raw);
-        } catch (e) {
-          var start = raw.indexOf("{");
-          var end = raw.lastIndexOf("}");
-          if (start !== -1 && end !== -1 && end > start) {
-            try {
-              return JSON.parse(raw.slice(start, end + 1));
-            } catch (e2) {
-              return null;
-            }
-          }
-          return null;
-        }
-      }
-
-      function formatMoney(n) {
-        if (n === null || n === undefined) return null;
-        return Number(n).toLocaleString("vi-VN") + "đ";
-      }
-
-      function escapeHtml(str) {
-        var div = document.createElement("div");
-        div.textContent = str == null ? "" : str;
-        return div.innerHTML;
-      }
-
-      var STATUS_OPTIONS = [
-        { value: "received", label: "Đã tiếp nhận" },
-        { value: "diagnosing", label: "Đang chẩn đoán" },
-        { value: "awaiting_approval", label: "Chờ duyệt giá" },
-        { value: "repairing", label: "Đang sửa chữa" },
-        { value: "completed", label: "Hoàn tất" },
-        { value: "cancelled", label: "Đã huỷ" },
-      ];
-      var STATUS_BADGE_CLASS = {
-        received: "badge-received",
-        diagnosing: "badge-received",
-        awaiting_approval: "badge-progress",
-        repairing: "badge-progress",
-        completed: "badge-done",
-        cancelled: "",
-      };
-
       var allOrders = [];
       var technicians = [];
       var currentFilter = "all";
       var currentSearch = "";
 
-      // ---------- Render bảng ----------
+      // ---------- Render bảng & Select ----------
       function statusSelectHtml(order) {
-        var opts = STATUS_OPTIONS.map(function (o) {
-          var sel = o.value === order.status ? " selected" : "";
-          return (
-            '<option value="' +
-            o.value +
-            '"' +
-            sel +
-            ">" +
-            o.label +
-            "</option>"
-          );
-        }).join("");
+        var opts = Object.keys(TF.STATUS)
+          .map(function (k) {
+            var sel = k === order.status ? " selected" : "";
+            return (
+              '<option value="' +
+              k +
+              '"' +
+              sel +
+              ">" +
+              TF.STATUS[k].label +
+              "</option>"
+            );
+          })
+          .join("");
+        var cls =
+          (TF.STATUS[order.status] && TF.STATUS[order.status].cls) || "";
         return (
           '<select class="status-select ' +
-          (STATUS_BADGE_CLASS[order.status] || "") +
-          '" ' +
-          'data-order-id="' +
+          cls +
+          '" data-order-id="' +
           order.id +
           '" style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
           opts +
@@ -224,7 +186,7 @@
               '"' +
               sel +
               ">" +
-              escapeHtml(t.full_name) +
+              TF.esc(t.full_name) +
               "</option>"
             );
           })
@@ -232,14 +194,12 @@
         return (
           '<select class="technician-select" data-order-id="' +
           order.id +
-          '" ' +
-          'style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
+          '" style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
           opts +
           "</select>"
         );
       }
 
-      // Đơn đã hoàn tất mà chưa có giá cuối thì đánh dấu đỏ để không bị bỏ sót
       function priceState(order, field) {
         var missing =
           field === "final_cost" &&
@@ -249,11 +209,10 @@
             order[field] === "");
         return {
           missing: missing,
-          text: missing ? "Chưa nhập" : formatMoney(order[field]) || "—",
+          text: missing ? "Chưa nhập" : TF.formatMoney(order[field]) || "—",
         };
       }
 
-      // Giá cuối chỉ được nhập khi đơn đã hoàn tất
       var LOCKED_TITLE = "Chỉ nhập được giá cuối khi đơn đã hoàn tất";
       function isPriceLocked(order, field) {
         return field === "final_cost" && order.status !== "completed";
@@ -316,24 +275,21 @@
       }
 
       function renderRow(order) {
-        var deviceLabel = escapeHtml(
-          (order.brand + " " + (order.model || "")).trim(),
-        );
         return (
           "<tr>" +
           "<td>#" +
-          escapeHtml(order.order_code) +
+          TF.esc(order.order_code) +
           "</td>" +
           "<td>" +
-          escapeHtml(order.customer_name) +
+          TF.esc(order.customer_name) +
           "</td>" +
           "<td>" +
-          deviceLabel +
+          TF.esc(TF.deviceLabel(order)) +
           "</td>" +
           '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' +
-          escapeHtml(order.issue_description) +
+          TF.esc(order.issue_description) +
           '">' +
-          escapeHtml(order.issue_description) +
+          TF.esc(order.issue_description) +
           "</td>" +
           "<td>" +
           technicianSelectHtml(order) +
@@ -382,7 +338,7 @@
 
       function renderStats() {
         var open = allOrders.filter(function (o) {
-          return o.status !== "completed" && o.status !== "cancelled";
+          return TF.OPEN_STATUS(o.status);
         }).length;
         var awaiting = allOrders.filter(function (o) {
           return o.status === "awaiting_approval";
@@ -391,14 +347,8 @@
           return o.status === "repairing";
         }).length;
 
-        var now = new Date();
         var completedThisMonth = allOrders.filter(function (o) {
-          if (o.status !== "completed" || !o.completed_at) return false;
-          var d = new Date(o.completed_at.replace(" ", "T"));
-          return (
-            d.getMonth() === now.getMonth() &&
-            d.getFullYear() === now.getFullYear()
-          );
+          return o.status === "completed" && TF.thisMonth(o.completed_at);
         }).length;
 
         document.getElementById("stat-open").textContent = open;
@@ -415,35 +365,18 @@
           " đơn đang chờ khách duyệt giá.";
       }
 
-      // ---------- Lưu thay đổi ----------
+      // ---------- Cập nhật dữ liệu ----------
       async function saveOrderField(orderId, fields) {
-        var formData = new FormData();
-        formData.append("order_id", orderId);
-        Object.keys(fields).forEach(function (k) {
-          formData.append(k, fields[k]);
-        });
-
-        try {
-          var res = await fetch("../api/update_order_status.php", {
-            method: "POST",
-            body: formData,
-          });
-          var raw = await res.text();
-          var result = tryExtractJson(raw);
-
-          if (!result || !result.success) {
-            alert(
-              (result && result.message) || "Lưu thất bại, vui lòng thử lại.",
-            );
-            return false;
-          }
-          return true;
-        } catch (err) {
-          alert(
-            "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",
+        fields.order_id = orderId;
+        var res = await TF.post("../api/update_order_status.php", fields);
+        if (!res || !res.success) {
+          TF.toast(
+            (res && res.message) || "Lưu thất bại, vui lòng thử lại.",
+            true,
           );
           return false;
         }
+        return true;
       }
 
       // ---------- Bảng chi tiết đơn ----------
@@ -453,7 +386,7 @@
       function fmtDate(v) {
         if (!v) return "—";
         var d = new Date(String(v).replace(" ", "T"));
-        return isNaN(d.getTime()) ? escapeHtml(v) : d.toLocaleString("vi-VN");
+        return isNaN(d.getTime()) ? TF.esc(v) : d.toLocaleString("vi-VN");
       }
 
       function closeOrderDetail() {
@@ -487,9 +420,10 @@
         closeOrderDetail();
         detailOpener = opener || null;
 
-        var statusOpt = STATUS_OPTIONS.find(function (o) {
-          return o.value === order.status;
-        });
+        var statusObj = TF.STATUS[order.status] || {
+          label: order.status,
+          cls: "",
+        };
         var techName =
           order.technician_name ||
           (
@@ -497,25 +431,27 @@
               return String(t.id) === String(order.technician_id);
             }) || {}
           ).full_name;
-        var device = (order.brand + " " + (order.model || "")).trim();
+        var device = TF.deviceLabel(order);
         var finalText =
           order.status === "completed" || Number(order.final_cost) > 0
-            ? formatMoney(order.final_cost) || "Chưa nhập"
+            ? TF.formatMoney(order.final_cost) || "Chưa nhập"
             : "—";
 
         var rows =
-          detailRow("Khách hàng", escapeHtml(order.customer_name) || "—") +
-          detailRow("Thiết bị", escapeHtml(device) || "—") +
+          detailRow("Khách hàng", TF.esc(order.customer_name) || "—") +
+          detailRow("Thiết bị", TF.esc(device) || "—") +
           detailRow(
             "Kỹ thuật viên",
-            techName ? escapeHtml(techName) : "Chưa phân công",
+            techName ? TF.esc(techName) : "Chưa phân công",
           ) +
           detailRow("Ngày tiếp nhận", fmtDate(order.received_at)) +
           detailRow("Ngày hoàn tất", fmtDate(order.completed_at)) +
-          detailRow("Giá ước tính", formatMoney(order.estimated_cost) || "—") +
+          detailRow(
+            "Giá ước tính",
+            TF.formatMoney(order.estimated_cost) || "—",
+          ) +
           detailRow("Giá cuối", finalText);
 
-        // Các trường tuỳ chọn: chỉ hiện nếu API có trả về
         [
           ["customer_phone", "Số điện thoại"],
           ["phone", "Số điện thoại"],
@@ -525,7 +461,7 @@
           ["service_type", "Dịch vụ"],
           ["note", "Ghi chú"],
         ].forEach(function (f) {
-          if (order[f[0]]) rows += detailRow(f[1], escapeHtml(order[f[0]]));
+          if (order[f[0]]) rows += detailRow(f[1], TF.esc(order[f[0]]));
         });
 
         detailOverlay = document.createElement("div");
@@ -533,12 +469,12 @@
         detailOverlay.innerHTML =
           '<div class="od-dialog" role="dialog" aria-modal="true" aria-labelledby="od-title">' +
           '<div class="od-head"><h3 id="od-title">Đơn #' +
-          escapeHtml(order.order_code) +
+          TF.esc(order.order_code) +
           "</h3>" +
           '<span class="badge ' +
-          (STATUS_BADGE_CLASS[order.status] || "") +
+          statusObj.cls +
           '">' +
-          (statusOpt ? statusOpt.label : escapeHtml(order.status)) +
+          statusObj.label +
           "</span>" +
           '<button type="button" class="icon-btn od-close" aria-label="Đóng">✕</button></div>' +
           '<div class="od-grid">' +
@@ -546,7 +482,7 @@
           "</div>" +
           '<div class="od-issue"><span class="od-label">Mô tả lỗi</span>' +
           "<p>" +
-          (escapeHtml(order.issue_description) || "—") +
+          (TF.esc(order.issue_description) || "—") +
           "</p></div></div>";
 
         detailOverlay.addEventListener("click", function (e) {
@@ -575,8 +511,9 @@
                   order.completed_at = new Date().toISOString();
                 refreshPriceCell(order, "final_cost");
               }
-              sel.className =
-                "status-select " + (STATUS_BADGE_CLASS[newStatus] || "");
+              var cls =
+                (TF.STATUS[newStatus] && TF.STATUS[newStatus].cls) || "";
+              sel.className = "status-select " + cls;
               renderStats();
             }
           });
@@ -662,68 +599,46 @@
           renderTable();
         });
 
-      // ---------- Tải trang: kiểm tra quyền admin + tải dữ liệu ----------
+      // ---------- Khởi tạo trang: kiểm tra quyền & nạp dữ liệu ----------
       (async function init() {
-        try {
-          var meRes = await fetch("../api/me.php");
-          var meRaw = await meRes.text();
-          var meResult = tryExtractJson(meRaw);
+        // Dùng TF.guard để tự động check role ("admin" hoặc "technician")
+        var user = await TF.guard("admin.html", ["admin", "technician"]);
+        if (!user) return;
 
-          if (!meResult || !meResult.success) {
-            window.location.href = "login.html?next=admin.html";
-            return;
-          }
-          if (meResult.data.role !== "admin") {
-            alert("Tài khoản của bạn không có quyền truy cập trang quản trị.");
-            window.location.href = "dashboard.html";
-            return;
-          }
+        // Nếu là kỹ thuật viên, ẩn các menu không đủ quyền
+        if (user.role === "technician") {
+          var dashLink = document.getElementById("admin-dashboard-link");
+          var techLink = document.getElementById("admin-technicians-link");
+          if (dashLink) dashLink.style.display = "none";
+          if (techLink) techLink.style.display = "none";
+        }
 
-          document.getElementById("greeting").textContent =
-            "Chào " + meResult.data.full_name + " 👋";
-        } catch (err) {
-          window.location.href = "login.html?next=admin.html";
+        document.getElementById("greeting").textContent =
+          "Chào " + user.full_name + " 👋";
+
+        // Lấy danh sách đơn hàng & kỹ thuật viên song song bằng TF.get
+        var results = await Promise.all([
+          TF.get("../api/get_all_orders.php"),
+          TF.get("../api/get_technicians.php"),
+        ]);
+
+        var ordersRes = results[0];
+        var techRes = results[1];
+
+        if (!ordersRes || !ordersRes.success) {
+          document.getElementById("orders-tbody").innerHTML =
+            '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không tải được danh sách đơn.</td></tr>';
           return;
         }
 
-        try {
-          var ordersRes = await fetch("../api/get_all_orders.php");
-          var ordersRaw = await ordersRes.text();
-          var ordersResult = tryExtractJson(ordersRaw);
+        allOrders = ordersRes.data;
+        technicians = techRes && techRes.success ? techRes.data : [];
 
-          var techRes = await fetch("../api/get_technicians.php");
-          var techRaw = await techRes.text();
-          var techResult = tryExtractJson(techRaw);
-
-          if (!ordersResult || !ordersResult.success) {
-            document.getElementById("orders-tbody").innerHTML =
-              '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không tải được danh sách đơn.</td></tr>';
-            return;
-          }
-
-          allOrders = ordersResult.data;
-          technicians = techResult && techResult.success ? techResult.data : [];
-
-          renderStats();
-          renderTable();
-        } catch (err) {
-          document.getElementById("orders-tbody").innerHTML =
-            '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không kết nối được tới máy chủ.</td></tr>';
-        }
+        renderStats();
+        renderTable();
       })();
 
-      // ---------- Đăng xuất thật ----------
-      document
-        .getElementById("nav-logout")
-        .addEventListener("click", async function (e) {
-          e.preventDefault();
-          try {
-            await fetch("../api/logout.php");
-          } catch (err) {}
-          window.location.href = "login.html";
-        });
-
-      // Nút "Xem cột giá": chỉ hiện khi bảng còn rộng hơn khung hiển thị
+      // ---------- Nút cuộn cột giá ----------
       (function () {
         var box = document.getElementById("table-scroll");
         var hint = document.getElementById("scroll-hint");

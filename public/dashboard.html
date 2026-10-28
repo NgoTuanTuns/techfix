@@ -81,6 +81,7 @@
           </div>
           <nav>
             <a href="#" class="active" data-panel="orders">Đơn sửa chữa</a>
+            <a href="admin.html?v=20261028" id="admin-panel-link" style="display: none">Bảng điều khiển</a>
             <a href="#" data-panel="account">Thông tin tài khoản</a>
             <a href="#" data-panel="payments">Lịch sử thanh toán</a>
             <a href="contact.html">Đánh giá dịch vụ</a>
@@ -457,6 +458,9 @@
           document.getElementById("avatar").textContent = getInitials(
             currentUser.full_name,
           );
+          if (["admin", "technician"].includes(currentUser.role)) {
+            document.getElementById("admin-panel-link").style.display = "";
+          }
 
           // Prefill form tài khoản luôn, để mở tab là có sẵn, không cần gọi thêm API
           document.getElementById("acc-name").value = currentUser.full_name;

@@ -3,7 +3,9 @@
   "use strict";
   var TF = (window.TF = {});
 
-  TF.OPEN_STATUS = function (s) { return s !== "completed" && s !== "cancelled"; };
+  TF.OPEN_STATUS = function (s) {
+    return s !== "completed" && s !== "cancelled";
+  };
   TF.STATUS = {
     received: { label: "Đã tiếp nhận", cls: "badge-received" },
     diagnosing: { label: "Đang chẩn đoán", cls: "badge-received" },
@@ -14,9 +16,16 @@
   };
 
   TF.tryExtractJson = function (raw) {
-    try { return JSON.parse(raw); } catch (e) {
-      var s = raw.indexOf("{"), t = raw.lastIndexOf("}");
-      if (s !== -1 && t > s) { try { return JSON.parse(raw.slice(s, t + 1)); } catch (e2) {} }
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      var s = raw.indexOf("{"),
+        t = raw.lastIndexOf("}");
+      if (s !== -1 && t > s) {
+        try {
+          return JSON.parse(raw.slice(s, t + 1));
+        } catch (e2) {}
+      }
       return null;
     }
   };
@@ -38,30 +47,56 @@
   };
   TF.thisMonth = function (str) {
     if (!str) return false;
-    var d = new Date(String(str).replace(" ", "T")), now = new Date();
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    var d = new Date(String(str).replace(" ", "T")),
+      now = new Date();
+    return (
+      d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    );
   };
-  TF.deviceLabel = function (o) { return ((o.brand || "") + " " + (o.model || "")).trim(); };
+  TF.deviceLabel = function (o) {
+    return ((o.brand || "") + " " + (o.model || "")).trim();
+  };
 
   TF.get = async function (url) {
-    try { return TF.tryExtractJson(await (await fetch(url)).text()); } catch (e) { return null; }
+    try {
+      return TF.tryExtractJson(await (await fetch(url)).text());
+    } catch (e) {
+      return null;
+    }
   };
   TF.post = async function (url, fields) {
     var fd = new FormData();
-    Object.keys(fields).forEach(function (k) { fd.append(k, fields[k]); });
+    Object.keys(fields).forEach(function (k) {
+      fd.append(k, fields[k]);
+    });
     try {
-      var r = TF.tryExtractJson(await (await fetch(url, { method: "POST", body: fd })).text());
-      return r || { success: false, message: "Máy chủ trả về dữ liệu không đọc được." };
+      var r = TF.tryExtractJson(
+        await (await fetch(url, { method: "POST", body: fd })).text(),
+      );
+      return (
+        r || {
+          success: false,
+          message: "Máy chủ trả về dữ liệu không đọc được.",
+        }
+      );
     } catch (e) {
-      return { success: false, message: "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa." };
+      return {
+        success: false,
+        message:
+          "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",
+      };
     }
   };
 
-  // Chặn người không phải admin. Trả về thông tin user, hoặc null nếu đã chuyển trang.
-  TF.guard = async function (page) {
+  // Chỉ cho phép các vai trò được truyền vào. Mặc định vẫn là admin.
+  TF.guard = async function (page, allowedRoles) {
     var me = await TF.get("../api/me.php");
-    if (!me || !me.success) { location.href = "login.html?next=" + page; return null; }
-    if (me.data.role !== "admin") {
+    if (!me || !me.success) {
+      location.href = "login.html";
+      return null;
+    }
+    allowedRoles = allowedRoles || ["admin", "technician"];
+    if (!allowedRoles.includes(me.data.role)) {
       alert("Tài khoản của bạn không có quyền truy cập trang quản trị.");
       location.href = "dashboard.html";
       return null;
@@ -83,15 +118,19 @@
     t.classList.toggle("err", !!isError);
     t.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 3200);
+    toastTimer = setTimeout(function () {
+      t.classList.remove("show");
+    }, 3200);
   };
 
   // Animate thanh tiến độ: đặt width sau khi phần tử đã vào DOM
   TF.growBars = function (root) {
     setTimeout(function () {
-      (root || document).querySelectorAll(".bar-fill[data-w]").forEach(function (b) {
-        b.style.width = b.dataset.w + "%";
-      });
+      (root || document)
+        .querySelectorAll(".bar-fill[data-w]")
+        .forEach(function (b) {
+          b.style.width = b.dataset.w + "%";
+        });
     }, 30);
   };
 
@@ -100,7 +139,9 @@
     if (!out) return;
     out.addEventListener("click", async function (e) {
       e.preventDefault();
-      try { await fetch("../api/logout.php"); } catch (err) {}
+      try {
+        await fetch("../api/logout.php");
+      } catch (err) {}
       location.href = "login.html";
     });
   });

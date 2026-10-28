@@ -1,7 +1,8 @@
 <?php
 /**
  * api/update_part_stock.php
- * Yêu cầu role = admin. Nhận POST: part_id, quantity (số lượng tồn mới, >= 0).
+ * Yêu cầu role = admin hoặc technician. Nhận POST: id (hoặc part_id), quantity
+ * Cập nhật số lượng tồn kho của 1 linh kiện (nút −, +, ✎ trong admin-inventory.html).
  * Trả JSON: {success: bool, message: string}
  */
 
@@ -17,27 +18,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_role('admin');
+require_any_role(['admin', 'technician']);
 
-$partId = (int)($_POST['id'] ?? 0);
-$qty    = $_POST['quantity'] ?? '';
+$id       = (int)($_POST['id'] ?? $_POST['part_id'] ?? 0);
+$quantity = filter_var($_POST['quantity'] ?? null, FILTER_VALIDATE_INT);
 
-if ($partId <= 0 || !ctype_digit((string)$qty)) {
-    echo json_encode(['success' => false, 'message' => 'Mã linh kiện hoặc số lượng không hợp lệ']);
+if ($id <= 0 || $quantity === false || $quantity < 0) {
+    echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
     exit;
 }
 
 try {
-    $check = $pdo->prepare('SELECT id FROM inventory_parts WHERE id = ?');
-    $check->execute([$partId]);
-    if (!$check->fetch()) {
-        echo json_encode(['success' => false, 'message' => 'Không tìm thấy linh kiện này']);
-        exit;
+    $stmt = $pdo->prepare('UPDATE inventory_parts SET quantity = ? WHERE id = ?');
+    $stmt->execute([$quantity, $id]);
+
+    // rowCount() = 0 cũng xảy ra khi số lượng không đổi, nên chỉ coi là lỗi nếu id không tồn tại
+    if ($stmt->rowCount() === 0) {
+        $exists = $pdo->prepare('SELECT 1 FROM inventory_parts WHERE id = ?');
+        $exists->execute([$id]);
+        if (!$exists->fetch()) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy linh kiện này']);
+            exit;
+        }
     }
 
-    $pdo->prepare('UPDATE inventory_parts SET quantity = ? WHERE id = ?')->execute([(int)$qty, $partId]);
     echo json_encode(['success' => true, 'message' => 'Đã cập nhật tồn kho']);
-
 } catch (PDOException $e) {
     http_response_code(500);
     error_log('update_part_stock.php error: ' . $e->getMessage());

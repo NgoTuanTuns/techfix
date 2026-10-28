@@ -25,3 +25,15 @@ function require_role(string $role): void
         exit;
     }
 }
+
+/** Cho phép một trong các vai trò được chỉ định truy cập API. */
+function require_any_role(array $roles): void
+{
+    require_login();
+    if (!in_array($_SESSION['role'] ?? '', $roles, true)) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'Bạn không có quyền truy cập chức năng này']);
+        exit;
+    }
+}

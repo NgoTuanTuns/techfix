@@ -1,7 +1,7 @@
 <?php
 /**
  * api/update_order_status.php
- * Yêu cầu role = admin. Nhận POST: order_id (bắt buộc) + bất kỳ tổ hợp nào trong
+ * Yêu cầu role = admin hoặc technician. Nhận POST: order_id (bắt buộc) + bất kỳ tổ hợp nào trong
  *   status, technician_id, estimated_cost, final_cost, note
  * Chỉ cập nhật những trường thực sự được gửi lên (cho phép sửa từng ô trên bảng admin
  * mà không phải gửi lại toàn bộ đơn).
@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_role('admin');
-$adminId = $_SESSION['user_id'];
+require_any_role(['admin', 'technician']);
+$actorId = $_SESSION['user_id'];
 
 $orderId = (int)($_POST['order_id'] ?? 0);
 if ($orderId <= 0) {
@@ -91,7 +91,7 @@ try {
     if ($hasStatus && $_POST['status'] !== $existing['status']) {
         $pdo->prepare(
             'INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, ?, ?, ?)'
-        )->execute([$orderId, $_POST['status'], trim($_POST['note'] ?? '') ?: null, $adminId]);
+        )->execute([$orderId, $_POST['status'], trim($_POST['note'] ?? '') ?: null, $actorId]);
     }
 
     $pdo->commit();
