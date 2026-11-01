@@ -3,6 +3,7 @@
  * api/create_order.php
  * Yêu cầu đã đăng nhập (Hướng A: không cho đặt lịch khi chưa có tài khoản).
  * Nhận POST (multipart/form-data): device, brand, model, issue, method, time,
+ *   delivery_address (optional), delivery_phone (optional),
  *   service (optional), photo (optional file)
  * Trả JSON: {success: bool, message: string, data?: {order_code, order_id}}
  */
@@ -22,13 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_login();
 $userId = $_SESSION['user_id'];
 
-$deviceType  = trim($_POST['device'] ?? '');
-$brand       = trim($_POST['brand'] ?? '');
-$model       = trim($_POST['model'] ?? '');
-$issue       = trim($_POST['issue'] ?? '');
-$method      = trim($_POST['method'] ?? '');
-$time        = trim($_POST['time'] ?? '');   // định dạng datetime-local: 2026-10-09T14:30
-$serviceSlug = trim($_POST['service'] ?? '');
+$deviceType      = trim($_POST['device'] ?? '');
+$brand           = trim($_POST['brand'] ?? '');
+$model           = trim($_POST['model'] ?? '');
+$issue           = trim($_POST['issue'] ?? '');
+$method          = trim($_POST['method'] ?? '');
+$time            = trim($_POST['time'] ?? '');   // định dạng datetime-local: 2026-10-09T14:30
+$serviceSlug     = trim($_POST['service'] ?? '');
+$deliveryAddress = trim($_POST['delivery_address'] ?? '');
+$deliveryPhone   = trim($_POST['delivery_phone'] ?? '');
 
 // ---------- Validate ----------
 $errors = [];
@@ -42,6 +45,16 @@ if ($brand === '') {
 }
 if (mb_strlen($issue) < 5) {
     $errors[] = 'Vui lòng mô tả lỗi rõ hơn (ít nhất 5 ký tự)';
+}
+
+// Nếu chọn nhận máy tận nơi thì bắt buộc phải có địa chỉ và số điện thoại liên lạc
+if ($method === 'Nhận máy tận nơi') {
+    if ($deliveryAddress === '') {
+        $errors[] = 'Vui lòng nhập địa chỉ nhận máy tận nơi';
+    }
+    if ($deliveryPhone === '') {
+        $errors[] = 'Vui lòng nhập số điện thoại liên lạc nhận máy';
+    }
 }
 
 if (!empty($errors)) {
@@ -98,28 +111,44 @@ try {
     $insDevice->execute([$userId, $deviceType, $brand, $model]);
     $deviceId = (int)$pdo->lastInsertId();
 
-    // 2. Tạo đơn sửa chữa (order_code tạm, cập nhật lại ngay sau khi có id)
+    // Khởi tạo giá gốc dịch vụ
+    $servicePrice = null;
+
+    // 2. Tạo đơn sửa chữa (chưa gắn giá dịch vụ nếu chưa chọn)
     $insOrder = $pdo->prepare(
         'INSERT INTO repair_orders
-            (order_code, customer_id, device_id, issue_description, delivery_method, preferred_time, status)
-         VALUES ("", ?, ?, ?, ?, ?, "received")'
+            (order_code, customer_id, device_id, issue_description, delivery_method, delivery_address, delivery_phone, preferred_time, estimated_cost, status)
+         VALUES ("", ?, ?, ?, ?, ?, ?, ?, NULL, "pending_receipt")' 
     );
-    $insOrder->execute([$userId, $deviceId, $issue, $method ?: null, $preferredTime]);
+    $insOrder->execute([
+        $userId, 
+        $deviceId, 
+        $issue, 
+        $method ?: null, 
+        $deliveryAddress ?: null, 
+        $deliveryPhone ?: null, 
+        $preferredTime
+    ]);
     $orderId = (int)$pdo->lastInsertId();
 
     $orderCode = 'TF-' . str_pad((string)$orderId, 4, '0', STR_PAD_LEFT);
     $pdo->prepare('UPDATE repair_orders SET order_code = ? WHERE id = ?')
         ->execute([$orderCode, $orderId]);
 
-    // 3. Nếu khách chọn gói đề cử từ trang chủ -> gắn vào order_services
+    // 3. Nếu khách chọn gói đề cử từ trang chủ -> gắn vào order_services và lưu đúng giá trị gốc
     if ($serviceSlug !== '') {
         $svc = $pdo->prepare('SELECT id, base_price FROM services WHERE slug = ? AND is_active = 1');
         $svc->execute([$serviceSlug]);
         $serviceRow = $svc->fetch();
 
         if ($serviceRow) {
+            $servicePrice = (float)$serviceRow['base_price'];
             $pdo->prepare('INSERT INTO order_services (order_id, service_id, price) VALUES (?, ?, ?)')
-                ->execute([$orderId, $serviceRow['id'], $serviceRow['base_price']]);
+                ->execute([$orderId, $serviceRow['id'], $servicePrice]);
+
+            // Cập nhật giá gốc dịch vụ vào estimated_cost
+            $pdo->prepare('UPDATE repair_orders SET estimated_cost = ? WHERE id = ?')
+                ->execute([$servicePrice, $orderId]);
         }
     }
 
@@ -129,10 +158,10 @@ try {
             ->execute([$orderId, $uploadedPath]);
     }
 
-    // 5. Ghi lịch sử trạng thái đầu tiên (để dựng stepper trên dashboard)
+    // 5. Ghi lịch sử trạng thái đầu tiên
     $pdo->prepare(
-        'INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, "received", ?, ?)'
-    )->execute([$orderId, 'Khách đặt lịch online', $userId]);
+        'INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, "pending_receipt", ?, ?)'
+    )->execute([$orderId, 'Khách đặt lịch online (Chưa tiếp nhận máy)', $userId]);
 
     $pdo->commit();
 

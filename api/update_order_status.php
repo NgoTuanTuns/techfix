@@ -30,7 +30,7 @@ if ($orderId <= 0) {
     exit;
 }
 
-$allowedStatus = ['received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled'];
+$allowedStatus = ['pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled'];
 
 $hasStatus      = array_key_exists('status', $_POST) && $_POST['status'] !== '';
 $hasTechnician  = array_key_exists('technician_id', $_POST);
@@ -49,7 +49,8 @@ if ($hasStatus && !in_array($_POST['status'], $allowedStatus, true)) {
 try {
     $pdo->beginTransaction();
 
-    $check = $pdo->prepare('SELECT status FROM repair_orders WHERE id = ?');
+    // Lấy trạng thái cũ và hình thức nhận máy của đơn hàng[cite: 22]
+    $check = $pdo->prepare('SELECT status, delivery_method FROM repair_orders WHERE id = ?');
     $check->execute([$orderId]);
     $existing = $check->fetch();
 
@@ -58,6 +59,20 @@ try {
         echo json_encode(['success' => false, 'message' => 'Không tìm thấy đơn này']);
         exit;
     }
+
+    // RÀNG BUỘC: Nếu đơn đang chờ duyệt giá (awaiting_approval) mà cố chuyển sang repairing hoặc completed thì chặn[cite: 22]
+    if ($hasStatus) {
+        $newStatus = $_POST['status'];
+        if ($existing['status'] === 'awaiting_approval' && in_array($newStatus, ['repairing', 'completed'], true)) {
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'message' => 'Khách hàng chưa duyệt giá, không thể chuyển sang trạng thái này!']);
+            exit;
+        }
+    }
+
+    // Kiểm tra xem đơn có phải nhận tận nơi không để tự động cộng 20k phí ship vào CSDL
+    $isDelivery = ($existing['delivery_method'] === 'Nhận máy tận nơi');
+    $shippingFee = $isDelivery ? 20000 : 0;
 
     $sets = [];
     $params = [];
@@ -76,18 +91,20 @@ try {
     }
     if ($hasEstimated) {
         $sets[] = 'estimated_cost = ?';
-        $params[] = (int)$_POST['estimated_cost'];
+        // Cộng thêm 20k vào giá ước tính thực tế lưu xuống CSDL nếu là nhận tận nơi
+        $params[] = (int)$_POST['estimated_cost'] + $shippingFee;
     }
     if ($hasFinal) {
         $sets[] = 'final_cost = ?';
-        $params[] = (int)$_POST['final_cost'];
+        // Cộng thêm 20k vào giá cuối thực tế lưu xuống CSDL nếu là nhận tận nơi
+        $params[] = (int)$_POST['final_cost'] + $shippingFee;
     }
 
     $params[] = $orderId;
     $pdo->prepare('UPDATE repair_orders SET ' . implode(', ', $sets) . ' WHERE id = ?')
         ->execute($params);
 
-    // Chỉ ghi lịch sử khi status thực sự thay đổi (để dashboard khách hàng vẽ đúng stepper)
+    // Chỉ ghi lịch sử khi status thực sự thay đổi (để dashboard khách hàng vẽ đúng stepper)[cite: 22]
     if ($hasStatus && $_POST['status'] !== $existing['status']) {
         $pdo->prepare(
             'INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, ?, ?, ?)'

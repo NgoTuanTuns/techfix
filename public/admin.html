@@ -111,6 +111,7 @@
                 <th>Khách hàng</th>
                 <th>Thiết bị</th>
                 <th>Lỗi</th>
+                <th>Hình thức</th>
                 <th>Kỹ thuật viên</th>
                 <th>Trạng thái</th>
                 <th>Giá ước tính</th>
@@ -200,19 +201,6 @@
         );
       }
 
-      function priceState(order, field) {
-        var missing =
-          field === "final_cost" &&
-          order.status === "completed" &&
-          (order[field] === null ||
-            order[field] === undefined ||
-            order[field] === "");
-        return {
-          missing: missing,
-          text: missing ? "Chưa nhập" : TF.formatMoney(order[field]) || "—",
-        };
-      }
-
       var LOCKED_TITLE = "Chỉ nhập được giá cuối khi đơn đã hoàn tất";
       function isPriceLocked(order, field) {
         return field === "final_cost" && order.status !== "completed";
@@ -274,7 +262,32 @@
         }
       }
 
+      function isDelivery(order) {
+        return order.delivery_method === "Nhận máy tận nơi";
+      }
+
+      function priceState(order, field) {
+        var val = order[field];
+        // Kiểm tra xem giá trị có tồn tại và lớn hơn 0 không
+        var hasValue =
+          val !== null && val !== undefined && val !== "" && Number(val) > 0;
+
+        var missing =
+          field === "final_cost" && order.status === "completed" && !hasValue;
+
+        return {
+          missing: missing,
+          // Chỉ lấy thẳng giá trị từ CSDL ra hiển thị, tuyệt đối không cộng thêm 20k ở đây
+          text: !hasValue ? "—" : TF.formatMoney(val),
+        };
+      }
+
       function renderRow(order) {
+        var methodLabel =
+          order.delivery_method === "Nhận máy tận nơi"
+            ? '<span class="badge" style="background:#e0f2fe; color:#0369a1; font-size:0.75rem;">Nhận tận nơi</span>'
+            : '<span style="color:var(--ink-soft); font-size:0.85rem;">Tại cửa hàng</span>';
+
         return (
           "<tr>" +
           "<td>#" +
@@ -286,10 +299,13 @@
           "<td>" +
           TF.esc(TF.deviceLabel(order)) +
           "</td>" +
-          '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' +
+          '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' +
           TF.esc(order.issue_description) +
           '">' +
           TF.esc(order.issue_description) +
+          "</td>" +
+          "<td>" +
+          methodLabel +
           "</td>" +
           "<td>" +
           technicianSelectHtml(order) +
@@ -500,11 +516,28 @@
           sel.addEventListener("change", async function () {
             var orderId = sel.dataset.orderId;
             var newStatus = sel.value;
+
+            // Tìm thông tin đơn hàng hiện tại trong mảng allOrders
+            var order = allOrders.find(function (o) {
+              return String(o.id) === String(orderId);
+            });
+
+            // Ràng buộc trên giao diện: Đang chờ duyệt giá mà chọn Sang Đang sửa hoặc Hoàn tất thì chặn lại
+            if (
+              order &&
+              order.status === "awaiting_approval" &&
+              (newStatus === "repairing" || newStatus === "completed")
+            ) {
+              alert(
+                "Khách hàng chưa duyệt giá, không thể chuyển sang trạng thái Đang sửa chữa hoặc Hoàn tất!",
+              );
+              // Trả lại giá trị select cũ trên giao diện
+              sel.value = order.status;
+              return;
+            }
+
             var ok = await saveOrderField(orderId, { status: newStatus });
             if (ok) {
-              var order = allOrders.find(function (o) {
-                return String(o.id) === String(orderId);
-              });
               if (order) {
                 order.status = newStatus;
                 if (newStatus === "completed")
@@ -515,6 +548,9 @@
                 (TF.STATUS[newStatus] && TF.STATUS[newStatus].cls) || "";
               sel.className = "status-select " + cls;
               renderStats();
+            } else {
+              // Nếu API bên dưới từ chối, trả lại select về trạng thái cũ
+              if (order) sel.value = order.status;
             }
           });
         });

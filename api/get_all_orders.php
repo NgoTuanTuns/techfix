@@ -15,9 +15,10 @@ header('Content-Type: application/json; charset=utf-8');
 require_any_role(['admin', 'technician']);
 
 try {
-    $stmt = $pdo->query(
+   $stmt = $pdo->query(
         'SELECT ro.id, ro.order_code, ro.issue_description, ro.status,
                 ro.estimated_cost, ro.final_cost, ro.received_at, ro.completed_at,
+                ro.delivery_method, ro.delivery_address, ro.delivery_phone,
                 d.device_type, d.brand, d.model,
                 cu.id AS customer_id, cu.full_name AS customer_name, cu.phone AS customer_phone,
                 te.id AS technician_id, te.full_name AS technician_name

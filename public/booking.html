@@ -178,11 +178,50 @@
           <div class="field">
             <label for="method">Hình thức tiếp nhận</label>
             <select id="method" name="method">
-              <option>Mang trực tiếp đến cửa hàng</option>
-              <option>
+              <option value="Mang trực tiếp đến cửa hàng">
+                Mang trực tiếp đến cửa hàng
+              </option>
+              <option value="Nhận máy tận nơi">
                 Nhận máy tận nơi (nội thành, phí vận chuyển 20.000đ)
               </option>
             </select>
+          </div>
+
+          <!-- Các trường ẩn/hiện khi chọn nhận máy tận nơi -->
+          <div
+            id="delivery-fields"
+            style="
+              display: none;
+              background: var(--bg-alt);
+              padding: 16px;
+              border-radius: 8px;
+              border: 1px solid var(--line);
+              margin-bottom: 16px;
+            "
+          >
+            <div class="field" style="margin-bottom: 12px">
+              <label for="delivery-address"
+                >Địa chỉ nhận máy tận nơi <span class="req">*</span></label
+              >
+              <input
+                type="text"
+                id="delivery-address"
+                name="delivery_address"
+                placeholder="Ví dụ: 105 Nguyễn Trãi, Phường Bến Thành, Quận 1"
+              />
+            </div>
+            <div class="field" style="margin-bottom: 0">
+              <label for="delivery-phone"
+                >Số điện thoại liên lạc nhận máy
+                <span class="req">*</span></label
+              >
+              <input
+                type="tel"
+                id="delivery-phone"
+                name="delivery_phone"
+                placeholder="Số điện thoại người nhận tại nhà"
+              />
+            </div>
           </div>
 
           <div class="field">
@@ -382,6 +421,26 @@
           return null;
         }
       }
+
+      // Ẩn hiện ô nhập địa chỉ và SĐT dựa vào hình thức nhận máy
+      document.getElementById("method").addEventListener("change", function () {
+        var deliveryFields = document.getElementById("delivery-fields");
+        var addressInput = document.getElementById("delivery-address");
+        var phoneInput = document.getElementById("delivery-phone");
+
+        // Kiểm tra đúng giá trị tiếng Việt mới chọn
+        if (this.value === "Nhận máy tận nơi") {
+          deliveryFields.style.display = "block";
+          addressInput.required = true;
+          phoneInput.required = true;
+        } else {
+          deliveryFields.style.display = "none";
+          addressInput.required = false;
+          phoneInput.required = false;
+          addressInput.value = "";
+          phoneInput.value = "";
+        }
+      });
 
       document
         .getElementById("booking-form")

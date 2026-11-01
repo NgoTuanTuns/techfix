@@ -81,7 +81,12 @@
           </div>
           <nav>
             <a href="#" class="active" data-panel="orders">Đơn sửa chữa</a>
-            <a href="admin.html?v=20261028" id="admin-panel-link" style="display: none">Bảng điều khiển</a>
+            <a
+              href="admin.html?v=20261028"
+              id="admin-panel-link"
+              style="display: none"
+              >Bảng điều khiển</a
+            >
             <a href="#" data-panel="account">Thông tin tài khoản</a>
             <a href="#" data-panel="payments">Lịch sử thanh toán</a>
             <a href="contact.html">Đánh giá dịch vụ</a>
@@ -227,34 +232,46 @@
 
       // ---------- Trạng thái đơn: badge + bước stepper ----------
       var STATUS_META = {
+        pending_receipt: {
+          badgeClass: "badge-received",
+          text: "Chưa tiếp nhận máy",
+          step: 1,
+        },
         received: {
           badgeClass: "badge-received",
-          text: "Đã tiếp nhận",
-          step: 1,
+          text: "Đã tiếp nhận máy",
+          step: 2,
         },
         diagnosing: {
           badgeClass: "badge-received",
           text: "Đang chẩn đoán",
-          step: 2,
+          step: 3,
         },
         awaiting_approval: {
           badgeClass: "badge-progress",
           text: "Chờ duyệt giá",
-          step: 2,
+          step: 3,
         },
         repairing: {
           badgeClass: "badge-progress",
           text: "Đang sửa chữa",
-          step: 3,
+          step: 4,
         },
-        completed: { badgeClass: "badge-done", text: "Hoàn tất", step: 4 },
+        completed: { badgeClass: "badge-done", text: "Hoàn tất", step: 5 },
         cancelled: { badgeClass: "", text: "Đã huỷ", step: 0 },
       };
-      var STEP_LABELS = ["Tiếp nhận", "Chẩn đoán", "Đang sửa", "Bàn giao"];
+
+      var STEP_LABELS = [
+        "Chờ nhận máy",
+        "Đã nhận máy",
+        "Chẩn đoán",
+        "Đang sửa",
+        "Bàn giao",
+      ];
 
       function renderTracker(currentStep) {
         var html = "";
-        for (var i = 1; i <= 4; i++) {
+        for (var i = 1; i <= 5; i++) {
           var cls = "tracker-step";
           var circleContent = i;
           if (i < currentStep) {
@@ -286,29 +303,56 @@
         };
         var deviceLabel = (order.brand + " " + (order.model || "")).trim();
 
-        var badgeHtml;
-        if (order.status === "cancelled") {
-          badgeHtml =
-            '<span class="badge" style="background:#FBE3E0;color:#B3261E;">Đã huỷ</span>';
-        } else {
-          badgeHtml =
-            '<span class="badge ' +
-            meta.badgeClass +
-            '">' +
-            meta.text +
-            "</span>";
-        }
+        var badgeHtml =
+          order.status === "cancelled"
+            ? '<span class="badge" style="background:#FBE3E0;color:#B3261E;">Đã huỷ</span>'
+            : '<span class="badge ' +
+              meta.badgeClass +
+              '">' +
+              meta.text +
+              "</span>";
 
         var trackerHtml =
           order.status === "cancelled"
             ? ""
             : '<div class="tracker">' + renderTracker(meta.step) + "</div>";
 
-        var cost =
-          formatMoney(order.final_cost) || formatMoney(order.estimated_cost);
+        var isDeliveryMethod = order.delivery_method === "Nhận máy tận nơi";
+        var costVal = order.final_cost || order.estimated_cost;
+        var cost = formatMoney(costVal);
+
         var costLine = cost
-          ? 'Chi phí: <strong style="color:var(--ink)">' + cost + "</strong>."
-          : "Đang chờ kỹ thuật viên báo giá.";
+          ? 'Chi phí dự kiến (đã gồm 20.000đ phí vận chuyển tận nơi): <strong style="color:var(--ink)">' +
+            cost +
+            "</strong>."
+          : "Đang chờ kỹ thuật viên kiểm tra và báo giá.";
+
+        // Hộp duyệt giá 3 nút
+        var approvalBoxHtml = "";
+        if (order.status === "awaiting_approval") {
+          var shippingNote = isDeliveryMethod
+            ? '<div style="font-size: 0.8rem; color: #0284c7; margin-bottom: 6px;">ℹ️ Tổng tiền trên đã bao gồm <strong>20.000đ</strong> phí nhận máy tận nơi.</div>'
+            : "";
+
+          approvalBoxHtml =
+            '<div style="margin-top: 14px; padding: 14px; background: var(--surface); border-radius: 8px; border: 1px solid var(--line);">' +
+            shippingNote +
+            '<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">' +
+            '<span style="font-size: 0.88rem; color: var(--ink); font-weight: 500;">Cửa hàng đã gửi báo giá. Vui lòng phản hồi:</span>' +
+            '<div style="display: flex; gap: 8px; flex-wrap: wrap;">' +
+            '<button type="button" class="btn btn-primary btn-sm" onclick="handleQuoteAction(' +
+            order.id +
+            ", 'approve')\">Duyệt giá</button>" +
+            '<button type="button" class="btn btn-outline btn-sm" style="color: var(--ink);" onclick="handleQuoteAction(' +
+            order.id +
+            ", 'request_requote')\">Báo giá lại</button>" +
+            '<button type="button" class="btn btn-outline btn-sm" style="color: #b3261e; border-color: #b3261e;" onclick="handleQuoteAction(' +
+            order.id +
+            ", 'reject')\">Hủy đơn</button>" +
+            "</div>" +
+            "</div>" +
+            "</div>";
+        }
 
         return (
           '<div class="order-card">' +
@@ -331,8 +375,45 @@
           '<p style="margin-top:18px;font-size:0.88rem;color:var(--ink-soft);">' +
           costLine +
           "</p>" +
+          approvalBoxHtml +
           "</div>"
         );
+      }
+
+      async function handleQuoteAction(orderId, action) {
+        var prompts = {
+          approve:
+            "Bạn có chắc chắn muốn DUYỆT mức giá này để cửa hàng bắt đầu sửa chữa?",
+          request_requote: "Bạn muốn yêu cầu cửa hàng KIỂM TRA & BÁO GIÁ LẠI?",
+          reject: "Bạn có chắc chắn muốn HỦY ĐƠN sửa chữa này?",
+        };
+
+        if (!confirm(prompts[action])) return;
+
+        var formData = new FormData();
+        formData.append("order_id", orderId);
+        formData.append("action", action);
+
+        try {
+          var res = await fetch("../api/approve_quote.php", {
+            method: "POST",
+            body: formData,
+          });
+          var raw = await res.text();
+          var result = tryExtractJson(raw);
+
+          if (!result || !result.success) {
+            alert(
+              (result && result.message) || "Có lỗi xảy ra, vui lòng thử lại.",
+            );
+            return;
+          }
+
+          alert(result.message);
+          location.reload();
+        } catch (err) {
+          alert("Không kết nối được tới máy chủ.");
+        }
       }
 
       function renderOrders(orders) {
