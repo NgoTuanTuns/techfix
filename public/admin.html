@@ -73,6 +73,9 @@
         <div class="admin-toolbar">
           <div class="admin-filters">
             <div class="chip active" data-status="all">Tất cả</div>
+            <div class="chip" data-status="pending_receipt">
+              Chưa tiếp nhận
+            </div>
             <div class="chip" data-status="received">Đã tiếp nhận</div>
             <div class="chip" data-status="repairing">Đang sửa</div>
             <div class="chip" data-status="awaiting_approval">
@@ -122,7 +125,7 @@
             <tbody id="orders-tbody">
               <tr>
                 <td
-                  colspan="9"
+                  colspan="10"
                   style="
                     text-align: center;
                     color: var(--ink-soft);
@@ -139,10 +142,25 @@
     </section>
 
     <!-- Nạp helper dùng chung -->
-    <script src="../js/admin-common.js?v=20261028b"></script>
+    <script src="../js/admin-common.js?v=20261101"></script>
     <script>
       var allOrders = [];
       var technicians = [];
+      var currentUser = null;
+      var DELIVERY_FEE = 20000; // khớp update_order_status.php: tự cộng cho đơn nhận tận nơi
+
+      function isTechnicianUser() {
+        return !!currentUser && currentUser.role === "technician";
+      }
+
+      // Admin sửa mọi đơn; kỹ thuật viên chỉ sửa đơn đang giao cho mình (backend cũng chặn)
+      function canEditOrder(order) {
+        return (
+          !isTechnicianUser() ||
+          String(order.technician_id) === String(currentUser.id)
+        );
+      }
+      var CLAIM_FIRST = "Nhận đơn về mình trước khi cập nhật";
       var currentFilter = "all";
       var currentSearch = "";
 
@@ -164,12 +182,17 @@
           .join("");
         var cls =
           (TF.STATUS[order.status] && TF.STATUS[order.status].cls) || "";
+        var lock = canEditOrder(order)
+          ? ""
+          : ' disabled title="' + CLAIM_FIRST + '"';
         return (
           '<select class="status-select ' +
           cls +
           '" data-order-id="' +
           order.id +
-          '" style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
+          '"' +
+          lock +
+          ' style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
           opts +
           "</select>"
         );
@@ -177,7 +200,17 @@
 
       function technicianSelectHtml(order) {
         var opts = '<option value="">— Chưa phân công —</option>';
-        opts += technicians
+        // Kỹ thuật viên: chỉ chọn được chính mình cho đơn chưa ai nhận, đơn đã nhận thì khoá
+        var choices = isTechnicianUser()
+          ? technicians.filter(function (t) {
+              return String(t.id) === String(currentUser.id);
+            })
+          : technicians;
+        var lock =
+          isTechnicianUser() && order.technician_id
+            ? ' disabled title="Chỉ quản trị viên mới đổi người phụ trách"'
+            : "";
+        opts += choices
           .map(function (t) {
             var sel =
               String(t.id) === String(order.technician_id) ? " selected" : "";
@@ -195,7 +228,9 @@
         return (
           '<select class="technician-select" data-order-id="' +
           order.id +
-          '" style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
+          '"' +
+          lock +
+          ' style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
           opts +
           "</select>"
         );
@@ -209,8 +244,10 @@
       function priceCellHtml(order, field) {
         var st = priceState(order, field);
         var isFinal = field === "final_cost";
-        var locked = isPriceLocked(order, field);
-        var title = locked
+        var locked = isPriceLocked(order, field) || !canEditOrder(order);
+        var title = !canEditOrder(order)
+          ? CLAIM_FIRST
+          : locked
           ? LOCKED_TITLE
           : isFinal
             ? "Sửa giá cuối"
@@ -252,15 +289,21 @@
         cell.querySelector("span").textContent = st.text;
         var btn = cell.querySelector("[data-edit-price]");
         if (btn) {
-          var locked = isPriceLocked(order, field);
+          var editable = canEditOrder(order);
+          var locked = isPriceLocked(order, field) || !editable;
           btn.disabled = locked;
-          btn.title = btn.ariaLabel = locked
+          btn.title = btn.ariaLabel = !editable
+            ? CLAIM_FIRST
+            : locked
             ? LOCKED_TITLE
             : field === "final_cost"
               ? "Sửa giá cuối"
               : "Sửa giá ước tính";
         }
       }
+
+      var VAN_ICON =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>';
 
       function isDelivery(order) {
         return order.delivery_method === "Nhận máy tận nơi";
@@ -283,10 +326,13 @@
       }
 
       function renderRow(order) {
-        var methodLabel =
-          order.delivery_method === "Nhận máy tận nơi"
-            ? '<span class="badge" style="background:#e0f2fe; color:#0369a1; font-size:0.75rem;">Nhận tận nơi</span>'
-            : '<span style="color:var(--ink-soft); font-size:0.85rem;">Tại cửa hàng</span>';
+        var methodLabel = isDelivery(order)
+          ? '<span class="delivery-tag" title="' +
+            TF.esc(order.delivery_address || "") +
+            '">' +
+            VAN_ICON +
+            "Tận nơi</span>"
+          : '<span class="method-store">Tại cửa hàng</span>';
 
         return (
           "<tr>" +
@@ -345,7 +391,7 @@
 
         if (!filtered.length) {
           tbody.innerHTML =
-            '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không có đơn nào khớp.</td></tr>';
+            '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:24px;">Không có đơn nào khớp.</td></tr>';
           return;
         }
         tbody.innerHTML = filtered.map(renderRow).join("");
@@ -480,6 +526,30 @@
           if (order[f[0]]) rows += detailRow(f[1], TF.esc(order[f[0]]));
         });
 
+        // Đơn nhận tận nơi: gom địa chỉ, SĐT người giao máy và phí vận chuyển thành một khối riêng
+        var deliveryHtml = "";
+        if (isDelivery(order)) {
+          var phone = order.delivery_phone
+            ? '<a href="tel:' +
+              TF.esc(order.delivery_phone) +
+              '">' +
+              TF.esc(order.delivery_phone) +
+              "</a>"
+            : "Chưa có";
+          deliveryHtml =
+            '<div class="od-delivery">' +
+            '<div class="od-delivery-head"><span class="delivery-tag">' +
+            VAN_ICON +
+            "Nhận máy tận nơi</span>" +
+            '<span class="od-fee">Phí vận chuyển 20.000đ, tự cộng vào giá khi lưu</span></div>' +
+            '<div class="od-grid">' +
+            detailRow("Địa chỉ nhận máy", TF.esc(order.delivery_address) || "Chưa có") +
+            detailRow("SĐT liên lạc", phone) +
+            "</div></div>";
+        } else {
+          rows += detailRow("Hình thức nhận máy", "Mang đến cửa hàng");
+        }
+
         detailOverlay = document.createElement("div");
         detailOverlay.className = "od-overlay";
         detailOverlay.innerHTML =
@@ -496,6 +566,7 @@
           '<div class="od-grid">' +
           rows +
           "</div>" +
+          deliveryHtml +
           '<div class="od-issue"><span class="od-label">Mô tả lỗi</span>' +
           "<p>" +
           (TF.esc(order.issue_description) || "—") +
@@ -528,8 +599,9 @@
               order.status === "awaiting_approval" &&
               (newStatus === "repairing" || newStatus === "completed")
             ) {
-              alert(
-                "Khách hàng chưa duyệt giá, không thể chuyển sang trạng thái Đang sửa chữa hoặc Hoàn tất!",
+              TF.toast(
+                "Khách chưa duyệt giá nên chưa chuyển sang Đang sửa hoặc Hoàn tất được.",
+                true,
               );
               // Trả lại giá trị select cũ trên giao diện
               sel.value = order.status;
@@ -565,7 +637,14 @@
               var order = allOrders.find(function (o) {
                 return String(o.id) === String(orderId);
               });
-              if (order) order.technician_id = sel.value;
+              if (order) order.technician_id = sel.value || null;
+              if (isTechnicianUser()) renderTable();
+            } else {
+              // API từ chối: trả select về người phụ trách cũ
+              var prev = allOrders.find(function (o) {
+                return String(o.id) === String(orderId);
+              });
+              sel.value = (prev && prev.technician_id) || "";
             }
           });
         });
@@ -586,12 +665,18 @@
               );
               return;
             }
-            var current = order[fieldName];
-            var label = isFinal
-              ? "Nhập giá cuối cùng (đ):"
-              : "Nhập giá ước tính (đ):";
+            // Giá trong DB đã gồm phí ship với đơn tận nơi, còn API nhận giá gốc rồi tự cộng phí.
+            // Điền sẵn giá gốc để lưu lại không bị cộng phí lần nữa.
+            var fee = isDelivery(order) ? DELIVERY_FEE : 0;
+            var current = Number(order[fieldName]) > 0 ? Number(order[fieldName]) : null;
+            var basePrice = current == null ? null : Math.max(current - fee, 0);
+            var label =
+              (isFinal ? "Nhập giá cuối cùng (đ)" : "Nhập giá ước tính (đ)") +
+              (fee
+                ? ", chưa gồm phí nhận máy tận nơi. Hệ thống tự cộng 20.000đ:"
+                : ":");
 
-            var input = prompt(label, current == null ? "" : current);
+            var input = prompt(label, basePrice == null ? "" : basePrice);
             if (input === null || input.trim() === "") return;
             var num = parseInt(input.replace(/\D/g, ""), 10);
             if (isNaN(num) || num < 0) {
@@ -603,7 +688,7 @@
             fields[fieldName] = num;
             var ok = await saveOrderField(orderId, fields);
             if (ok) {
-              order[fieldName] = num;
+              order[fieldName] = num + fee;
               refreshPriceCell(order, fieldName);
             }
           });
@@ -640,6 +725,7 @@
         // Dùng TF.guard để tự động check role ("admin" hoặc "technician")
         var user = await TF.guard("admin.html", ["admin", "technician"]);
         if (!user) return;
+        currentUser = user;
 
         // Nếu là kỹ thuật viên, ẩn các menu không đủ quyền
         if (user.role === "technician") {
@@ -663,7 +749,7 @@
 
         if (!ordersRes || !ordersRes.success) {
           document.getElementById("orders-tbody").innerHTML =
-            '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:24px;">Không tải được danh sách đơn.</td></tr>';
+            '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:24px;">Không tải được danh sách đơn.</td></tr>';
           return;
         }
 

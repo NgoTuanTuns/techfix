@@ -64,7 +64,8 @@ try {
 
     $userId = (int)$pdo->lastInsertId();
 
-    // Tự động đăng nhập sau khi đăng ký thành công
+    // Tự động đăng nhập sau khi đăng ký thành công (cấp session ID mới, chống session fixation)
+    session_regenerate_id(true);
     $_SESSION['user_id']   = $userId;
     $_SESSION['role']      = 'customer';
     $_SESSION['full_name'] = $full_name;

@@ -64,9 +64,11 @@ CREATE TABLE IF NOT EXISTS repair_orders (
     issue_description TEXT NOT NULL,
     diagnosis_note TEXT NULL,
     delivery_method VARCHAR(30) NULL,
+    delivery_address VARCHAR(255) NULL,
+    delivery_phone VARCHAR(15) NULL,
     preferred_time DATETIME NULL,
-    status ENUM('received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled')
-        NOT NULL DEFAULT 'received',
+    status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled')
+        NOT NULL DEFAULT 'pending_receipt',
     estimated_cost DECIMAL(10,0) NULL,
     final_cost DECIMAL(10,0) NULL,
     received_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -193,6 +195,16 @@ CREATE TABLE IF NOT EXISTS reviews (
         ON DELETE CASCADE,
     CONSTRAINT chk_reviews_rating CHECK (rating BETWEEN 1 AND 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Nâng cấp cho database đã tạo từ bản schema cũ (CREATE TABLE IF NOT EXISTS không tự thêm cột).
+-- IF NOT EXISTS (MariaDB 10.0.2+) giúp chạy lại file trên database mới vẫn không lỗi trùng cột.
+ALTER TABLE repair_orders
+ADD COLUMN IF NOT EXISTS delivery_address VARCHAR(255) NULL AFTER delivery_method,
+ADD COLUMN IF NOT EXISTS delivery_phone VARCHAR(15) NULL AFTER delivery_address;
+
+ALTER TABLE repair_orders
+MODIFY COLUMN status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled')
+    NOT NULL DEFAULT 'pending_receipt';
 
 -- Dữ liệu dịch vụ mẫu. INSERT IGNORE tránh lỗi nếu slug đã tồn tại.
 INSERT IGNORE INTO services (slug, device_type, name, base_price) VALUES

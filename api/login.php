@@ -39,6 +39,8 @@ try {
         exit;
     }
 
+    // Cấp session ID mới sau khi xác thực, chống session fixation
+    session_regenerate_id(true);
     $_SESSION['user_id']   = $user['id'];
     $_SESSION['role']      = $user['role'];
     $_SESSION['full_name'] = $user['full_name'];

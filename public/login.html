@@ -237,6 +237,15 @@
           var raw = await res.text();
           var result = tryExtractJson(raw);
 
+          // Chỉ chấp nhận ?next= là một trang .html nội bộ (vd "booking.html"),
+          // chặn chuyển hướng ra trang ngoài kiểu ?next=https://... hoặc //evil.com
+          function safeNextPage() {
+            var next = new URLSearchParams(window.location.search).get("next");
+            return next && /^[a-z0-9_-]+\.html(\?[^#\s]*)?$/i.test(next)
+              ? next
+              : null;
+          }
+
           if (!result) {
             // Không trích được message cụ thể nào — chỉ lúc này mới hiện câu chung chung.
             console.error("Response không parse được:", raw);
@@ -246,11 +255,10 @@
 
           if (result.success) {
             var role = result.data && result.data.role;
-            if (role === "admin") {
+            if (role === "admin" || role === "technician") {
               window.location.href = "admin.html";
             } else {
-              var params = new URLSearchParams(window.location.search);
-              window.location.href = params.get("next") || "dashboard.html";
+              window.location.href = safeNextPage() || "dashboard.html";
             }
           } else {
             // Luôn ưu tiên hiện đúng message cụ thể server trả về

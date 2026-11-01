@@ -187,40 +187,47 @@
             </select>
           </div>
 
-          <!-- Các trường ẩn/hiện khi chọn nhận máy tận nơi -->
-          <div
-            id="delivery-fields"
-            style="
-              display: none;
-              background: var(--bg-alt);
-              padding: 16px;
-              border-radius: 8px;
-              border: 1px solid var(--line);
-              margin-bottom: 16px;
-            "
-          >
-            <div class="field" style="margin-bottom: 12px">
-              <label for="delivery-address"
-                >Địa chỉ nhận máy tận nơi <span class="req">*</span></label
-              >
-              <input
-                type="text"
-                id="delivery-address"
-                name="delivery_address"
-                placeholder="Ví dụ: 105 Nguyễn Trãi, Phường Bến Thành, Quận 1"
-              />
-            </div>
-            <div class="field" style="margin-bottom: 0">
-              <label for="delivery-phone"
-                >Số điện thoại liên lạc nhận máy
-                <span class="req">*</span></label
-              >
-              <input
-                type="tel"
-                id="delivery-phone"
-                name="delivery_phone"
-                placeholder="Số điện thoại người nhận tại nhà"
-              />
+          <!-- Các trường ẩn/hiện khi chọn nhận máy tận nơi (mở ra kiểu lá cuộn) -->
+          <div id="delivery-fields" class="delivery-fields" inert>
+            <div class="delivery-fields-inner">
+              <div class="delivery-box">
+                <div class="delivery-box-head">
+                  <span class="delivery-tag"
+                    ><svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7" />
+                      <circle cx="7" cy="17.5" r="1.8" />
+                      <circle cx="17" cy="17.5" r="1.8" /></svg
+                    >Nhận máy tận nơi</span
+                  >
+                  <span class="hint">Nội thành TP.HCM, phí vận chuyển 20.000đ</span>
+                </div>
+                <div class="field">
+                  <label for="delivery-address"
+                    >Địa chỉ nhận máy <span class="req">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="delivery-address"
+                    name="delivery_address"
+                    autocomplete="street-address"
+                    placeholder="Ví dụ: 105 Nguyễn Trãi, Phường Bến Thành, Quận 1"
+                  />
+                </div>
+                <div class="field">
+                  <label for="delivery-phone"
+                    >Số điện thoại người giao máy
+                    <span class="req">*</span></label
+                  >
+                  <input
+                    type="tel"
+                    id="delivery-phone"
+                    name="delivery_phone"
+                    autocomplete="tel"
+                    inputmode="numeric"
+                    placeholder="Kỹ thuật viên gọi số này khi tới lấy máy"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -303,12 +310,12 @@
         "thay-ban-phim": {
           device: "laptop",
           label: "Thay bàn phím laptop",
-          price: "Từ 250.000đ",
+          price: "250.000đ",
         },
         "thay-man-hinh-laptop": {
           device: "laptop",
           label: "Thay màn hình laptop",
-          price: "Từ 1.200.000đ",
+          price: "1.200.000đ",
         },
         "cai-win": {
           device: "laptop",
@@ -322,17 +329,17 @@
         "ep-kinh": {
           device: "phone",
           label: "Ép kính mặt trước điện thoại",
-          price: "Từ 350.000đ",
+          price: "350.000đ",
         },
         "thay-pin-dt": {
           device: "phone",
           label: "Thay pin điện thoại chính hãng",
-          price: "Từ 450.000đ",
+          price: "450.000đ",
         },
         "sua-chan-sac": {
           device: "phone",
           label: "Sửa lỗi chân sạc",
-          price: "Từ 200.000đ",
+          price: "200.000đ",
         },
         "xu-ly-vao-nuoc": {
           device: "phone",
@@ -346,22 +353,22 @@
         "thay-man-hinh-tablet": {
           device: "tablet",
           label: "Thay màn hình cảm ứng tablet",
-          price: "Từ 1.500.000đ",
+          price: "1.500.000đ",
         },
         "thay-pin-tablet": {
           device: "tablet",
           label: "Thay pin tablet",
-          price: "Từ 550.000đ",
+          price: "550.000đ",
         },
         "thay-cong-sac-tablet": {
           device: "tablet",
           label: "Thay cổng sạc tablet",
-          price: "Từ 300.000đ",
+          price: "300.000đ",
         },
         "sua-loi-phan-mem": {
           device: "tablet",
           label: "Sửa lỗi phần mềm, treo logo",
-          price: "Từ 150.000đ",
+          price: "150.000đ",
         },
       };
 
@@ -428,15 +435,15 @@
         var addressInput = document.getElementById("delivery-address");
         var phoneInput = document.getElementById("delivery-phone");
 
-        // Kiểm tra đúng giá trị tiếng Việt mới chọn
-        if (this.value === "Nhận máy tận nơi") {
-          deliveryFields.style.display = "block";
-          addressInput.required = true;
-          phoneInput.required = true;
+        var isDelivery = this.value === "Nhận máy tận nơi";
+        deliveryFields.classList.toggle("is-open", isDelivery);
+        // inert: khi đóng, ô nhập không nhận focus bàn phím
+        deliveryFields.inert = !isDelivery;
+        addressInput.required = isDelivery;
+        phoneInput.required = isDelivery;
+        if (isDelivery) {
+          addressInput.focus({ preventScroll: true });
         } else {
-          deliveryFields.style.display = "none";
-          addressInput.required = false;
-          phoneInput.required = false;
           addressInput.value = "";
           phoneInput.value = "";
         }

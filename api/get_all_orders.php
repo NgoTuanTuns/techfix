@@ -1,8 +1,9 @@
 <?php
 /**
  * api/get_all_orders.php
- * Yêu cầu role = admin hoặc technician. Trả toàn bộ đơn sửa chữa,
- * kèm thông tin khách hàng + kỹ thuật viên phụ trách, để render bảng admin.
+ * Yêu cầu role = admin hoặc technician. Admin nhận toàn bộ đơn sửa chữa;
+ * kỹ thuật viên chỉ nhận đơn đang giao cho mình và đơn chưa ai phụ trách.
+ * Kèm thông tin khách hàng + kỹ thuật viên phụ trách, để render bảng admin.
  * Trả JSON: {success: bool, data?: [...], message?: string}
  */
 
@@ -14,8 +15,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_any_role(['admin', 'technician']);
 
+$isTechnician = ($_SESSION['role'] ?? '') === 'technician';
+
 try {
-   $stmt = $pdo->query(
+   $stmt = $pdo->prepare(
         'SELECT ro.id, ro.order_code, ro.issue_description, ro.status,
                 ro.estimated_cost, ro.final_cost, ro.received_at, ro.completed_at,
                 ro.delivery_method, ro.delivery_address, ro.delivery_phone,
@@ -26,8 +29,10 @@ try {
          JOIN devices d ON d.id = ro.device_id
          JOIN users cu ON cu.id = ro.customer_id
          LEFT JOIN users te ON te.id = ro.technician_id
+         WHERE ? = 0 OR ro.technician_id = ? OR ro.technician_id IS NULL
          ORDER BY ro.received_at DESC'
     );
+    $stmt->execute([$isTechnician ? 1 : 0, $_SESSION['user_id']]);
     $orders = $stmt->fetchAll();
 
     echo json_encode(['success' => true, 'data' => $orders]);

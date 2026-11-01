@@ -166,6 +166,24 @@
       <a href="#" class="float-btn zalo" title="Nhắn tin qua Zalo">Zalo</a>
     </div>
 
+    <!-- Hộp xác nhận khi khách phản hồi báo giá -->
+    <dialog
+      class="tf-dialog"
+      id="quote-dialog"
+      aria-labelledby="quote-dialog-title"
+      aria-describedby="quote-dialog-body"
+    >
+      <h3 id="quote-dialog-title"></h3>
+      <p id="quote-dialog-body"></p>
+      <p class="form-note" id="quote-dialog-note" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="quote-dialog-cancel">
+          Để sau
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="quote-dialog-confirm"></button>
+      </div>
+    </dialog>
+
     <script>
       // ---------- Helpers dùng chung ----------
       function tryExtractJson(raw) {
@@ -233,7 +251,7 @@
       // ---------- Trạng thái đơn: badge + bước stepper ----------
       var STATUS_META = {
         pending_receipt: {
-          badgeClass: "badge-received",
+          badgeClass: "badge-pending",
           text: "Chưa tiếp nhận máy",
           step: 1,
         },
@@ -258,7 +276,7 @@
           step: 4,
         },
         completed: { badgeClass: "badge-done", text: "Hoàn tất", step: 5 },
-        cancelled: { badgeClass: "", text: "Đã huỷ", step: 0 },
+        cancelled: { badgeClass: "badge-out", text: "Đã huỷ", step: 0 },
       };
 
       var STEP_LABELS = [
@@ -295,6 +313,95 @@
         return html;
       }
 
+      // ---------- Thẻ đơn hàng ----------
+      var DELIVERY_METHOD = "Nhận máy tận nơi";
+      var DELIVERY_FEE_TEXT = "20.000đ";
+      var VAN_ICON =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>';
+
+      function escapeHtml(value) {
+        var d = document.createElement("div");
+        d.textContent = value == null ? "" : value;
+        return d.innerHTML;
+      }
+
+      // get_orders.php chưa chắc đã trả delivery_method: thiếu thì coi như mang đến cửa hàng
+      function isDeliveryOrder(order) {
+        return order.delivery_method === DELIVERY_METHOD;
+      }
+
+      function deliveryLineHtml(order) {
+        if (!isDeliveryOrder(order)) return "";
+        var address = order.delivery_address
+          ? "<span>Nhận tại: " + escapeHtml(order.delivery_address) + "</span>"
+          : "";
+        return (
+          '<div class="delivery-line"><span class="delivery-tag">' +
+          VAN_ICON +
+          "Nhận máy tận nơi</span>" +
+          address +
+          "</div>"
+        );
+      }
+
+      function costLineHtml(order) {
+        if (order.status === "awaiting_approval") return ""; // giá nằm trong hộp báo giá
+        var hasFinal = Number(order.final_cost) > 0;
+        var cost = formatMoney(hasFinal ? order.final_cost : order.estimated_cost);
+        if (!cost || (!hasFinal && !(Number(order.estimated_cost) > 0))) {
+          return '<p class="cost-line">Đang chờ kỹ thuật viên kiểm tra và báo giá.</p>';
+        }
+
+        // Kỹ thuật viên nhập giá thì backend tự cộng phí giao nhận; giá gói lúc mới đặt thì chưa
+        var shipNote = "";
+        if (isDeliveryOrder(order)) {
+          shipNote =
+            order.status === "pending_receipt" || order.status === "received"
+              ? " Phí nhận máy tận nơi " + DELIVERY_FEE_TEXT + " sẽ cộng vào báo giá."
+              : " Đã gồm " + DELIVERY_FEE_TEXT + " phí nhận máy tận nơi.";
+        }
+        return (
+          '<p class="cost-line">' +
+          (hasFinal ? "Chi phí cuối: " : "Chi phí dự kiến: ") +
+          "<strong>" +
+          cost +
+          "</strong>." +
+          shipNote +
+          "</p>"
+        );
+      }
+
+      function quoteBoxHtml(order) {
+        if (order.status !== "awaiting_approval") return "";
+        var price = formatMoney(order.estimated_cost) || "Chưa có giá";
+        var note = isDeliveryOrder(order)
+          ? '<div class="quote-note">Đã gồm ' +
+            DELIVERY_FEE_TEXT +
+            " phí nhận máy tận nơi.</div>"
+          : "";
+        return (
+          '<div class="quote-box">' +
+          '<div class="quote-status"><span class="led" aria-hidden="true"></span>Cửa hàng đã gửi báo giá, đang chờ bạn phản hồi</div>' +
+          '<div class="quote-price">' +
+          price +
+          "</div>" +
+          note +
+          '<p class="quote-ask">Bạn duyệt giá thì kỹ thuật viên bắt đầu sửa ngay. Chưa đồng ý thì có thể yêu cầu kiểm tra và báo giá lại, hoặc hủy đơn.</p>' +
+          '<div class="quote-actions">' +
+          '<button type="button" class="btn btn-primary btn-sm" data-quote-action="approve" data-order-id="' +
+          order.id +
+          '">Duyệt giá và sửa</button>' +
+          '<button type="button" class="btn btn-outline btn-sm" data-quote-action="request_requote" data-order-id="' +
+          order.id +
+          '">Yêu cầu báo giá lại</button>' +
+          '<button type="button" class="btn-text-danger" data-quote-action="reject" data-order-id="' +
+          order.id +
+          '">Hủy đơn</button>' +
+          "</div>" +
+          "</div>"
+        );
+      }
+
       function renderOrderCard(order) {
         var meta = STATUS_META[order.status] || {
           badgeClass: "",
@@ -303,118 +410,159 @@
         };
         var deviceLabel = (order.brand + " " + (order.model || "")).trim();
 
-        var badgeHtml =
-          order.status === "cancelled"
-            ? '<span class="badge" style="background:#FBE3E0;color:#B3261E;">Đã huỷ</span>'
-            : '<span class="badge ' +
-              meta.badgeClass +
-              '">' +
-              meta.text +
-              "</span>";
-
         var trackerHtml =
           order.status === "cancelled"
             ? ""
             : '<div class="tracker">' + renderTracker(meta.step) + "</div>";
-
-        var isDeliveryMethod = order.delivery_method === "Nhận máy tận nơi";
-        var costVal = order.final_cost || order.estimated_cost;
-        var cost = formatMoney(costVal);
-
-        var costLine = cost
-          ? 'Chi phí dự kiến (đã gồm 20.000đ phí vận chuyển tận nơi): <strong style="color:var(--ink)">' +
-            cost +
-            "</strong>."
-          : "Đang chờ kỹ thuật viên kiểm tra và báo giá.";
-
-        // Hộp duyệt giá 3 nút
-        var approvalBoxHtml = "";
-        if (order.status === "awaiting_approval") {
-          var shippingNote = isDeliveryMethod
-            ? '<div style="font-size: 0.8rem; color: #0284c7; margin-bottom: 6px;">ℹ️ Tổng tiền trên đã bao gồm <strong>20.000đ</strong> phí nhận máy tận nơi.</div>'
-            : "";
-
-          approvalBoxHtml =
-            '<div style="margin-top: 14px; padding: 14px; background: var(--surface); border-radius: 8px; border: 1px solid var(--line);">' +
-            shippingNote +
-            '<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">' +
-            '<span style="font-size: 0.88rem; color: var(--ink); font-weight: 500;">Cửa hàng đã gửi báo giá. Vui lòng phản hồi:</span>' +
-            '<div style="display: flex; gap: 8px; flex-wrap: wrap;">' +
-            '<button type="button" class="btn btn-primary btn-sm" onclick="handleQuoteAction(' +
-            order.id +
-            ", 'approve')\">Duyệt giá</button>" +
-            '<button type="button" class="btn btn-outline btn-sm" style="color: var(--ink);" onclick="handleQuoteAction(' +
-            order.id +
-            ", 'request_requote')\">Báo giá lại</button>" +
-            '<button type="button" class="btn btn-outline btn-sm" style="color: #b3261e; border-color: #b3261e;" onclick="handleQuoteAction(' +
-            order.id +
-            ", 'reject')\">Hủy đơn</button>" +
-            "</div>" +
-            "</div>" +
-            "</div>";
-        }
 
         return (
           '<div class="order-card">' +
           '<div class="order-card-top">' +
           "<div>" +
           "<h3>" +
-          deviceLabel +
+          escapeHtml(deviceLabel) +
           " — #" +
-          order.order_code +
+          escapeHtml(order.order_code) +
           "</h3>" +
           '<div class="meta">Lỗi: ' +
-          order.issue_description +
+          escapeHtml(order.issue_description) +
           ". Gửi ngày " +
           formatDate(order.received_at) +
           ".</div>" +
           "</div>" +
-          badgeHtml +
+          '<span class="badge ' +
+          meta.badgeClass +
+          '">' +
+          meta.text +
+          "</span>" +
           "</div>" +
+          deliveryLineHtml(order) +
           trackerHtml +
-          '<p style="margin-top:18px;font-size:0.88rem;color:var(--ink-soft);">' +
-          costLine +
-          "</p>" +
-          approvalBoxHtml +
+          costLineHtml(order) +
+          quoteBoxHtml(order) +
           "</div>"
         );
       }
 
-      async function handleQuoteAction(orderId, action) {
-        var prompts = {
-          approve:
-            "Bạn có chắc chắn muốn DUYỆT mức giá này để cửa hàng bắt đầu sửa chữa?",
-          request_requote: "Bạn muốn yêu cầu cửa hàng KIỂM TRA & BÁO GIÁ LẠI?",
-          reject: "Bạn có chắc chắn muốn HỦY ĐƠN sửa chữa này?",
-        };
+      // ---------- Duyệt báo giá: hộp xác nhận ----------
+      var QUOTE_ACTIONS = {
+        approve: {
+          title: "Duyệt giá và bắt đầu sửa?",
+          body: "Kỹ thuật viên sẽ sửa theo đúng báo giá. Không phát sinh chi phí ngoài mức giá này.",
+          confirm: "Duyệt giá",
+          danger: false,
+          done: "Đã duyệt giá. Kỹ thuật viên bắt đầu sửa máy của bạn.",
+        },
+        request_requote: {
+          title: "Yêu cầu báo giá lại?",
+          body: "Đơn quay về bước chẩn đoán. Kỹ thuật viên kiểm tra lại máy và gửi báo giá mới cho bạn.",
+          confirm: "Gửi yêu cầu",
+          danger: false,
+          done: "Đã gửi yêu cầu báo giá lại.",
+        },
+        reject: {
+          title: "Hủy đơn sửa chữa này?",
+          body: "Máy sẽ không được sửa. Bạn liên hệ cửa hàng để nhận lại máy. Thao tác này không hoàn tác được.",
+          confirm: "Hủy đơn",
+          danger: true,
+          done: "Đã hủy đơn.",
+        },
+      };
 
-        if (!confirm(prompts[action])) return;
+      var quoteDialog = document.getElementById("quote-dialog");
+      var pendingQuote = null;
+
+      function openQuoteDialog(orderId, action) {
+        var cfg = QUOTE_ACTIONS[action];
+        if (!cfg) return;
+        pendingQuote = { orderId: orderId, action: action };
+        document.getElementById("quote-dialog-title").textContent = cfg.title;
+        document.getElementById("quote-dialog-body").textContent = cfg.body;
+        var note = document.getElementById("quote-dialog-note");
+        note.textContent = "";
+        note.classList.remove("is-error");
+        var ok = document.getElementById("quote-dialog-confirm");
+        ok.textContent = cfg.confirm;
+        ok.disabled = false;
+        ok.className = "btn btn-sm " + (cfg.danger ? "btn-danger" : "btn-primary");
+        quoteDialog.showModal();
+      }
+
+      function showToast(message, isError) {
+        var t = document.getElementById("tf-toast");
+        if (!t) {
+          t = document.createElement("div");
+          t.id = "tf-toast";
+          t.className = "toast";
+          t.setAttribute("role", "status");
+          document.body.appendChild(t);
+        }
+        t.textContent = message;
+        t.classList.toggle("err", !!isError);
+        t.classList.add("show");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(function () {
+          t.classList.remove("show");
+        }, 3200);
+      }
+
+      async function submitQuoteAction() {
+        if (!pendingQuote) return;
+        var cfg = QUOTE_ACTIONS[pendingQuote.action];
+        var ok = document.getElementById("quote-dialog-confirm");
+        var note = document.getElementById("quote-dialog-note");
+        ok.disabled = true;
+        note.classList.remove("is-error");
+        note.textContent = "Đang gửi...";
 
         var formData = new FormData();
-        formData.append("order_id", orderId);
-        formData.append("action", action);
+        formData.append("order_id", pendingQuote.orderId);
+        formData.append("action", pendingQuote.action);
 
         try {
           var res = await fetch("../api/approve_quote.php", {
             method: "POST",
             body: formData,
           });
-          var raw = await res.text();
-          var result = tryExtractJson(raw);
-
+          var result = tryExtractJson(await res.text());
           if (!result || !result.success) {
-            alert(
-              (result && result.message) || "Có lỗi xảy ra, vui lòng thử lại.",
-            );
+            note.classList.add("is-error");
+            note.textContent =
+              (result && result.message) ||
+              "Chưa gửi được. Thử lại sau ít phút giúp mình.";
+            ok.disabled = false;
             return;
           }
-
-          alert(result.message);
-          location.reload();
+          quoteDialog.close();
+          showToast(cfg.done);
+          loadOrders();
         } catch (err) {
-          alert("Không kết nối được tới máy chủ.");
+          note.classList.add("is-error");
+          note.textContent =
+            "Không kết nối được tới máy chủ. Kiểm tra mạng rồi thử lại.";
+          ok.disabled = false;
         }
       }
+
+      document
+        .getElementById("quote-dialog-confirm")
+        .addEventListener("click", submitQuoteAction);
+      document
+        .getElementById("quote-dialog-cancel")
+        .addEventListener("click", function () {
+          quoteDialog.close();
+        });
+      // bấm ra vùng tối bên ngoài thì đóng
+      quoteDialog.addEventListener("click", function (e) {
+        if (e.target === quoteDialog) quoteDialog.close();
+      });
+
+      document
+        .getElementById("orders-container")
+        .addEventListener("click", function (e) {
+          var btn = e.target.closest("[data-quote-action]");
+          if (btn) openQuoteDialog(btn.dataset.orderId, btn.dataset.quoteAction);
+        });
 
       function renderOrders(orders) {
         var container = document.getElementById("orders-container");
@@ -551,6 +699,11 @@
           return;
         }
 
+        await loadOrders();
+      })();
+
+      // ---------- Tải danh sách đơn (gọi lại sau khi khách phản hồi báo giá) ----------
+      async function loadOrders() {
         try {
           var ordersRes = await fetch("../api/get_orders.php");
           var ordersRaw = await ordersRes.text();
@@ -566,7 +719,7 @@
           document.getElementById("orders-container").innerHTML =
             '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không kết nối được tới máy chủ.</p></div>';
         }
-      })();
+      }
 
       // ---------- Submit form tài khoản ----------
       document

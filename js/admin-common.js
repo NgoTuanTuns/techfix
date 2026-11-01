@@ -7,7 +7,7 @@
     return s !== "completed" && s !== "cancelled";
   };
   TF.STATUS = {
-    pending_receipt: { label: "Chưa tiếp nhận máy", cls: "badge-received" },
+    pending_receipt: { label: "Chưa tiếp nhận máy", cls: "badge-pending" },
     received: { label: "Đã tiếp nhận", cls: "badge-received" },
     diagnosing: { label: "Đang chẩn đoán", cls: "badge-received" },
     awaiting_approval: { label: "Chờ duyệt giá", cls: "badge-progress" },

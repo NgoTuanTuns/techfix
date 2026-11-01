@@ -6,6 +6,10 @@
  * Chỉ cập nhật những trường thực sự được gửi lên (cho phép sửa từng ô trên bảng admin
  * mà không phải gửi lại toàn bộ đơn).
  * Nếu status thay đổi -> tự ghi thêm 1 dòng vào order_status_history.
+ * Phân quyền: admin sửa mọi đơn. Kỹ thuật viên chỉ được nhận đơn chưa ai phụ trách về mình
+ *   (technician_id = id của chính mình) và chỉ sửa trạng thái/giá của đơn đang giao cho mình.
+ * Giá: estimated_cost/final_cost gửi lên là giá sửa CHƯA gồm phí giao nhận; đơn nhận tận nơi
+ *   được cộng thêm phí ở đây, nên client phải gửi giá gốc, không gửi lại giá đã lưu trong DB.
  * Trả JSON: {success: bool, message: string}
  */
 
@@ -22,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_any_role(['admin', 'technician']);
-$actorId = $_SESSION['user_id'];
+$actorId = (int)$_SESSION['user_id'];
+$isTechnician = ($_SESSION['role'] ?? '') === 'technician';
 
 $orderId = (int)($_POST['order_id'] ?? 0);
 if ($orderId <= 0) {
@@ -49,8 +54,10 @@ if ($hasStatus && !in_array($_POST['status'], $allowedStatus, true)) {
 try {
     $pdo->beginTransaction();
 
-    // Lấy trạng thái cũ và hình thức nhận máy của đơn hàng[cite: 22]
-    $check = $pdo->prepare('SELECT status, delivery_method FROM repair_orders WHERE id = ?');
+    // Lấy trạng thái cũ, hình thức nhận máy và người phụ trách (khoá dòng tới khi commit)
+    $check = $pdo->prepare(
+        'SELECT status, delivery_method, technician_id FROM repair_orders WHERE id = ? FOR UPDATE'
+    );
     $check->execute([$orderId]);
     $existing = $check->fetch();
 
@@ -58,6 +65,41 @@ try {
         $pdo->rollBack();
         echo json_encode(['success' => false, 'message' => 'Không tìm thấy đơn này']);
         exit;
+    }
+
+    $currentTechId = $existing['technician_id'] !== null ? (int)$existing['technician_id'] : null;
+    $newTechId = null;
+    if ($hasTechnician) {
+        $newTechId = $_POST['technician_id'] !== '' ? (int)$_POST['technician_id'] : null;
+    }
+
+    if ($isTechnician) {
+        // Kỹ thuật viên chỉ được tự nhận đơn chưa ai phụ trách, không giao/bỏ giao cho người khác
+        if ($hasTechnician && $newTechId !== $currentTechId
+            && !($currentTechId === null && $newTechId === $actorId)) {
+            $pdo->rollBack();
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Bạn chỉ có thể tự nhận đơn chưa có người phụ trách']);
+            exit;
+        }
+        $ownerAfter = $hasTechnician ? $newTechId : $currentTechId;
+        if (($hasStatus || $hasEstimated || $hasFinal) && $ownerAfter !== $actorId) {
+            $pdo->rollBack();
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Hãy nhận đơn về mình trước khi cập nhật trạng thái hoặc giá']);
+            exit;
+        }
+    }
+
+    // Người được giao phải là tài khoản kỹ thuật viên
+    if ($hasTechnician && $newTechId !== null) {
+        $techCheck = $pdo->prepare("SELECT 1 FROM users WHERE id = ? AND role = 'technician'");
+        $techCheck->execute([$newTechId]);
+        if (!$techCheck->fetch()) {
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'message' => 'Người được giao không phải kỹ thuật viên']);
+            exit;
+        }
     }
 
     // RÀNG BUỘC: Nếu đơn đang chờ duyệt giá (awaiting_approval) mà cố chuyển sang repairing hoặc completed thì chặn[cite: 22]
@@ -85,9 +127,8 @@ try {
         }
     }
     if ($hasTechnician) {
-        $techId = $_POST['technician_id'] !== '' ? (int)$_POST['technician_id'] : null;
         $sets[] = 'technician_id = ?';
-        $params[] = $techId;
+        $params[] = $newTechId;
     }
     if ($hasEstimated) {
         $sets[] = 'estimated_cost = ?';

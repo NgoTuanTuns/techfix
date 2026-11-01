@@ -91,15 +91,7 @@
   max-width: 180px;
 }
 
-/* huy hiệu cho trạng thái hết hàng / đã huỷ */
-.badge-out {
-  background: #f3d3cc;
-  color: #7a2417;
-}
-[data-theme="dark"] .badge-out {
-  background: #4a2420;
-  color: #f2b5aa;
-}
+/* .badge-out đã chuyển sang style.css để trang khách dùng chung */
 
 /* thẻ kỹ thuật viên */
 .tech-grid {
@@ -172,33 +164,7 @@
   flex: 1;
 }
 
-/* thông báo nhỏ */
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 28px;
-  z-index: 90;
-  background: var(--moss-ink);
-  color: var(--washi);
-  padding: 12px 20px;
-  border-radius: var(--r-btn);
-  box-shadow: var(--shadow-2);
-  font-size: 0.95rem;
-  opacity: 0;
-  transform: translate(-50%, 16px);
-  pointer-events: none;
-  transition:
-    opacity var(--t-base),
-    transform var(--t-base) var(--ease-spring);
-}
-.toast.show {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-.toast.err {
-  background: var(--error);
-  color: #fff;
-}
+/* .toast đã chuyển sang style.css để trang khách dùng chung */
 
 @media (max-width: 860px) {
   .split {
@@ -339,6 +305,40 @@
   overflow-wrap: anywhere;
   line-height: 1.55;
 }
+/* khối nhận máy tận nơi trong bảng chi tiết đơn */
+.od-delivery {
+  margin-top: 16px;
+  padding: 16px 18px 4px;
+  border-radius: var(--r-leaf);
+  background: color-mix(in srgb, var(--card-wisteria) 45%, var(--surface));
+}
+.od-delivery .od-grid {
+  border-bottom: 0;
+  padding-bottom: 12px;
+}
+.od-delivery-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+.od-fee {
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+}
+.od-value a {
+  color: var(--accent-text);
+}
+.method-store {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.orders .delivery-tag {
+  font-size: 0.78rem;
+}
+
 @media (max-width: 520px) {
   .od-grid {
     grid-template-columns: 1fr;

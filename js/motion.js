@@ -379,6 +379,124 @@
     });
   }
 
+  /* ---------- 5b. CTA: khung mạch + dòng điện chạy ----------
+     Vẽ theo kích thước thật của khối: viền mạch quanh khung, đường nối hàng ô thông số tới nút,
+     đường từ nút lên viền trên. Mỗi đường có một xung sáng chạy dọc (CSS: stroke-dashoffset). */
+  function initCtaCircuit(cta) {
+    var svg = el("svg", { class: "cta-circuit", "aria-hidden": "true" });
+    cta.insertBefore(svg, cta.firstChild);
+    var stats = $(".cta-stats", cta);
+    var btn = $(".cta-action .btn", cta);
+
+    function box(node) {
+      var a = node.getBoundingClientRect();
+      var b = cta.getBoundingClientRect();
+      return {
+        l: a.left - b.left,
+        t: a.top - b.top,
+        r: a.right - b.left,
+        b: a.bottom - b.top,
+      };
+    }
+    function trace(d, seconds, delay, extraClass) {
+      el("path", { d: d, class: "cta-trace", pathLength: 100 }, svg);
+      if (reduce) return;
+      el(
+        "path",
+        {
+          d: d,
+          class: "cta-pulse" + (extraClass ? " " + extraClass : ""),
+          pathLength: 100,
+          style:
+            "animation-duration:" + seconds + "s;animation-delay:-" + delay + "s",
+        },
+        svg,
+      );
+    }
+    function via(x, y) {
+      el("circle", { cx: x, cy: y, r: 3.5, class: "cta-via" }, svg);
+    }
+
+    function draw() {
+      var W = cta.clientWidth;
+      var H = cta.clientHeight;
+      var i = 12; // khoảng lùi của viền mạch so với mép khối
+      var r = 26; // bo góc viền, nhỏ hơn bo góc khối một chút
+      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      svg.textContent = "";
+
+      trace(
+        "M" + (i + r) + " " + i + "H" + (W - i - r) +
+          "A" + r + " " + r + " 0 0 1 " + (W - i) + " " + (i + r) +
+          "V" + (H - i - r) +
+          "A" + r + " " + r + " 0 0 1 " + (W - i - r) + " " + (H - i) +
+          "H" + (i + r) +
+          "A" + r + " " + r + " 0 0 1 " + i + " " + (H - i - r) +
+          "V" + (i + r) +
+          "A" + r + " " + r + " 0 0 1 " + (i + r) + " " + i + "Z",
+        16,
+        0,
+        "is-frame",
+      );
+      via(i + r + 40, i);
+      via(W - i, H * 0.62);
+      via(i, H * 0.4);
+      via(W - i - r - 40, H - i);
+
+      if (!stats || !btn) return;
+      var s = box(stats);
+      var b = box(btn);
+      var btnY = (b.t + b.b) / 2;
+      var btnX = (b.l + b.r) / 2;
+
+      var x0 = s.r + 8;
+      var y0 = (s.t + s.b) / 2;
+      var dy = btnY - y0;
+      if (b.l - x0 > Math.abs(dy) + 40) {
+        // đủ rộng: đi ngang, rẽ 45° rồi cắm vào cạnh trái nút
+        var bend = b.l - 28 - Math.abs(dy);
+        trace(
+          "M" + x0 + " " + y0 + "H" + bend +
+            "L" + (bend + Math.abs(dy)) + " " + btnY + "H" + b.l,
+          2.6,
+          0,
+        );
+        via(x0, y0);
+      } else if (b.l > s.r) {
+        // khe hẹp: đi ngang tới dưới mép trái nút rồi đi thẳng lên đáy nút
+        var xUp = b.l + 14;
+        var yEnd = y0 > btnY ? b.b : b.t;
+        trace("M" + x0 + " " + y0 + "H" + xUp + "V" + yEnd, 2.2, 0);
+        via(x0, y0);
+      } else {
+        // màn hẹp, nút nằm dưới hàng ô: đi thẳng xuống
+        trace("M" + btnX + " " + (s.b + 8) + "V" + b.t, 1.8, 0);
+        via(btnX, s.b + 8);
+      }
+
+      // từ đỉnh nút lên viền trên: thẳng lên nửa đường rồi rẽ 45°.
+      // Chỉ vẽ khi nút nằm cạnh hàng ô; màn hẹp nút ở dưới, đường này sẽ cắt chéo qua chữ.
+      var rise = b.t - i;
+      if (b.l > s.r && rise > 40) {
+        var turnY = i + rise * 0.5;
+        trace(
+          "M" + btnX + " " + b.t + "V" + turnY + "L" + (btnX + rise * 0.5) + " " + i,
+          3.4,
+          1.2,
+        );
+      }
+    }
+
+    draw();
+    var timer;
+    window.addEventListener("resize", function () {
+      clearTimeout(timer);
+      timer = setTimeout(draw, 150);
+    });
+    // font tải xong làm chữ đổi kích thước, vẽ lại cho khớp
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  }
+
   /* ---------- 6. Trang trí từng trang ---------- */
   function initDecor() {
     // bộ lọc mực cho dấu triện
@@ -420,6 +538,29 @@
       watchPause(hero);
     }
 
+    // banner đầu trang chủ: mưa mảnh + đom đóm LED trên nền đêm
+    var slider = $(".promo-slider");
+    if (slider) {
+      if (!reduce) {
+        rainInto(slider, small ? 8 : 18);
+        firefliesInto(
+          slider,
+          small
+            ? [
+                [14, 30],
+                [84, 62],
+              ]
+            : [
+                [9, 34],
+                [27, 72],
+                [70, 22],
+                [91, 58],
+              ],
+        );
+      }
+      watchPause(slider);
+    }
+
     var auth = $(".auth-shell");
     if (auth) {
       div("moon", auth);
@@ -444,7 +585,8 @@
     var cta = $(".cta-band");
     if (cta) {
       div("cta-moon", cta);
-      cta.appendChild(buildBranch());
+      initCtaCircuit(cta);
+      watchPause(cta);
       var ticking = false;
       var upd = function () {
         var r = cta.getBoundingClientRect();
@@ -483,11 +625,6 @@
         ]);
       watchPause(foot);
     }
-
-    // dấu triện "Free sấy khô"
-    $$(".promo-card .corner").forEach(function (c) {
-      c.classList.add("stamp-ready");
-    });
   }
 
   function watchPause(host) {
@@ -501,8 +638,14 @@
 
   /* ---------- 7. Reveal khi cuộn tới ---------- */
   var REVEAL = [
-    ".promo-card",
-    ".pkg-card",
+    ".browse-list > li",
+    ".deal-feature",
+    ".deal-mini",
+    ".svc-feature",
+    ".svc-rows",
+    ".rail-card",
+    ".tablet-art",
+    ".price-menu li",
     ".order-card",
     ".stat-box",
     ".review-card",
@@ -547,7 +690,8 @@
     // phần tử bị clip-path cắt về 0 thì IntersectionObserver coi như không thấy,
     // nên với nhóm này ta quan sát khối cha rồi bật .in cho các con.
     var CLIPPED =
-      ".promo-card, .pkg-card, .order-card, .stat-box, .review-card, .map-box";
+      ".browse-list > li, .deal-feature, .deal-mini, .svc-feature, .tablet-art, " +
+      ".order-card, .stat-box, .review-card, .map-box";
     var groups = new Map();
     var io = new IntersectionObserver(
       function (es) {

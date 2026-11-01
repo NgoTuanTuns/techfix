@@ -29,6 +29,8 @@
       })();
     </script>
     <script src="../js/motion.js" defer></script>
+    <script src="../js/banner-slider.js" defer></script>
+    <script src="../js/card-rail.js" defer></script>
     <!-- Đổi nút "Đăng nhập" thành "<tên> | Đăng xuất" khi đã có phiên.
          src: đường dẫn tới auth-ui.js (tính từ file index.html này)
          data-api: đường dẫn tới thư mục api/ (tính từ file index.html này) -->
@@ -47,7 +49,8 @@
       </div>
     </div>
 
-    <header class="site-header">
+    <!-- header-overlay: trong suốt, chữ sáng khi nằm trên slider; cuộn xuống thì trở về nền washi -->
+    <header class="site-header header-overlay">
       <div class="wrap">
         <a class="logo" href="index.html">
           <img src="../assets/logo.png" alt="" class="logo-icon" />
@@ -61,23 +64,159 @@
       </div>
     </header>
 
-    <div class="category-strip">
-      <div class="wrap">
-        <a class="cat-item" href="#sua-laptop">
-          <span class="txt">Sửa laptop</span></a
-        >
-        <a class="cat-item" href="#sua-dienthoai">
-          <span class="txt">Sửa điện thoại</span></a
-        >
-        <a class="cat-item" href="#sua-tablet">
-          <span class="txt">Sửa tablet</span></a
-        >
-        <a class="cat-item" href="#uu-dai"> <span class="txt">Ưu đãi</span></a>
-        <a class="cat-item" href="contact.html">
-          <span class="txt">Tìm cửa hàng gần bạn</span></a
-        >
+    <!-- Banner ảnh tự lướt, nằm dưới header trong suốt (desktop).
+         Thay ảnh: đổi file trong assets/slides/, giữ tỉ lệ 1672x941 (16:9).
+         data-tone="light|dark" cho biết ảnh sáng/tối để header đổi màu chữ cho dễ đọc. -->
+    <section
+      class="promo-slider"
+      aria-roledescription="carousel"
+      aria-label="Chương trình nổi bật"
+      data-interval="5000"
+    >
+      <div class="slider-viewport">
+        <div class="slider-track" aria-live="off">
+            <a
+              class="slide"
+              href="booking.html"
+              data-tone="light"
+              role="group"
+              aria-roledescription="slide"
+              aria-label="1 / 4"
+            >
+              <img
+                class="slide-bg"
+                src="../assets/slides/slide-1.png"
+                alt="Giải pháp công nghệ toàn diện: sửa chữa, nâng cấp và cung cấp thiết bị công nghệ chất lượng, nhanh chóng, uy tín. Đặt lịch sửa chữa"
+                width="1672"
+                height="941"
+              />
+            </a>
+            <a
+              class="slide"
+              href="#sua-laptop"
+              data-tone="dark"
+              role="group"
+              aria-roledescription="slide"
+              aria-label="2 / 4"
+            >
+              <img
+                class="slide-bg"
+                src="../assets/slides/slide-2.png"
+                alt="Sửa chữa công nghệ: sửa laptop, tablet, điện thoại lấy liền, báo giá minh bạch, bảo hành dài hạn. Xem bảng giá"
+                width="1672"
+                height="941"
+                loading="lazy"
+              />
+            </a>
+            <a
+              class="slide"
+              href="#uu-dai"
+              data-tone="light"
+              role="group"
+              aria-roledescription="slide"
+              aria-label="3 / 4"
+            >
+              <img
+                class="slide-bg"
+                src="../assets/slides/slide-3.png"
+                alt="TechFix, smarter tech, better life: sửa chữa, nâng cấp, chăm sóc laptop, tablet, điện thoại và phụ kiện. Xem ưu đãi"
+                width="1672"
+                height="941"
+                loading="lazy"
+              />
+            </a>
+            <a
+              class="slide"
+              href="booking.html"
+              data-tone="dark"
+              role="group"
+              aria-roledescription="slide"
+              aria-label="4 / 4"
+            >
+              <img
+                class="slide-bg"
+                src="../assets/slides/slide-4.png"
+                alt="Hồi sinh công nghệ: nơi mỗi thiết bị được trao thêm một cuộc đời. Đặt lịch sửa chữa"
+                width="1672"
+                height="941"
+                loading="lazy"
+              />
+            </a>
+        </div>
+        <button type="button" class="slider-arrow prev" aria-label="Ảnh trước">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 5 8 12l7 7" />
+          </svg>
+        </button>
+        <button type="button" class="slider-arrow next" aria-label="Ảnh sau">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+        <div class="slider-dots" role="group" aria-label="Chọn ảnh"></div>
       </div>
-    </div>
+    </section>
+
+    <!-- Chọn dịch vụ theo thiết bị: tiêu đề bên trái, hàng thẻ ảnh bên phải -->
+    <section class="browse" aria-labelledby="browse-title">
+      <div class="wrap browse-layout">
+        <div class="browse-intro">
+          <h2 id="browse-title">Chọn theo thiết bị</h2>
+          <p>
+            Mỗi gói đều có giá rõ ràng. Chưa biết máy lỗi gì thì cứ đặt lịch,
+            kỹ thuật viên kiểm tra rồi mới báo giá.
+          </p>
+          <a class="link-leaf" href="booking.html">Đặt lịch sửa chữa</a>
+        </div>
+        <ul class="browse-list">
+          <li>
+            <a class="browse-tile" href="#sua-laptop">
+              <span class="browse-img tone-peach"
+                ><img src="../assets/illus/laptop.svg" alt=""
+              /></span>
+              <span class="browse-name">Sửa laptop</span>
+              <span class="browse-count">4 gói</span>
+            </a>
+          </li>
+          <li>
+            <a class="browse-tile" href="#sua-dienthoai">
+              <span class="browse-img tone-mist"
+                ><img src="../assets/illus/phone.svg" alt=""
+              /></span>
+              <span class="browse-name">Sửa điện thoại</span>
+              <span class="browse-count">4 gói</span>
+            </a>
+          </li>
+          <li>
+            <a class="browse-tile" href="#sua-tablet">
+              <span class="browse-img tone-matcha"
+                ><img src="../assets/illus/tablet.svg" alt=""
+              /></span>
+              <span class="browse-name">Sửa tablet</span>
+              <span class="browse-count">4 gói</span>
+            </a>
+          </li>
+          <li>
+            <a class="browse-tile" href="#uu-dai">
+              <span class="browse-img tone-wisteria"
+                ><img src="../assets/illus/deal.svg" alt=""
+              /></span>
+              <span class="browse-name">Ưu đãi tuần này</span>
+              <span class="browse-count">4 ưu đãi</span>
+            </a>
+          </li>
+          <li>
+            <a class="browse-tile" href="contact.html">
+              <span class="browse-img tone-peach"
+                ><img src="../assets/illus/store.svg" alt=""
+              /></span>
+              <span class="browse-name">Cửa hàng gần bạn</span>
+              <span class="browse-count">12 cửa hàng</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
 
     <section class="hero">
       <div class="wrap">
@@ -110,10 +249,6 @@
           </p>
           <div class="hero-actions">
             <a href="booking.html" class="btn btn-primary">Đặt lịch sửa chữa</a>
-            <div class="rating-chip">
-              <span class="stars">★★★★★</span> <b>4.8/5</b> từ 2.350 đánh giá
-              trên Google
-            </div>
           </div>
         </div>
         <div class="hero-photo">
@@ -133,257 +268,325 @@
       </div>
     </section>
     <div class="banner"><img src="../assets/banner.png" alt="" /></div>
-    <section id="uu-dai" class="alt">
+    <!-- Ưu đãi: 2 banner lớn (sáng / đêm) + 2 thẻ ngang nhỏ -->
+    <section id="uu-dai" class="alt deals">
       <div class="wrap">
         <div class="section-head">
           <div>
             <h2>Ưu đãi tuần này</h2>
             <p>
-              Giá đã bao gồm công sửa và linh kiện chính hãng. Chương trình được
-              cập nhật hằng tuần.
+              Giá đã gồm công sửa và linh kiện chính hãng. Chương trình cập
+              nhật hằng tuần.
             </p>
           </div>
         </div>
-        <div class="promo-grid">
-          <div class="promo-card">
-            <div class="promo-img tone-peach">
-              <img src="../assets/thaypin.png" alt="" />
+
+        <div class="deal-feature-row">
+          <article class="deal-feature deal-light">
+            <div class="deal-text">
+              <span class="deal-stamp" aria-label="Giảm 20%">-20%</span>
+              <h3>Thay pin laptop Dell, Asus, HP</h3>
+              <p>Pin chính hãng, kiểm tra dung lượng trước khi giao máy.</p>
+              <div class="deal-price"><b>450.000đ</b></div>
+              <a class="btn btn-primary btn-sm" href="booking.html?service=sua-laptop"
+                >Đặt lịch thay pin</a
+              >
             </div>
-            <div class="info">
-              <div class="name">Thay pin laptop Dell, Asus, HP</div>
-              <div class="price-tag">Chỉ từ 450.000đ</div>
+            <div class="deal-photo">
+              <img
+                src="../assets/thaypin.png"
+                alt="Kỹ thuật viên thay pin laptop Dell"
+                loading="lazy"
+              />
             </div>
-          </div>
-          <div class="promo-card">
-            <div class="promo-img tone-mist">
-              <img src="../assets/thaymanhinh.png" alt="" />
+          </article>
+
+          <article class="deal-feature deal-dark">
+            <div class="deal-text">
+              <span class="deal-stamp" aria-label="Giảm 20%">-20%</span>
+              <h3>Thay màn hình iPhone, Samsung, Oppo</h3>
+              <p>Màn mới, cân chỉnh cảm ứng và màu trước khi bàn giao.</p>
+              <div class="deal-price"><b>1.050.000đ</b></div>
+              <a
+                class="btn btn-primary btn-sm"
+                href="booking.html?service=sua-dien-thoai"
+                >Đặt lịch thay màn hình</a
+              >
             </div>
-            <div class="info">
-              <div class="name">Thay màn hình iPhone, Samsung, Oppo</div>
-              <div class="price-tag">Chỉ từ 1.050.000đ</div>
+            <div class="deal-photo">
+              <img
+                src="../assets/thaymanhinh.png"
+                alt="Thay màn hình điện thoại trên thảm sửa chữa"
+                loading="lazy"
+              />
             </div>
-          </div>
-          <div class="promo-card">
-            <span class="corner">Miễn phí sấy khô</span>
-            <div class="promo-img tone-matcha">
-              <img src="../assets/saykho.png" alt="" />
+          </article>
+        </div>
+
+        <div class="deal-mini-row">
+          <article class="deal-mini">
+            <div class="deal-mini-photo">
+              <img
+                src="../assets/saykho.png"
+                alt="Soi bo mạch điện thoại bị vào nước"
+                loading="lazy"
+              />
             </div>
-            <div class="info">
-              <div class="name">Xử lý máy vào nước, không lên nguồn</div>
-              <div class="price-tag">Kiểm tra miễn phí</div>
+            <div class="deal-mini-body">
+              <span class="deal-tag">Miễn phí sấy khô</span>
+              <h3>Xử lý máy vào nước, không lên nguồn</h3>
+              <div class="deal-price"><b>Kiểm tra miễn phí</b></div>
+              <a class="link-leaf" href="booking.html?service=xu-ly-vao-nuoc"
+                >Đặt lịch kiểm tra</a
+              >
             </div>
-          </div>
-          <div class="promo-card">
-            <div class="promo-img tone-wisteria">
-              <img src="../assets/ssd.png" alt="" />
+          </article>
+          <article class="deal-mini">
+            <div class="deal-mini-photo">
+              <img
+                src="../assets/ssd.png"
+                alt="Lắp ổ SSD 256GB vào laptop"
+                loading="lazy"
+              />
             </div>
-            <div class="info">
-              <div class="name">Nâng cấp SSD 256GB cho laptop</div>
-              <div class="price-tag">Chỉ từ 590.000đ</div>
+            <div class="deal-mini-body">
+              <span class="deal-tag">Giảm 15%</span>
+              <h3>Nâng cấp SSD 256GB cho laptop</h3>
+              <div class="deal-price"><b>590.000đ</b></div>
+              <a class="link-leaf" href="booking.html?service=sua-laptop"
+                >Đặt lịch nâng cấp</a
+              >
             </div>
-          </div>
+          </article>
         </div>
       </div>
     </section>
 
+    <!-- Sửa laptop: 1 gói nổi bật bên trái + danh sách gói bên phải -->
     <section id="sua-laptop" class="device-section">
       <div class="wrap">
         <div class="device-section-head">
-          <div>
-            <h2>Sửa laptop</h2>
-          </div>
-          <div>
-            <a href="booking.html?service=sua-laptop">Đặt lịch sửa laptop</a>
-          </div>
+          <h2>Sửa laptop</h2>
+          <a href="booking.html?service=sua-laptop">Đặt lịch sửa laptop</a>
         </div>
-        <div class="pkg-grid">
-          <div class="pkg-card">
-            <h4>Vệ sinh và tra keo tản nhiệt</h4>
-            <p>
-              Máy nóng, quạt kêu to, nhanh tụt pin? Làm sạch quạt, thay keo tản
-              nhiệt và giao máy ngay trong ngày.
-            </p>
-            <div class="pkg-price">99.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=ve-sinh-tan-nhiet"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Thay bàn phím</h4>
-            <p>
-              Phím liệt, gõ nhảy chữ hoặc dính nước? Thay nguyên cụm bàn phím
-              chính hãng, đúng chuẩn từng dòng máy.
-            </p>
-            <div class="pkg-price">Từ 250.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=thay-ban-phim"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Thay màn hình laptop</h4>
-            <p>
-              Màn hình ám màu, nứt vỡ hoặc sọc? Thay tấm nền mới và cân chỉnh
-              màu trước khi bàn giao.
-            </p>
-            <div class="pkg-price">Từ 1.200.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=thay-man-hinh-laptop"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Cài lại Windows và driver</h4>
-            <p>
-              Máy đơ, giật lag hoặc nhiễm virus? Cài Windows mới sạch, đủ driver
-              và giữ nguyên dữ liệu của bạn.
-            </p>
-            <div class="pkg-price">150.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=cai-win"
-              >Đặt lịch gói này</a
-            >
-          </div>
+        <div class="svc-split">
+          <article class="svc-feature">
+            <div class="svc-feature-art tone-matcha">
+              <img src="../assets/illus/laptop-fan.svg" alt="" loading="lazy" />
+            </div>
+            <div class="svc-feature-body">
+              <span class="deal-tag">Giao máy trong ngày</span>
+              <h3>Vệ sinh và tra keo tản nhiệt</h3>
+              <p>
+                Máy nóng, quạt kêu to, nhanh tụt pin? Làm sạch quạt, thay keo
+                tản nhiệt và giao máy ngay trong ngày.
+              </p>
+              <div class="svc-feature-foot">
+                <span class="svc-price">99.000đ</span>
+                <a class="btn btn-primary" href="booking.html?service=ve-sinh-tan-nhiet"
+                  >Đặt lịch gói này</a
+                >
+              </div>
+            </div>
+          </article>
+
+          <ul class="svc-rows">
+            <li class="svc-row">
+              <span class="svc-row-icon tone-peach"
+                ><img src="../assets/illus/keyboard.svg" alt=""
+              /></span>
+              <div class="svc-row-text">
+                <h3>Thay bàn phím</h3>
+                <p>
+                  Phím liệt, gõ nhảy chữ hoặc dính nước? Thay nguyên cụm bàn
+                  phím chính hãng, đúng chuẩn từng dòng máy.
+                </p>
+              </div>
+              <div class="svc-row-side">
+                <span class="svc-row-price">250.000đ</span>
+                <a class="btn btn-outline btn-sm" href="booking.html?service=thay-ban-phim"
+                  >Đặt lịch</a
+                >
+              </div>
+            </li>
+            <li class="svc-row">
+              <span class="svc-row-icon tone-wisteria"
+                ><img src="../assets/illus/screen.svg" alt=""
+              /></span>
+              <div class="svc-row-text">
+                <h3>Thay màn hình laptop</h3>
+                <p>
+                  Màn hình ám màu, nứt vỡ hoặc sọc? Thay tấm nền mới và cân
+                  chỉnh màu trước khi bàn giao.
+                </p>
+              </div>
+              <div class="svc-row-side">
+                <span class="svc-row-price">1.200.000đ</span>
+                <a
+                  class="btn btn-outline btn-sm"
+                  href="booking.html?service=thay-man-hinh-laptop"
+                  >Đặt lịch</a
+                >
+              </div>
+            </li>
+            <li class="svc-row">
+              <span class="svc-row-icon tone-mist"
+                ><img src="../assets/illus/windows.svg" alt=""
+              /></span>
+              <div class="svc-row-text">
+                <h3>Cài lại Windows và driver</h3>
+                <p>
+                  Máy đơ, giật lag hoặc nhiễm virus? Cài Windows mới sạch, đủ
+                  driver và giữ nguyên dữ liệu của bạn.
+                </p>
+              </div>
+              <div class="svc-row-side">
+                <span class="svc-row-price">150.000đ</span>
+                <a class="btn btn-outline btn-sm" href="booking.html?service=cai-win"
+                  >Đặt lịch</a
+                >
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </section>
 
+    <!-- Sửa điện thoại: băng chuyền thẻ ảnh kéo ngang -->
     <section id="sua-dienthoai" class="device-section alt">
       <div class="wrap">
         <div class="device-section-head">
-          <div>
-            <h2>Sửa điện thoại</h2>
-          </div>
-          <div>
-            <a href="booking.html?service=sua-dien-thoai"
-              >Đặt lịch sửa điện thoại</a
-            >
+          <h2>Sửa điện thoại</h2>
+          <div class="rail-controls">
+            <button type="button" class="rail-btn" data-rail-prev aria-label="Gói trước">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" /></svg>
+            </button>
+            <button type="button" class="rail-btn" data-rail-next aria-label="Gói sau">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+            </button>
+            <a href="booking.html?service=sua-dien-thoai">Đặt lịch sửa điện thoại</a>
           </div>
         </div>
-        <div class="pkg-grid">
-          <div class="pkg-card">
-            <h4>Ép kính mặt trước</h4>
+        <div class="card-rail" tabindex="0" aria-label="Các gói sửa điện thoại, kéo ngang để xem thêm">
+          <article class="rail-card">
+            <div class="rail-art tone-mist">
+              <img src="../assets/illus/phone-glass.svg" alt="" loading="lazy" />
+              <span class="rail-tag">Nhận máy sau 45 phút</span>
+            </div>
+            <h3>Ép kính mặt trước</h3>
             <p>
-              Kính nứt nhưng màn hình vẫn hiển thị và cảm ứng tốt? Ép kính mới,
-              nhận máy sau 45 phút.
+              Kính nứt nhưng màn hình vẫn hiển thị và cảm ứng tốt? Ép kính mới
+              cho bạn.
             </p>
-            <div class="pkg-price">Từ 350.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=ep-kinh"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Thay pin chính hãng</h4>
+            <div class="rail-foot">
+              <span class="rail-price">350.000đ</span>
+              <a class="btn btn-outline btn-sm" href="booking.html?service=ep-kinh">Đặt lịch</a>
+            </div>
+          </article>
+          <article class="rail-card">
+            <div class="rail-art tone-peach">
+              <img src="../assets/illus/phone-battery.svg" alt="" loading="lazy" />
+            </div>
+            <h3>Thay pin chính hãng</h3>
             <p>
               Pin chai, phồng hoặc máy tự tắt nguồn? Thay pin chính hãng và đo
               dung lượng ngay trước mặt bạn.
             </p>
-            <div class="pkg-price">Từ 450.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=thay-pin-dt"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Sửa lỗi chân sạc</h4>
+            <div class="rail-foot">
+              <span class="rail-price">450.000đ</span>
+              <a class="btn btn-outline btn-sm" href="booking.html?service=thay-pin-dt">Đặt lịch</a>
+            </div>
+          </article>
+          <article class="rail-card">
+            <div class="rail-art tone-wisteria">
+              <img src="../assets/illus/phone-port.svg" alt="" loading="lazy" />
+            </div>
+            <h3>Sửa lỗi chân sạc</h3>
             <p>
               Cắm sạc chập chờn hoặc không nhận sạc? Vệ sinh hoặc thay chân sạc
               tùy tình trạng thực tế.
             </p>
-            <div class="pkg-price">Từ 200.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=sua-chan-sac"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Xử lý vào nước, không lên nguồn</h4>
+            <div class="rail-foot">
+              <span class="rail-price">200.000đ</span>
+              <a class="btn btn-outline btn-sm" href="booking.html?service=sua-chan-sac">Đặt lịch</a>
+            </div>
+          </article>
+          <article class="rail-card">
+            <div class="rail-art tone-matcha">
+              <img src="../assets/illus/phone-water.svg" alt="" loading="lazy" />
+              <span class="rail-tag">Kiểm tra miễn phí</span>
+            </div>
+            <h3>Xử lý vào nước, không lên nguồn</h3>
             <p>
               Máy rơi vào nước, cắm sạc không lên hình? Kiểm tra bo mạch miễn
               phí trước, bạn quyết định sửa sau.
             </p>
-            <div class="pkg-price">Miễn phí kiểm tra</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=xu-ly-vao-nuoc"
-              >Đặt lịch gói này</a
-            >
-          </div>
+            <div class="rail-foot">
+              <span class="rail-price">Miễn phí kiểm tra</span>
+              <a class="btn btn-outline btn-sm" href="booking.html?service=xu-ly-vao-nuoc">Đặt lịch</a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
 
+    <!-- Sửa tablet: minh hoạ đêm bên trái + bảng giá kiểu thực đơn -->
     <section id="sua-tablet" class="device-section">
-      <div class="wrap">
-        <div class="device-section-head">
-          <div>
+      <div class="wrap tablet-layout">
+        <div class="tablet-art">
+          <img src="../assets/illus/tablet-night.svg" alt="" loading="lazy" />
+        </div>
+        <div class="tablet-menu">
+          <div class="device-section-head">
             <h2>Sửa tablet</h2>
-          </div>
-          <div>
             <a href="booking.html?service=sua-tablet">Đặt lịch sửa tablet</a>
           </div>
-        </div>
-        <div class="pkg-grid">
-          <div class="pkg-card">
-            <h4>Thay màn hình cảm ứng</h4>
-            <p>
-              Vỡ kính, liệt cảm ứng hoặc sọc màn? Thay nguyên bộ màn hình mới.
-            </p>
-            <div class="pkg-price">Từ 1.500.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=thay-man-hinh-tablet"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Thay pin tablet</h4>
-            <p>
-              Pin chai, phồng hoặc sạc rất lâu đầy? Thay pin mới và kiểm tra sạc
-              kỹ trước khi giao máy.
-            </p>
-            <div class="pkg-price">Từ 550.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=thay-pin-tablet"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Thay cổng sạc</h4>
-            <p>
-              Cổng sạc lỏng, gãy chân hoặc không nhận cáp? Thay cổng mới đúng
-              chuẩn từng dòng máy.
-            </p>
-            <div class="pkg-price">Từ 300.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=thay-cong-sac-tablet"
-              >Đặt lịch gói này</a
-            >
-          </div>
-          <div class="pkg-card">
-            <h4>Sửa lỗi phần mềm, treo logo</h4>
-            <p>
-              Máy treo logo, đơ màn hoặc không vào được hệ điều hành? Khắc phục
-              và cố gắng giữ nguyên dữ liệu, tùy tình trạng máy.
-            </p>
-            <div class="pkg-price">Từ 150.000đ</div>
-            <a
-              class="btn btn-outline btn-sm"
-              href="booking.html?service=sua-loi-phan-mem"
-              >Đặt lịch gói này</a
-            >
-          </div>
+          <ul class="price-menu">
+            <li>
+              <a class="pm-line" href="booking.html?service=thay-man-hinh-tablet">
+                <span class="pm-name">Thay màn hình cảm ứng</span>
+                <span class="pm-dots" aria-hidden="true"></span>
+                <span class="pm-price">1.500.000đ</span>
+              </a>
+              <p class="pm-desc">
+                Vỡ kính, liệt cảm ứng hoặc sọc màn? Thay nguyên bộ màn hình mới.
+              </p>
+            </li>
+            <li>
+              <a class="pm-line" href="booking.html?service=thay-pin-tablet">
+                <span class="pm-name">Thay pin tablet</span>
+                <span class="pm-dots" aria-hidden="true"></span>
+                <span class="pm-price">550.000đ</span>
+              </a>
+              <p class="pm-desc">
+                Pin chai, phồng hoặc sạc rất lâu đầy? Thay pin mới và kiểm tra
+                sạc kỹ trước khi giao máy.
+              </p>
+            </li>
+            <li>
+              <a class="pm-line" href="booking.html?service=thay-cong-sac-tablet">
+                <span class="pm-name">Thay cổng sạc</span>
+                <span class="pm-dots" aria-hidden="true"></span>
+                <span class="pm-price">300.000đ</span>
+              </a>
+              <p class="pm-desc">
+                Cổng sạc lỏng, gãy chân hoặc không nhận cáp? Thay cổng mới đúng
+                chuẩn từng dòng máy.
+              </p>
+            </li>
+            <li>
+              <a class="pm-line" href="booking.html?service=sua-loi-phan-mem">
+                <span class="pm-name">Sửa lỗi phần mềm, treo logo</span>
+                <span class="pm-dots" aria-hidden="true"></span>
+                <span class="pm-price">150.000đ</span>
+              </a>
+              <p class="pm-desc">
+                Máy treo logo, đơ màn hoặc không vào được hệ điều hành? Khắc
+                phục và cố gắng giữ nguyên dữ liệu, tùy tình trạng máy.
+              </p>
+            </li>
+          </ul>
+          <p class="pm-note">Bấm vào từng dòng để đặt lịch đúng gói.</p>
         </div>
       </div>
     </section>
@@ -430,15 +633,20 @@
 
     <section>
       <div class="wrap">
+        <!-- CTA cuối trang: khung mạch điện, motion.js vẽ đường mạch + xung sáng nối các ô tới nút -->
         <div class="cta-band">
-          <div>
+          <div class="cta-copy">
             <h2>Đừng để máy hỏng làm chậm công việc của bạn.</h2>
-            <p>
-              Đặt lịch chưa đến 2 phút. Kỹ thuật viên gọi xác nhận trong vòng 30
-              phút.
-            </p>
+            <ul class="cta-stats">
+              <li><b>2 phút</b><span>đặt lịch online</span></li>
+              <li><b>30 phút</b><span>kỹ thuật viên gọi xác nhận</span></li>
+              <li><b>6 tháng</b><span>bảo hành sau sửa</span></li>
+            </ul>
           </div>
-          <a href="booking.html" class="btn btn-primary">Đặt lịch sửa chữa</a>
+          <div class="cta-action">
+            <a href="booking.html" class="btn btn-primary">Đặt lịch sửa chữa</a>
+            <span class="cta-note">Gửi yêu cầu miễn phí</span>
+          </div>
         </div>
       </div>
     </section>
