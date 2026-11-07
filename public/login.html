@@ -206,8 +206,8 @@
         }
       }
 
-      // Cố gắng tìm và parse phần JSON bên trong response, kể cả khi PHP
-      // lỡ in thêm Warning/Notice phía trước (dính noise nhưng JSON vẫn còn nguyên).
+      // Attempt to extract and parse the JSON payload from the response, even if PHP
+      // prepended stray Warnings or Notices before the JSON body.
       function tryExtractJson(raw) {
         try {
           return JSON.parse(raw);
@@ -237,8 +237,8 @@
           var raw = await res.text();
           var result = tryExtractJson(raw);
 
-          // Chỉ chấp nhận ?next= là một trang .html nội bộ (vd "booking.html"),
-          // chặn chuyển hướng ra trang ngoài kiểu ?next=https://... hoặc //evil.com
+          // Only allow internal .html pages in ?next= (e.g. "booking.html") to prevent open redirects.
+          // Rejects external URLs such as ?next=https://... or //evil.com.
           function safeNextPage() {
             var next = new URLSearchParams(window.location.search).get("next");
             return next && /^[a-z0-9_-]+\.html(\?[^#\s]*)?$/i.test(next)
@@ -247,7 +247,7 @@
           }
 
           if (!result) {
-            // Không trích được message cụ thể nào — chỉ lúc này mới hiện câu chung chung.
+            // Fallback generic message when response cannot be parsed as JSON
             console.error("Response không parse được:", raw);
             alert("Có lỗi xảy ra, vui lòng thử lại sau.");
             return;
@@ -261,11 +261,11 @@
               window.location.href = safeNextPage() || "dashboard.html";
             }
           } else {
-            // Luôn ưu tiên hiện đúng message cụ thể server trả về
+            // Display the specific validation/auth message returned by the server
             alert(result.message || "Thao tác thất bại, vui lòng thử lại.");
           }
         } catch (networkErr) {
-          // Chỉ rơi vào đây khi THỰC SỰ không gọi tới được server
+          // Network-level failure (e.g. local server is offline)
           console.error(networkErr);
           alert(
             "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",

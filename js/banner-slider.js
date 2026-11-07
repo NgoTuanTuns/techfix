@@ -1,8 +1,8 @@
-/* TechFix — banner ảnh tự lướt ở đầu trang chủ (header trong suốt nằm đè lên trên desktop).
-   Thời gian chờ mỗi ảnh do animation CSS của chấm đang chọn quyết định:
-   chấm chạy hết thanh tiến độ thì chuyển ảnh. Nhờ vậy tạm dừng (hover, focus,
-   ra khỏi màn hình, đổi tab) chỉ cần dừng animation đó.
-   prefers-reduced-motion: không tự chạy, không trượt, vẫn bấm chuyển được. */
+/* TechFix — Hero promo slider at the top of the home page.
+   Slide timing is driven by the CSS fill animation on the active pagination dot:
+   when the progress bar animation ends, the slider advances to the next slide.
+   Pausing (on hover, focus, off-screen, or tab switch) simply pauses that CSS animation.
+   Respects prefers-reduced-motion: disables auto-advance and slide transitions while keeping manual controls active. */
 (function () {
   "use strict";
 
@@ -16,7 +16,7 @@
     var interval = parseInt(root.dataset.interval, 10) || 5000;
     root.style.setProperty("--slide-interval", interval + "ms");
 
-    // Bản sao ảnh đầu đặt cuối dải để từ ảnh cuối lướt tiếp sang ảnh đầu, không tua ngược
+    // Clone the first slide at the end of the track for seamless infinite forward looping
     var clone = slides[0].cloneNode(true);
     clone.setAttribute("aria-hidden", "true");
     clone.inert = true;
@@ -38,20 +38,20 @@
 
     var index = 0;
     var pauseReasons = {};
-    // header trong suốt nằm đè lên slider: đổi màu chữ theo ảnh sáng/tối (data-tone)
+    // Transparent overlay header: adapt text contrast based on slide brightness (data-tone)
     var overlayHeader = document.querySelector(".header-overlay");
 
     function setPosition(i, animate) {
       track.classList.toggle("no-anim", !animate);
       track.style.transform = "translate3d(" + i * -100 + "%,0,0)";
-      if (!animate) void track.offsetWidth; // ép trình duyệt áp vị trí ngay trước khi bật lại transition
+      if (!animate) void track.offsetWidth; // Force reflow before re-enabling CSS transitions
     }
 
     function markActive() {
       var real = index % count;
       slides.forEach(function (s, i) {
         s.classList.toggle("is-active", i === real);
-        // slide đang khuất: nút bên trong không nhận Tab, trình đọc màn hình bỏ qua
+        // Mark off-screen slides as inert so inner buttons are excluded from tab order and screen readers
         s.inert = i !== real;
       });
       clone.classList.toggle("is-active", index === count);
@@ -75,7 +75,7 @@
     }
 
     function next() {
-      // đang đứng ở bản sao thì nhảy thầm về ảnh đầu trước khi đi tiếp
+      // If currently resting on the trailing clone, snap back to slide 0 before advancing
       if (index >= count) {
         index = 0;
         setPosition(0, false);
@@ -98,7 +98,7 @@
       markActive();
     });
 
-    // chấm chạy hết thanh tiến độ thì sang ảnh kế
+    // Advance to the next slide when the active dot's progress fill completes
     dotsHost.addEventListener("animationend", function (e) {
       if (e.target.classList.contains("fill")) next();
     });
@@ -141,7 +141,7 @@
       ).observe(root);
     }
 
-    // vuốt trên điện thoại
+    // Touch swipe support on mobile devices
     var startX = null;
     var startY = 0;
     track.addEventListener(
@@ -165,7 +165,7 @@
       }
     });
 
-    // đặt vị trí đầu mà không gắn .no-anim, để tiêu đề ảnh đầu vẫn chạy hiệu ứng mực loang
+    // Set initial position without .no-anim so the first slide's headline reveal animation plays
     track.style.transform = "translate3d(0,0,0)";
     markActive();
     root.classList.add("is-ready");

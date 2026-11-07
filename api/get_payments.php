@@ -1,8 +1,8 @@
 <?php
 /**
  * api/get_payments.php
- * Yêu cầu đã đăng nhập. Trả lịch sử thanh toán của khách đang đăng nhập.
- * Trả JSON: {success: bool, data?: [...], message?: string}
+ * Requires an authenticated session. Returns payment history for the current customer.
+ * Returns JSON: {success: bool, data?: [...], message?: string}
  */
 
 session_start();

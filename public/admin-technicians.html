@@ -81,7 +81,7 @@
       </div>
     </section>
 
-    <script src="../js/admin-common.js?v=20261107-2"></script>
+    <script src="../js/admin-common.js?v=20261107-3"></script>
     <script>
       var technicians = [];
       var orders = [];
@@ -131,7 +131,7 @@
           ? unassigned.length + " đơn đang chờ được giao cho kỹ thuật viên."
           : "Mọi đơn đang mở đều đã có người phụ trách.";
 
-        // Thẻ từng kỹ thuật viên
+        // Technician workload cards
         var grid = document.getElementById("tech-grid");
         if (!technicians.length) {
           grid.innerHTML =
@@ -218,7 +218,7 @@
           TF.growBars(grid);
         }
 
-        // Danh sách đơn chưa phân công
+        // Unassigned orders queue
         var ul = document.getElementById("unassigned-list");
         if (!unassigned.length) {
           ul.innerHTML =

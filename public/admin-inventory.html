@@ -113,10 +113,10 @@
 
     <script src="../js/admin-common.js?v=20261107-2"></script>
     <script>
-      /* Bảng inventory: part_id, name, compatible_with, quantity, unit_cost
+      /* Inventory table: part_id, name, compatible_with, quantity, unit_cost
          GET  ../api/get_parts.php          -> {success, data:[{id, name, compatible_with, quantity, unit_cost}]}
          POST ../api/update_part_stock.php  (part_id, quantity) -> {success, message} */
-      var LOW_STOCK = 3; // tồn <= ngưỡng này thì báo "Sắp hết" (bảng chưa có cột ngưỡng riêng)
+      var LOW_STOCK = 3; // Flag as "Low Stock" when quantity <= threshold
       var parts = [];
       var filter = "all";
       var query = "";
@@ -295,7 +295,7 @@
           "technician",
         ]);
 
-        // Đặt kiểm tra !user lên đầu tiên để tránh lỗi TypeError
+        // Guard against null user before reading user.role
         if (!user) return;
 
         if (user.role === "technician") {

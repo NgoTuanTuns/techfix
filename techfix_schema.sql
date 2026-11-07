@@ -1,7 +1,7 @@
--- Database schema cho project TechFix
--- Khớp với các truy vấn trong các file PHP đã cung cấp.
--- Chạy trong phpMyAdmin / MariaDB khi đã chọn database techfix.
--- Lưu ý: CREATE TABLE IF NOT EXISTS không sửa cấu trúc các bảng cũ đã tồn tại.
+-- Database schema for the TechFix project.
+-- Matches the SQL queries across all backend PHP endpoints.
+-- Import this script via phpMyAdmin or MariaDB CLI after selecting the techfix database.
+-- Note: CREATE TABLE IF NOT EXISTS will not alter existing tables.
 
 CREATE DATABASE IF NOT EXISTS techfix
   CHARACTER SET utf8mb4
@@ -66,8 +66,9 @@ CREATE TABLE IF NOT EXISTS repair_orders (
     delivery_method VARCHAR(30) NULL,
     delivery_address VARCHAR(255) NULL,
     delivery_phone VARCHAR(15) NULL,
+    customer_email VARCHAR(100) NULL,
     preferred_time DATETIME NULL,
-    status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled')
+    status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'awaiting_payment', 'completed', 'cancelled')
         NOT NULL DEFAULT 'pending_receipt',
     estimated_cost DECIMAL(10,0) NULL,
     final_cost DECIMAL(10,0) NULL,
@@ -196,8 +197,8 @@ CREATE TABLE IF NOT EXISTS reviews (
     CONSTRAINT chk_reviews_rating CHECK (rating BETWEEN 1 AND 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Nâng cấp cho database đã tạo từ bản schema cũ (CREATE TABLE IF NOT EXISTS không tự thêm cột).
--- IF NOT EXISTS (MariaDB 10.0.2+) giúp chạy lại file trên database mới vẫn không lỗi trùng cột.
+-- Schema migration for existing databases (since CREATE TABLE IF NOT EXISTS does not add new columns).
+-- IF NOT EXISTS (MariaDB 10.0.2+) ensures idempotency when re-running this script.
 ALTER TABLE repair_orders
 ADD COLUMN IF NOT EXISTS delivery_address VARCHAR(255) NULL AFTER delivery_method,
 ADD COLUMN IF NOT EXISTS delivery_phone VARCHAR(15) NULL AFTER delivery_address;
@@ -206,7 +207,7 @@ ALTER TABLE repair_orders
 MODIFY COLUMN status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled')
     NOT NULL DEFAULT 'pending_receipt';
 
--- Dữ liệu dịch vụ mẫu. INSERT IGNORE tránh lỗi nếu slug đã tồn tại.
+-- Seed service catalog data. INSERT IGNORE avoids duplicate key errors on existing slugs.
 INSERT IGNORE INTO services (slug, device_type, name, base_price) VALUES
 ('ve-sinh-tan-nhiet', 'laptop', 'Vệ sinh + tra keo tản nhiệt', 99000),
 ('thay-ban-phim', 'laptop', 'Thay bàn phím laptop', 250000),
@@ -221,7 +222,7 @@ INSERT IGNORE INTO services (slug, device_type, name, base_price) VALUES
 ('thay-cong-sac-tablet', 'tablet', 'Thay cổng sạc tablet', 300000),
 ('sua-loi-phan-mem', 'tablet', 'Sửa lỗi phần mềm / treo logo', 150000);
 
--- Dữ liệu kho linh kiện mẫu cho trang admin-inventory.html (INSERT IGNORE giữ nguyên tồn kho nếu đã có).
+-- Seed sample inventory parts for admin-inventory.html (INSERT IGNORE preserves existing stock).
 INSERT IGNORE INTO inventory_parts (id, name, compatible_with, quantity, unit_cost) VALUES
 (1, 'Keo tản nhiệt Arctic MX-4 (ống 4g)', 'Laptop Dell, Asus, HP, Lenovo, MacBook', 15, 65000),
 (2, 'Bàn phím laptop Dell Inspiron 15', 'Dell Inspiron 3511 / 3520 / 5510', 6, 180000),

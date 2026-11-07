@@ -1,8 +1,8 @@
 <?php
 /**
  * api/get_technicians.php
- * Yêu cầu role = admin. Trả danh sách kỹ thuật viên để gán vào đơn.
- * Trả JSON: {success: bool, data?: [{id, full_name}]}
+ * Requires role = admin or technician. Returns the list of technicians for order assignment.
+ * Returns JSON: {success: bool, data?: [{id, full_name}]}
  */
 
 session_start();

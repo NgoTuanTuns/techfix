@@ -1,9 +1,9 @@
 <?php
 /**
  * api/me.php
- * Trả thông tin tài khoản đang đăng nhập (dùng để các trang như booking.html,
- * dashboard.html kiểm tra đăng nhập khi vừa tải trang).
- * Trả JSON: {success: bool, data?: {id, full_name, phone, role}, message?: string}
+ * Returns profile details for the currently authenticated user (used by booking.html,
+ * dashboard.html, and admin pages to verify session state on page load).
+ * Returns JSON: {success: bool, data?: {id, full_name, phone, email, role}, message?: string}
  */
 
 session_start();
@@ -15,12 +15,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_login();
 
 try {
-    $stmt = $pdo->prepare('SELECT id, full_name, phone, role FROM users WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, full_name, phone, email, role FROM users WHERE id = ?');
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch();
 
     if (!$user) {
-        // Tài khoản trong session không còn tồn tại trong DB (hiếm, nhưng xử lý cho chắc)
+        // Session references a deleted user record; invalidate session
         session_destroy();
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Phiên đăng nhập không hợp lệ']);

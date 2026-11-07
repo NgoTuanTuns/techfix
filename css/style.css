@@ -1,7 +1,7 @@
 /* ==========================================================
-   TechFix — "Rừng Mạch" (Circuit Grove)
-   Thiết kế theo style.md. Giữ nguyên tên class cũ để HTML không đổi.
-   Mục lục:
+   TechFix — "Circuit Grove" Design System
+   Main stylesheet. Preserves legacy class names for backward compatibility.
+   Table of Contents:
    1. Tokens   2. Base   3. Header   4. Buttons   5. Hero
    6. Sections / Promo / Packages / Process / CTA
    7. Footer   8. Floating contact   9. Forms   10. Auth
@@ -11,7 +11,7 @@
 
 /* ---------- 1. Tokens ---------- */
 :root {
-  /* màu */
+  /* Color palette */
   --mist: #bcd0e0;
   --washi: #f2f1e6;
   --washi-alt: #e3e9ec;
@@ -21,7 +21,7 @@
   --olive-lt: #a9c1ab;
   --persimmon: #c2540f;
   --persimmon-lt: #f0a35e;
-  --accent-text: #9a3f08; /* chữ cam trên nền sáng, đạt >4.5:1 */
+  --accent-text: #9a3f08; /* High-contrast orange text on light backgrounds (>4.5:1) */
   --ink-soft: #4a5876;
   --surface: #fafaf3;
   --line: #cbd3d6;
@@ -33,25 +33,25 @@
   --error: #a63a2b;
   --ok: #3f7a4f;
 
-  /* chữ */
+  /* Typography */
   --font-display: "Fraunces", "Noto Serif Display", Georgia, serif;
   --font-body:
     "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  /* bo góc theo cấp bậc */
+  /* Border radius scale */
   --r-chip: 999px;
   --r-btn: 14px;
   --r-card: 22px;
   --r-hero: 36px;
   --r-leaf: 4px 24px 4px 24px;
 
-  /* bóng nhuốm rêu */
+  /* Moss-tinted elevation shadows */
   --shadow-1:
     0 1px 2px rgba(27, 43, 75, 0.1), 0 6px 16px -6px rgba(27, 43, 75, 0.18);
   --shadow-2:
     0 2px 4px rgba(27, 43, 75, 0.1), 0 24px 48px -16px rgba(27, 43, 75, 0.28);
 
-  /* khoảng cách */
+  /* Spacing scale */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -62,7 +62,7 @@
   --s-8: 72px;
   --s-9: 112px;
 
-  /* chuyển động */
+  /* Motion curves and durations */
   --ease-leaf: cubic-bezier(0.22, 0.8, 0.3, 1);
   --ease-drift: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -74,7 +74,7 @@
   --container: 1200px;
   --gutter: clamp(20px, 4vw, 48px);
 
-  /* tên cũ, để các style inline trong HTML vẫn chạy */
+  /* Legacy token aliases for inline HTML styles */
   --bg: var(--washi);
   --bg-alt: var(--washi-alt);
   --ink: var(--moss-ink);
@@ -91,7 +91,7 @@
   --shadow-card: var(--shadow-1);
 }
 
-/* chế độ đêm trăng */
+/* Dark mode (Moonlit theme) */
 [data-theme="dark"] {
   --washi: #0e1830;
   --washi-alt: #131f3c;
@@ -113,7 +113,7 @@
   color-scheme: dark;
 }
 
-/* Nâng cấp nền thẻ icon (.tone-*) với hiệu ứng kính mờ, chuyển sắc đa tầng & ánh sáng tâm điểm */
+/* Icon card surfaces (.tone-*) with frosted glass, multi-layer gradients, and radial highlights */
 .tone-peach,
 .tone-mist,
 .tone-matcha,
@@ -203,7 +203,7 @@
     0 14px 30px -8px rgba(4, 9, 20, 0.65);
 }
 
-/* Tinh chỉnh đồng bộ bo góc, hiệu ứng nổi & nhãn tag */
+/* Shared border radius, hover elevation, and tag pill refinements */
 .browse-list > li:first-child .browse-img,
 .svc-feature {
   border-radius: var(--r-card) !important;
@@ -283,6 +283,255 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
+/* Device selector tiles (.device-option) on the booking page */
+.device-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px 14px;
+  border-radius: 18px !important;
+}
+.device-option .glyph {
+  width: 78px;
+  height: 58px;
+  margin: 0 auto 2px;
+  display: grid;
+  place-items: center;
+  transition: transform var(--t-base) var(--ease-spring);
+}
+.device-option .glyph img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.device-option:hover .glyph {
+  transform: scale(1.07) translateY(-2px);
+}
+.device-option:has(input:checked) {
+  border-radius: 18px !important;
+  border-color: var(--persimmon);
+  background: linear-gradient(145deg, #fff1e0 0%, #fed7aa 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 10px 24px -8px rgba(194, 84, 15, 0.22);
+}
+[data-theme="dark"] .device-option:has(input:checked) {
+  border-color: #fb923c;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(251, 146, 60, 0.24) 0%, transparent 68%),
+    linear-gradient(145deg, #2d1e28 0%, #3d241e 55%, #1d1624 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(253, 186, 116, 0.28),
+    0 12px 26px -8px rgba(249, 115, 22, 0.28);
+}
+
+/* ---------- Horizontal Promo Banner ---------- */
+.dtv-banner {
+  margin: 0 auto;
+  max-width: var(--container);
+  width: 100%;
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1.25fr;
+  align-items: center;
+  gap: 16px;
+  padding: 0 28px;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  background:
+    radial-gradient(circle at 46% 50%, rgba(169, 193, 171, 0.45) 0%, transparent 58%),
+    linear-gradient(90deg, #fafaf3 0%, #e5efe3 42%, #dce9ef 68%, #f7ead9 100%);
+  border: 1.5px solid rgba(111, 143, 122, 0.45);
+  box-shadow:
+    0 14px 32px -10px rgba(27, 43, 75, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    transform var(--t-base) var(--ease-leaf),
+    box-shadow var(--t-base) var(--ease-leaf);
+}
+[data-theme="dark"] .dtv-banner {
+  background:
+    radial-gradient(circle at 46% 50%, rgba(111, 143, 122, 0.25) 0%, transparent 56%),
+    linear-gradient(90deg, #162442 0%, #183238 45%, #192b48 72%, #2b2129 100%);
+  border-color: rgba(169, 193, 171, 0.28);
+  box-shadow:
+    0 16px 36px -10px rgba(4, 9, 20, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.dtv-banner:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 18px 38px -10px rgba(194, 84, 15, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+[data-theme="dark"] .dtv-banner:hover {
+  border-color: rgba(240, 163, 94, 0.48);
+  box-shadow:
+    0 20px 42px -10px rgba(4, 9, 20, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.dtv-banner__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 3px;
+  padding: 14px 0;
+  z-index: 2;
+}
+.dtv-banner__eyebrow {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: clamp(1.1rem, 1.85vw, 1.52rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: #c2540f;
+  white-space: nowrap;
+}
+[data-theme="dark"] .dtv-banner__eyebrow {
+  color: #ff9f4a;
+  text-shadow: 0 2px 10px rgba(249, 115, 22, 0.35);
+}
+.dtv-banner__sub {
+  font-family: var(--font-body);
+  font-weight: 900;
+  font-size: clamp(1.15rem, 1.95vw, 1.62rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: #1b2b4b;
+  white-space: nowrap;
+}
+[data-theme="dark"] .dtv-banner__sub {
+  color: #fff4b8;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+.dtv-banner__devices {
+  height: 112px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2;
+  overflow: hidden;
+}
+.dtv-banner__devices svg {
+  width: 100%;
+  max-width: 340px;
+  height: 112px;
+  display: block;
+}
+.dtv-banner__deals {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 10px 0;
+  z-index: 2;
+}
+.dtv-deal-tag {
+  background: linear-gradient(180deg, #d15b13 0%, #9a3f08 100%);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transform: skewX(-10deg);
+  box-shadow:
+    4px 5px 0 rgba(27, 43, 75, 0.25),
+    0 6px 14px rgba(154, 63, 8, 0.28);
+  border: 1px solid rgba(255, 244, 184, 0.35);
+}
+[data-theme="dark"] .dtv-deal-tag {
+  box-shadow:
+    4px 5px 0 rgba(9, 17, 32, 0.55),
+    0 6px 16px rgba(194, 84, 15, 0.32);
+}
+.dtv-deal-tag__inner {
+  transform: skewX(10deg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dtv-deal-tag__label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: 0.02em;
+  color: #fafaf3;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.dtv-deal-tag__num {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--moon);
+  line-height: 1;
+}
+.dtv-deal-tag__num b {
+  font-size: clamp(2rem, 2.8vw, 2.75rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+}
+.dtv-deal-tag__unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dtv-deal-tag__unit small {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+.dtv-deal-tag__unit em {
+  font-style: normal;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--moon);
+  line-height: 0.95;
+}
+.dtv-banner__cta {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--moss-ink);
+  white-space: nowrap;
+  border-bottom: 3px solid var(--persimmon);
+  padding-bottom: 2px;
+  margin-left: 4px;
+  transition: color var(--t-fast), border-color var(--t-fast), transform var(--t-fast);
+}
+[data-theme="dark"] .dtv-banner__cta {
+  color: var(--moon);
+  border-color: var(--persimmon-lt);
+}
+.dtv-banner:hover .dtv-banner__cta {
+  color: var(--persimmon);
+  border-color: var(--persimmon);
+  transform: translateX(3px);
+}
+[data-theme="dark"] .dtv-banner:hover .dtv-banner__cta {
+  color: var(--persimmon-lt);
+  border-color: var(--persimmon-lt);
+}
+@media (max-width: 1024px) {
+  .dtv-banner {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 18px 20px;
+    gap: 12px;
+  }
+  .dtv-banner__deals {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
 [data-theme="dark"] {
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 16px -6px rgba(0, 0, 0, 0.45);
   --shadow-2:
@@ -311,7 +560,7 @@ body {
     color 600ms var(--ease-drift);
   overflow-x: hidden;
 }
-/* vân giấy washi */
+/* Washi paper grain texture */
 body::before {
   content: "";
   position: fixed;
@@ -410,7 +659,7 @@ section {
     border-color var(--t-base),
     box-shadow var(--t-base);
 }
-/* nền mờ nằm ở pseudo-element để header không tạo containing block cho menu mobile (position: fixed) */
+/* Apply backdrop blur on a pseudo-element so the header does not trap fixed mobile nav children */
 .site-header::before {
   content: "";
   position: absolute;
@@ -471,7 +720,7 @@ section {
   color: var(--ink-soft);
   transition: color var(--t-fast);
 }
-/* gạch chân vẽ ra như gân lá, đầu mút là chấm "via" */
+/* Animated underline with a terminal PCB via dot */
 .main-nav a::after {
   content: "";
   position: absolute;
@@ -533,7 +782,7 @@ section {
   color: var(--washi) !important;
 }
 
-/* công tắc ngày / đêm (chèn bằng JS) */
+/* Light / dark theme toggle button (injected via JS) */
 .theme-toggle {
   width: 44px;
   height: 44px;
@@ -690,7 +939,7 @@ section {
   font-size: 0.9rem;
   border-radius: 12px;
 }
-/* gợn nước khi bấm (JS thêm .ripple) */
+/* Click ripple effect (.ripple injected via JS) */
 .ripple {
   position: absolute;
   border-radius: 50%;
@@ -721,7 +970,7 @@ section {
     var(--washi) 100%
   );
 }
-/* đường chân trời gợn ở đáy hero */
+/* Curved horizon divider along the bottom of the hero section */
 .hero::after {
   content: "";
   position: absolute;
@@ -888,11 +1137,11 @@ section {
   box-shadow: var(--shadow-1);
 }
 
-/* ---------- 5b. Banner ảnh đầu trang chủ ----------
-   Ảnh đã có sẵn chữ nên slider chỉ hiện ảnh, khung giữ đúng tỉ lệ ảnh (16:9) để không cắt mất chữ.
-   Desktop: header trong suốt đè lên ảnh, màu chữ đổi theo ảnh sáng/tối (.on-light do banner-slider.js gắn).
-   Mobile: header nằm trên, không đè (đè sẽ che mất phần lớn ảnh).
-   Chuyển động ký tên: ảnh lướt ngang rồi "lắng xuống" (scale 1.04 → 1), chấm trang đếm thời gian chờ. */
+/* ---------- 5b. Homepage Hero Image Slider ----------
+   Slides contain embedded typography, so the container maintains a strict 16:9 aspect ratio to prevent cropping.
+   Desktop: transparent overlay header adapts text contrast via .on-light (toggled by banner-slider.js).
+   Mobile: standard stacked header above the slider to avoid obscuring slide content.
+   Transition: horizontal slide with a subtle scale settle (1.04 -> 1) and animated progress dots. */
 :root {
   --header-h: 76px;
 }
@@ -926,7 +1175,7 @@ section {
     background: var(--persimmon-lt);
   }
 
-  /* ảnh nền sáng: chữ về màu mực (mã màu cố định vì ảnh không đổi theo chế độ đêm) */
+  /* Light slide background: use fixed dark ink color regardless of dark mode */
   .header-overlay.on-light:not(.scrolled)::before {
     background: linear-gradient(
       to bottom,
@@ -947,7 +1196,7 @@ section {
   .header-overlay.on-light:not(.scrolled) .main-nav a::before {
     background: var(--persimmon);
   }
-  /* logo.png có chữ "TECH" màu trắng: đảo sáng/tối rồi xoay lại sắc độ để chữ thành đen, màu cam giữ nguyên tông */
+  /* Invert white "TECH" wordmark in logo.png to dark while preserving the orange hue via hue-rotate */
   .header-overlay.on-light:not(.scrolled) .logo-icon {
     filter: invert(1) hue-rotate(180deg);
   }
@@ -963,10 +1212,10 @@ section {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  padding: 0; /* bỏ padding mặc định của section */
+  padding: 0; /* Remove default section padding */
   background: #091120;
 }
-/* đường chân trời gợn nối sang khu bên dưới, thấp để không che chữ sát đáy ảnh */
+/* Low-profile curved horizon divider transitioning to the next section without overlapping bottom slide text */
 .promo-slider::after {
   content: "";
   position: absolute;
@@ -1093,7 +1342,7 @@ section {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-/* vùng bấm 28px, phần nhìn thấy là vạch mảnh bên trong */
+/* 28px hit target with a thin visible progress bar inside */
 .slider-dot {
   position: relative;
   width: 28px;
@@ -1141,7 +1390,7 @@ section {
     transform: scaleX(1);
   }
 }
-/* trước khi JS chạy: chỉ hiện ảnh đầu, ẩn điều khiển */
+/* Progressive enhancement fallback before JS initializes: show first slide only and hide controls */
 .promo-slider:not(.is-ready) .slider-arrow,
 .promo-slider:not(.is-ready) .slider-dots {
   display: none;
@@ -1187,10 +1436,10 @@ section.alt::before {
   font-size: 1.02rem;
 }
 
-/* dấu triện cam đỏ */
+/* Red-orange hanko seal stamp */
 
-/* gói dịch vụ */
-/* mạch nhỏ chạy ở góc mỗi thẻ gói */
+/* Service package cards */
+/* Subtle PCB trace motif in the corner of each package card */
 
 .device-section {
   padding: var(--s-8) 0;
@@ -1224,7 +1473,7 @@ section.alt::before {
   color: var(--washi);
 }
 
-/* dịch vụ (dự phòng cho trang khác) */
+/* Generic service grid (shared across secondary pages) */
 .service-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1260,7 +1509,7 @@ section.alt::before {
   margin-top: 14px;
 }
 
-/* Quy trình: dây leo nối các bước */
+/* Repair process timeline: vine connector linking steps */
 .process-track {
   position: relative;
   display: flex;
@@ -1307,7 +1556,7 @@ section.alt::before {
     background var(--t-base),
     color var(--t-base);
 }
-/* hoa nở khi dây leo chạm tới */
+/* Blossom node that blooms when the scroll-driven vine reaches it */
 .process-step .num::before {
   content: "";
   position: absolute;
@@ -1389,7 +1638,7 @@ section.alt::before {
   filter: drop-shadow(0 0 6px var(--persimmon-lt));
 }
 
-/* CTA cuối trang: cảnh đêm */
+/* Bottom CTA banner: night scene theme */
 .cta-band {
   --p: 0;
   position: relative;
@@ -1434,7 +1683,7 @@ section.alt::before {
   pointer-events: none;
 }
 
-/* CTA: khung mạch + dòng điện chạy (motion.js vẽ .cta-circuit theo vị trí thật) */
+/* CTA circuit frame and current pulse (.cta-circuit SVG generated dynamically by motion.js) */
 .cta-band > .cta-circuit {
   position: absolute;
   inset: 0;
@@ -1454,7 +1703,7 @@ section.alt::before {
   fill: #eef0d6;
   opacity: 0.85;
 }
-/* xung điện: một đoạn sáng ngắn chạy dọc đường mạch */
+/* Current pulse: short illuminated dash traveling along the circuit path */
 .cta-pulse {
   fill: none;
   stroke: var(--persimmon-lt);
@@ -1478,7 +1727,7 @@ section.alt::before {
 .cta-copy {
   flex: 1 1 460px;
 }
-/* ô thông số trông như linh kiện: chân pin ở cạnh trên, chấm LED bên trái */
+/* Stat boxes styled as IC components with top contact pins and a left status LED */
 .cta-stats {
   list-style: none;
   display: flex;
@@ -1543,7 +1792,7 @@ section.alt::before {
   font-size: 0.85rem;
   color: #b9c6dd;
 }
-/* nút như đèn LED: vòng sáng lan ra theo nhịp */
+/* Primary CTA button with a rhythmic LED halo pulse */
 .cta-band .cta-action .btn-primary {
   animation: led-ring 2.8s var(--ease-drift) infinite;
 }
@@ -1564,13 +1813,13 @@ section.alt::before {
 .cta-band.paused .cta-action .btn-primary {
   animation-play-state: paused;
 }
-/* chừa chỗ cho vầng trăng bên phải để nút không đè lên trăng */
+/* Reserve right-hand clearance so the CTA button does not overlap the decorative moon */
 @media (min-width: 1025px) {
   .cta-band {
     padding-right: clamp(64px, 18vw, 280px);
   }
 }
-/* vào khung: đường mạch vẽ ra rồi xung điện mới chạy */
+/* Viewport entry sequence: draw circuit traces first, then start the current pulse */
 .js .cta-band.rv .cta-trace {
   stroke-dasharray: 100;
   transition: stroke-dashoffset 1.6s var(--ease-leaf) 0.3s;
@@ -1587,10 +1836,10 @@ section.alt::before {
   transition: opacity 0.4s 1.6s;
 }
 
-/* ---------- 6b. Trang chủ: dịch vụ & bảng giá ----------
-   Mỗi khu một bố cục để trang không đều đều từ trên xuống:
-   chọn theo thiết bị (hàng thẻ ảnh) → ưu đãi (2 banner lớn + 2 thẻ ngang)
-   → laptop (gói nổi bật + danh sách) → điện thoại (băng chuyền) → tablet (thực đơn giá). */
+/* ---------- 6b. Homepage: Service Catalog & Pricing Sections ----------
+   Each section uses a distinct layout to maintain visual rhythm down the page:
+   Device category picker -> Featured deals -> Laptop packages -> Phone carousel -> Tablet price menu. */
+   Device category picker -> Featured deals -> Laptop packages -> Phone carousel -> Tablet price menu. */
 .tone-peach {
   background: var(--card-peach);
 }
@@ -1604,7 +1853,7 @@ section.alt::before {
   background: var(--card-wisteria);
 }
 
-/* link chữ có gạch chân vẽ ra như gân lá */
+/* Section header link with an animated leaf-vein underline */
 .link-leaf {
   position: relative;
   display: inline-flex;
@@ -1632,7 +1881,7 @@ section.alt::before {
   transform: scaleX(1);
 }
 
-/* --- Chọn theo thiết bị --- */
+/* --- Device Category Picker --- */
 section.browse {
   padding: var(--s-6) 0 var(--s-8);
   background: var(--washi-alt);
@@ -1705,7 +1954,7 @@ section.browse {
   color: var(--ink-soft);
 }
 
-/* --- Ưu đãi --- */
+/* --- Promotional Deals --- */
 .deal-feature-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1733,7 +1982,7 @@ section.browse {
   --deal-bg: #0b1712;
   box-shadow: inset 0 0 0 1px var(--line);
 }
-/* không đặt position ở đây để .deal-stamp định vị theo cả thẻ, không theo cột chữ */
+/* Avoid setting position here so .deal-stamp anchors to the full card rather than the text column */
 .deal-text {
   display: flex;
   flex-direction: column;
@@ -1770,7 +2019,7 @@ section.browse {
 .deal-text .btn {
   margin-top: 6px;
 }
-/* ảnh gốc có chữ in sẵn ở phần trên: phóng từ đáy để chỉ thấy phần ảnh chụp */
+/* Source image has baked-in top text: scale from bottom center to crop out the text region */
 .deal-photo,
 .deal-mini-photo {
   position: relative;
@@ -1791,14 +2040,14 @@ section.browse {
 .deal-feature:hover .deal-photo img {
   transform: scale(1.7);
 }
-/* khung ảnh nhỏ hẹp và cao nên phải phóng sâu hơn mới giấu hết chữ in sẵn */
+/* Narrower, taller frame requires a deeper zoom to crop out the baked-in header text */
 .deal-mini-photo img {
   transform: scale(2.1);
 }
 .deal-mini:hover .deal-mini-photo img {
   transform: scale(2.2);
 }
-/* mép ảnh hoà vào nền thẻ */
+/* Feather image edge into the card background */
 .deal-photo::before {
   content: "";
   position: absolute;
@@ -1807,7 +2056,7 @@ section.browse {
   background: linear-gradient(to right, var(--deal-bg), transparent 34%);
   pointer-events: none;
 }
-/* dấu triện đóng ở góc trên phải, đè lên ảnh */
+/* Seal badge anchored at the top-right corner over the artwork */
 .deal-stamp {
   position: absolute;
   top: var(--s-4);
@@ -1868,7 +2117,7 @@ section.browse {
   font-weight: 700;
 }
 
-/* --- Sửa laptop: gói nổi bật + danh sách --- */
+/* --- Laptop Repair: Featured Package + Service List --- */
 .svc-split {
   display: grid;
   grid-template-columns: 5fr 7fr;
@@ -1936,12 +2185,12 @@ section.browse {
   flex-direction: column;
   justify-content: center;
 }
-/* dây leo nối các gói, mọc từ trên xuống khi cuộn tới */
+/* Vertical vine connecting package items, growing downward on scroll */
 .svc-rows::before {
   content: "";
   position: absolute;
   left: 39px;
-  top: 56px; /* tâm icon đầu: padding 16px + nửa icon 40px */
+  top: 56px; /* Center of first icon: 16px top padding + 40px half-icon height */
   bottom: 56px;
   width: 2px;
   border-radius: 2px;
@@ -1995,7 +2244,7 @@ section.browse {
   white-space: nowrap;
 }
 
-/* --- Sửa điện thoại: băng chuyền --- */
+/* --- Phone Repair: Horizontal Card Rail --- */
 .rail-controls {
   display: flex;
   align-items: center;
@@ -2109,7 +2358,7 @@ section.browse {
   font-weight: 700;
 }
 
-/* --- Sửa tablet: thực đơn giá --- */
+/* --- Tablet Repair: Price Menu --- */
 .tablet-layout {
   display: grid;
   grid-template-columns: 5fr 7fr;
@@ -2174,7 +2423,7 @@ section.browse {
   color: var(--ink-soft);
 }
 
-/* --- Responsive cho các khu trên --- */
+/* --- Responsive Breakpoints for Catalog Sections --- */
 @media (max-width: 1024px) {
   .deal-feature-row,
   .deal-mini-row {
@@ -2256,8 +2505,8 @@ section.browse {
   }
 }
 
-/* --- Chuyển động khi cuộn tới (motion.js gắn .rv rồi .in) --- */
-/* thẻ thiết bị giở ra từ dưới như tờ washi */
+/* --- Scroll-Triggered Reveal Animations (.rv & .in toggled by motion.js) --- */
+/* Device cards unfold upward from the bottom edge */
 .js .browse-list > li.rv:not(.in) {
   clip-path: inset(100% 0 0 0);
 }
@@ -2267,7 +2516,7 @@ section.browse {
 .js .browse-list > li.rv.in {
   clip-path: inset(-20px);
 }
-/* banner ưu đãi hiện như mực loang từ trái, thẻ nhỏ từ phải */
+/* Promo banners wipe in from the left; compact cards slide in from the right */
 .js .deal-feature.rv:not(.in) {
   clip-path: inset(0 100% 0 0 round var(--r-card));
 }
@@ -2282,7 +2531,7 @@ section.browse {
 .js .deal-mini.rv.in {
   clip-path: inset(-20px);
 }
-/* dấu triện đóng xuống sau khi banner hiện xong */
+/* Seal badge stamps down after the banner reveal completes */
 .js .deal-feature.rv:not(.in) .deal-stamp {
   opacity: 0;
 }
@@ -2300,7 +2549,7 @@ section.browse {
     transform: scale(1) rotate(-8deg);
   }
 }
-/* gói nổi bật giở ra từ dưới, dây leo mọc dọc danh sách rồi từng gói hiện theo */
+/* Featured package unfolds upward, vine grows down the list, and items cascade in */
 .js .svc-feature.rv:not(.in) {
   clip-path: inset(100% 0 0 0);
 }
@@ -2331,7 +2580,7 @@ section.browse {
   opacity: 0;
   translate: 18px 0;
 }
-/* thẻ điện thoại rơi xuống như lá */
+/* Phone cards drift downward like falling leaves */
 .js .rail-card.rv:not(.in) {
   opacity: 0;
   rotate: -4deg;
@@ -2343,7 +2592,7 @@ section.browse {
     rotate 0.8s var(--ease-spring) calc(var(--i, 0) * 110ms),
     translate 0.8s var(--ease-spring) calc(var(--i, 0) * 110ms);
 }
-/* ảnh tablet hiện lan ra từ vầng trăng; đường chấm nối giá vẽ ra */
+/* Tablet showcase expands radially while dotted price leaders draw across */
 .js .tablet-art.rv:not(.in) {
   clip-path: circle(0% at 75% 20%);
 }
@@ -2901,14 +3150,14 @@ section.browse {
 [data-theme="dark"] .badge-received {
   color: #b4d8e2;
 }
-/* đơn đặt online, máy chưa tới cửa hàng: viền nét đứt như "chưa thành hình" */
+/* Online booking pending store drop-off: dashed border indicates unreceived state */
 .badge-pending {
   background: transparent;
   color: var(--ink-soft);
   outline: 1.5px dashed color-mix(in srgb, var(--moss-ink) 40%, transparent);
   outline-offset: -1.5px;
 }
-/* đã huỷ / hết hàng (dùng chung cho khách và trang quản trị) */
+/* Cancelled / out-of-stock badge (shared across customer and admin views) */
 .badge-out {
   background: #f3d3cc;
   color: #7a2417;
@@ -2918,7 +3167,7 @@ section.browse {
   color: #f2b5aa;
 }
 
-/* thẻ "Nhận máy tận nơi" */
+/* "Home Pickup" delivery badge */
 .delivery-tag {
   display: inline-flex;
   align-items: center;
@@ -2961,7 +3210,7 @@ section.browse {
   color: var(--moss-ink);
 }
 
-/* form đặt lịch: khối địa chỉ nhận máy tận nơi mở ra như lá cuộn */
+/* Booking form: collapsible pickup address panel */
 .delivery-fields {
   display: grid;
   grid-template-rows: 0fr;
@@ -2996,7 +3245,7 @@ section.browse {
   margin: 0;
 }
 
-/* hộp báo giá chờ khách duyệt — góc lá, sọc cam bên trái như mép giấy báo giá */
+/* Quote approval callout box with leaf-corner radius and orange left accent bar */
 .quote-box {
   position: relative;
   margin-top: 20px;
@@ -3029,7 +3278,7 @@ section.browse {
   font-weight: 600;
   color: var(--accent-text);
 }
-/* đèn LED trạng thái nhấp nháy chậm */
+/* Slow-pulsing status indicator LED */
 .quote-status .led {
   width: 8px;
   height: 8px;
@@ -3070,7 +3319,7 @@ section.browse {
   gap: 10px;
   margin-top: 16px;
 }
-/* hành động huỷ: chỉ là chữ, không tranh chỗ với nút chính */
+/* Secondary cancel action: low-emphasis text button */
 .btn-text-danger {
   min-height: 44px;
   padding: 0 12px;
@@ -3102,7 +3351,7 @@ section.browse {
   background: #8f2f22;
 }
 
-/* hộp xác nhận (thay cho confirm/alert của trình duyệt) */
+/* Custom confirmation modal (replaces native browser confirm/alert) */
 .tf-dialog {
   width: min(460px, calc(100vw - 32px));
   margin: auto;
@@ -3149,7 +3398,7 @@ section.browse {
   color: var(--error);
 }
 
-/* thông báo nhỏ */
+/* Toast notification popup */
 .toast {
   position: fixed;
   left: 50%;
@@ -3687,7 +3936,7 @@ table.orders tbody tr:hover td {
   font-size: 0.85rem;
 }
 
-/* ---------- 14. Decor (JS chèn vào) ---------- */
+/* ---------- 14. Decorative SVG Layers (injected via JS) ---------- */
 .decor {
   position: absolute;
   inset: 0;
@@ -3895,7 +4144,7 @@ table.orders tbody tr:hover td {
   }
 }
 
-/* cành nhỏ cho đầu trang con */
+/* Decorative branch accent for secondary page headers */
 .page-header .ph-deco {
   position: absolute;
   inset: 0;
@@ -3926,7 +4175,7 @@ table.orders tbody tr:hover td {
   transform: scaleX(-1);
 }
 
-/* chân trang: bụi cỏ */
+/* Footer foreground: animated grass silhouette */
 .grass {
   position: absolute;
   left: 0;
@@ -3968,8 +4217,8 @@ table.orders tbody tr:hover td {
   background: var(--moon);
 }
 
-/* ---------- 15. Motion: vào cảnh & reveal ---------- */
-/* khoảnh khắc chính: hero */
+/* ---------- 15. Motion: Scene Entry & Scroll Reveal ---------- */
+/* Hero entrance choreography */
 .hero .trust-row span {
   animation: rise-in 0.7s var(--ease-leaf) both;
 }
@@ -4009,7 +4258,7 @@ table.orders tbody tr:hover td {
     transform: none;
   }
 }
-/* chữ hiện kiểu mực loang */
+/* Ink-wipe mask reveal for hero headline */
 .hero h1 {
   -webkit-mask-image: linear-gradient(100deg, #000 42%, transparent 58%);
   mask-image: linear-gradient(100deg, #000 42%, transparent 58%);
@@ -4046,7 +4295,7 @@ table.orders tbody tr:hover td {
   }
 }
 
-/* reveal theo section — mỗi nhóm một kiểu */
+/* Section-specific scroll reveal variants */
 .js .rv {
   transition: opacity 0.01s;
 }
@@ -4176,7 +4425,7 @@ table.orders tbody tr:hover td {
   clip-path: inset(0 round var(--r-card));
 }
 
-/* ---------- Giảm chuyển động ---------- */
+/* ---------- Reduced Motion Preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -4221,7 +4470,7 @@ table.orders tbody tr:hover td {
     opacity: 1 !important;
     translate: none !important;
   }
-  /* banner: không tự chạy (animation tắt nên chấm không bao giờ chạy hết), ảnh đứng yên */
+  /* Disable slider auto-advance and scale transitions when reduced motion is enabled */
   .slide-bg,
   .slide.is-active .slide-bg {
     transform: none;
@@ -4366,12 +4615,12 @@ table.orders tbody tr:hover td {
   }
 }
 
-/* mobile: banner kéo ngang được, ưu đãi dạng băng chuyền, trăng CTA gọn lại */
+/* Mobile overrides: touch-scrollable banners, horizontal deal rail, and compact CTA moon */
 @media (max-width: 700px) {
   .slider-arrow {
     display: none;
   }
-  /* ảnh trên mobile thấp, chấm trang nằm ở dải tối ngay dưới ảnh thay vì đè lên ảnh */
+  /* Place pagination dots in the dark band below the mobile slide rather than overlapping the image */
   .promo-slider {
     padding-bottom: 40px;
   }

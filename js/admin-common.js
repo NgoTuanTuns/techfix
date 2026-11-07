@@ -1,4 +1,4 @@
-/* TechFix — helper dùng chung cho các trang quản trị (đặt trước script của từng trang). */
+/* TechFix — Shared utilities for admin pages (loaded before page-specific scripts). */
 (function () {
   "use strict";
   var TF = (window.TF = {});
@@ -12,6 +12,7 @@
     diagnosing: { label: "Đang chẩn đoán", cls: "badge-received" },
     awaiting_approval: { label: "Chờ duyệt giá", cls: "badge-progress" },
     repairing: { label: "Đang sửa chữa", cls: "badge-progress" },
+    awaiting_payment: { label: "Chờ thanh toán", cls: "badge-progress" },
     completed: { label: "Hoàn tất", cls: "badge-done" },
     cancelled: { label: "Đã huỷ", cls: "badge-out" },
   };
@@ -39,7 +40,7 @@
     if (n === null || n === undefined) return null;
     return Number(n).toLocaleString("vi-VN") + "đ";
   };
-  // 12500000 -> "12,5tr", 850000 -> "850k" (khớp regex đếm số của motion.js)
+  // Format compact currency: 12500000 -> "12,5tr", 850000 -> "850k" (matches motion.js counter regex)
   TF.shortMoney = function (n) {
     n = Number(n) || 0;
     if (n >= 1e6) return String(+(n / 1e6).toFixed(1)).replace(".", ",") + "tr";
@@ -89,7 +90,7 @@
     }
   };
 
-  // Chỉ cho phép các vai trò được truyền vào. Mặc định vẫn là admin.
+  // Enforce role-based access on page load. Defaults to admin and technician.
   TF.guard = async function (page, allowedRoles) {
     var me = await TF.get("../api/me.php");
     if (!me || !me.success) {
@@ -124,7 +125,7 @@
     }, 3200);
   };
 
-  // Animate thanh tiến độ: đặt width sau khi phần tử đã vào DOM
+  // Animate progress bars: apply target width after elements are mounted in the DOM
   TF.growBars = function (root) {
     setTimeout(function () {
       (root || document)

@@ -1,8 +1,8 @@
 <?php
 /**
  * includes/auth.php
- * Gọi require_login() hoặc require_role($role) ở đầu mỗi API cần chặn truy cập.
- * Lưu ý: file gọi hàm này phải session_start() trước đó.
+ * Authentication and role-based access control guards for API endpoints.
+ * Note: Call session_start() before invoking these helpers.
  */
 
 function require_login(): void
@@ -26,7 +26,7 @@ function require_role(string $role): void
     }
 }
 
-/** Cho phép một trong các vai trò được chỉ định truy cập API. */
+/** Allow access if the current user holds any of the specified roles. */
 function require_any_role(array $roles): void
 {
     require_login();

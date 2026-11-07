@@ -1,8 +1,8 @@
 <?php
 /**
  * api/register.php
- * Nhận POST: full_name, phone, password, password2
- * Trả JSON: {success: bool, message: string, data?: {...}}
+ * Accepts POST: full_name, phone, password, password2
+ * Returns JSON: {success: bool, message: string, data?: {...}}
  */
 
 session_start();
@@ -21,7 +21,7 @@ $phone = preg_replace('/[\s.\-]/', '', trim($_POST['phone'] ?? ''));
 $password  = (string)($_POST['password'] ?? '');
 $password2 = (string)($_POST['password2'] ?? '');
 
-// ---------- Validate dữ liệu đầu vào ----------
+// ---------- Input Validation ----------
 $errors = [];
 
 if ($full_name === '' || mb_strlen($full_name) < 2) {
@@ -45,9 +45,9 @@ if (!empty($errors)) {
     exit;
 }
 
-// ---------- Xử lý ----------
+// ---------- Account Creation ----------
 try {
-    // Kiểm tra số điện thoại đã tồn tại chưa
+    // Ensure phone number is not already registered
     $check = $pdo->prepare('SELECT id FROM users WHERE phone = ?');
     $check->execute([$phone]);
     if ($check->fetch()) {
@@ -64,7 +64,7 @@ try {
 
     $userId = (int)$pdo->lastInsertId();
 
-    // Tự động đăng nhập sau khi đăng ký thành công (cấp session ID mới, chống session fixation)
+    // Auto-login after registration and regenerate session ID to prevent session fixation
     session_regenerate_id(true);
     $_SESSION['user_id']   = $userId;
     $_SESSION['role']      = 'customer';
@@ -83,7 +83,7 @@ try {
 
 } catch (PDOException $e) {
     http_response_code(500);
-    // Không trả chi tiết lỗi SQL ra ngoài cho client, chỉ ghi log phía server
+    // Log SQL details server-side without exposing internal errors to the client
     error_log('register.php error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Lỗi hệ thống, vui lòng thử lại sau']);
 }

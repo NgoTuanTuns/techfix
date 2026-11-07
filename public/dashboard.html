@@ -95,7 +95,7 @@
         </aside>
 
         <div>
-          <!-- Tab: Đơn sửa chữa -->
+          <!-- Tab: Repair Orders -->
           <div id="panel-orders">
             <div id="orders-container">
               <div class="order-card" id="orders-loading">
@@ -106,7 +106,7 @@
             </div>
           </div>
 
-          <!-- Tab: Thông tin tài khoản -->
+          <!-- Tab: Account Profile -->
           <div id="panel-account" style="display: none">
             <form class="form-card" id="account-form" style="max-width: 460px">
               <div class="field">
@@ -142,7 +142,7 @@
             </form>
           </div>
 
-          <!-- Tab: Lịch sử thanh toán -->
+          <!-- Tab: Payment History -->
           <div id="panel-payments" style="display: none">
             <div id="payments-container">
               <div class="order-card">
@@ -166,7 +166,7 @@
       <a href="#" class="float-btn zalo" title="Nhắn tin qua Zalo">Zalo</a>
     </div>
 
-    <!-- Hộp xác nhận khi khách phản hồi báo giá -->
+    <!-- Quote response confirmation dialog -->
     <dialog
       class="tf-dialog"
       id="quote-dialog"
@@ -185,7 +185,7 @@
     </dialog>
 
     <script>
-      // ---------- Helpers dùng chung ----------
+      // ---------- Shared Helpers ----------
       function tryExtractJson(raw) {
         try {
           return JSON.parse(raw);
@@ -248,7 +248,7 @@
         }
       }
 
-      // ---------- Trạng thái đơn: badge + bước stepper ----------
+      // ---------- Order Status Metadata & Stepper ----------
       var STATUS_META = {
         pending_receipt: {
           badgeClass: "badge-pending",
@@ -275,7 +275,12 @@
           text: "Đang sửa chữa",
           step: 4,
         },
-        completed: { badgeClass: "badge-done", text: "Hoàn tất", step: 5 },
+        awaiting_payment: {
+          badgeClass: "badge-progress",
+          text: "Chờ thanh toán",
+          step: 5,
+        },
+        completed: { badgeClass: "badge-done", text: "Hoàn tất", step: 6 },
         cancelled: { badgeClass: "badge-out", text: "Đã huỷ", step: 0 },
       };
 
@@ -284,12 +289,13 @@
         "Đã nhận máy",
         "Chẩn đoán",
         "Đang sửa",
-        "Bàn giao",
+        "Chờ thanh toán",
+        "Hoàn tất",
       ];
 
       function renderTracker(currentStep) {
         var html = "";
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 1; i <= STEP_LABELS.length; i++) {
           var cls = "tracker-step";
           var circleContent = i;
           if (i < currentStep) {
@@ -315,7 +321,7 @@
         return html;
       }
 
-      // ---------- Thẻ đơn hàng ----------
+      // ---------- Order Card Renderer ----------
       var DELIVERY_METHOD = "Nhận máy tận nơi";
       var DELIVERY_FEE_TEXT = "20.000đ";
       var VAN_ICON =
@@ -327,7 +333,7 @@
         return d.innerHTML;
       }
 
-      // get_orders.php chưa chắc đã trả delivery_method: thiếu thì coi như mang đến cửa hàng
+      // Treat missing delivery_method as in-store drop-off by default
       function isDeliveryOrder(order) {
         return order.delivery_method === DELIVERY_METHOD;
       }
@@ -347,14 +353,14 @@
       }
 
       function costLineHtml(order) {
-        if (order.status === "awaiting_approval") return ""; // giá nằm trong hộp báo giá
+        if (order.status === "awaiting_approval") return ""; // Price is displayed inside the quote approval box
         var hasFinal = Number(order.final_cost) > 0;
         var cost = formatMoney(hasFinal ? order.final_cost : order.estimated_cost);
         if (!cost || (!hasFinal && !(Number(order.estimated_cost) > 0))) {
           return '<p class="cost-line">Đang chờ kỹ thuật viên kiểm tra và báo giá.</p>';
         }
 
-        // Cả khi đặt gói sẵn lẫn khi kỹ thuật viên nhập giá, backend đều đã cộng phí giao nhận 20.000đ
+        // The 20,000 VND pickup fee is already included in the stored database price for doorstep orders
         var shipNote = isDeliveryOrder(order)
           ? " Đã gồm " + DELIVERY_FEE_TEXT + " phí nhận máy tận nơi."
           : "";
@@ -400,6 +406,32 @@
         );
       }
 
+      function paymentBoxHtml(order) {
+        if (order.status !== "awaiting_payment") return "";
+        var price =
+          formatMoney(
+            Number(order.final_cost) > 0
+              ? order.final_cost
+              : order.estimated_cost,
+          ) || "Theo báo giá tại quầy";
+        var emailNote = order.customer_email
+          ? " Đã gửi email thông báo tới <strong>" +
+            escapeHtml(order.customer_email) +
+            "</strong>."
+          : "";
+        return (
+          '<div class="quote-box">' +
+          '<div class="quote-status"><span class="led" aria-hidden="true"></span>Đơn của bạn đã hoàn tất sửa chữa — Vui lòng đến để kiểm tra máy và thanh toán</div>' +
+          '<div class="quote-price">' +
+          price +
+          "</div>" +
+          '<p class="quote-ask">Kỹ thuật viên đã sửa xong máy của bạn. Vui lòng ghé cửa hàng để kiểm tra lại máy và thanh toán tại quầy.' +
+          emailNote +
+          "</p>" +
+          "</div>"
+        );
+      }
+
       function renderOrderCard(order) {
         var meta = STATUS_META[order.status] || {
           badgeClass: "",
@@ -438,11 +470,12 @@
           trackerHtml +
           costLineHtml(order) +
           quoteBoxHtml(order) +
+          paymentBoxHtml(order) +
           "</div>"
         );
       }
 
-      // ---------- Duyệt báo giá: hộp xác nhận ----------
+      // ---------- Quote Approval Confirmation Dialog ----------
       var QUOTE_ACTIONS = {
         approve: {
           title: "Duyệt giá và bắt đầu sửa?",
@@ -550,7 +583,7 @@
         .addEventListener("click", function () {
           quoteDialog.close();
         });
-      // bấm ra vùng tối bên ngoài thì đóng
+      // Close dialog when clicking on the backdrop overlay
       quoteDialog.addEventListener("click", function (e) {
         if (e.target === quoteDialog) quoteDialog.close();
       });
@@ -575,7 +608,7 @@
         container.innerHTML = orders.map(renderOrderCard).join("");
       }
 
-      // ---------- Lịch sử thanh toán ----------
+      // ---------- Payment History ----------
       var METHOD_LABELS = {
         cash: "Tiền mặt",
         bank_transfer: "Chuyển khoản",
@@ -638,7 +671,7 @@
         }
       }
 
-      // ---------- Chuyển tab ----------
+      // ---------- Tab Switching ----------
       function switchPanel(name) {
         ["orders", "account", "payments"].forEach(function (p) {
           document.getElementById("panel-" + p).style.display =
@@ -661,7 +694,7 @@
           });
         });
 
-      // ---------- Tải trang: kiểm tra đăng nhập + tải thông tin + đơn hàng ----------
+      // ---------- Page Init: Session Check, Profile & Orders ----------
       var currentUser = null;
 
       (async function init() {
@@ -689,7 +722,7 @@
             document.getElementById("admin-panel-link").style.display = "";
           }
 
-          // Prefill form tài khoản luôn, để mở tab là có sẵn, không cần gọi thêm API
+          // Pre-fill account form inputs from the initial session check
           document.getElementById("acc-name").value = currentUser.full_name;
           document.getElementById("acc-phone").value = currentUser.phone;
         } catch (err) {
@@ -700,7 +733,7 @@
         await loadOrders();
       })();
 
-      // ---------- Tải danh sách đơn (gọi lại sau khi khách phản hồi báo giá) ----------
+      // ---------- Load Orders (re-invoked after customer responds to a quote) ----------
       async function loadOrders() {
         try {
           var ordersRes = await fetch("../api/get_orders.php");
@@ -719,7 +752,7 @@
         }
       }
 
-      // ---------- Submit form tài khoản ----------
+      // ---------- Account Profile Form Submission ----------
       document
         .getElementById("account-form")
         .addEventListener("submit", async function (e) {

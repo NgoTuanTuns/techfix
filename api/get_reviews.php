@@ -1,5 +1,5 @@
 <?php
-/** Trả các đánh giá đã gửi để hiển thị công khai trên trang Liên hệ. */
+/** Returns recent public customer reviews for display on the Contact page. */
 
 require __DIR__ . '/../config/database.php';
 

@@ -1,5 +1,5 @@
 <?php
-/** Lưu một đánh giá cho đơn đã hoàn tất của khách đang đăng nhập. */
+/** Saves a customer review for a completed repair order. */
 
 session_start();
 require __DIR__ . '/../config/database.php';

@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/style.css?v=20261107-2" />
     <script>
       (function () {
         try {
@@ -108,17 +108,17 @@
           <div class="device-picker">
             <label class="device-option"
               ><input type="radio" name="device" value="laptop" checked />
-              <div class="glyph">LT</div>
+              <div class="glyph"><img src="../assets/illus/laptop.svg?v=20261107" alt="" /></div>
               <span class="label">Laptop</span></label
             >
             <label class="device-option"
               ><input type="radio" name="device" value="phone" />
-              <div class="glyph">ĐT</div>
+              <div class="glyph"><img src="../assets/illus/phone.svg?v=20261107" alt="" /></div>
               <span class="label">Điện thoại</span></label
             >
             <label class="device-option"
               ><input type="radio" name="device" value="tablet" />
-              <div class="glyph">TB</div>
+              <div class="glyph"><img src="../assets/illus/tablet.svg?v=20261107" alt="" /></div>
               <span class="label">Tablet</span></label
             >
           </div>
@@ -187,7 +187,7 @@
             </select>
           </div>
 
-          <!-- Các trường ẩn/hiện khi chọn nhận máy tận nơi (mở ra kiểu lá cuộn) -->
+          <!-- Collapsible doorstep pickup fields (unrolls when doorstep pickup is selected) -->
           <div id="delivery-fields" class="delivery-fields" inert>
             <div class="delivery-fields-inner">
               <div class="delivery-box">
@@ -234,8 +234,29 @@
           </div>
 
           <div class="field">
-            <label for="time">Thời gian mong muốn</label
+            <label for="notify-email"
+              >Email nhận thông báo trạng thái đơn hàng
+              <span class="req">*</span></label
+            >
+            <input
+              type="email"
+              id="notify-email"
+              name="customer_email"
+              required
+              autocomplete="email"
+              placeholder="Ví dụ: ban@gmail.com — hệ thống gửi email khi máy sửa xong"
+            />
+            <div class="hint">
+              Khi máy sửa xong và chuyển sang chờ thanh toán, hệ thống sẽ gửi thông báo về địa chỉ email này.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="time">Thời gian mong muốn (07:30 – 21:00)</label
             ><input type="datetime-local" id="time" name="time" />
+            <div class="hint">
+              Giờ làm việc của cửa hàng: 07:30 – 21:00 mỗi ngày. Chỉ áp dụng khi mang trực tiếp đến cửa hàng.
+            </div>
           </div>
 
           <input type="hidden" id="service-slug" name="service" value="" />
@@ -274,13 +295,13 @@
     </div>
 
     <script>
-      // Bắt buộc đăng nhập mới được đặt lịch — kiểm tra ngay khi vào trang,
-      // tránh để khách điền hết form rồi mới bị từ chối lúc submit.
+      // Require authentication before booking — verified on page load
+      // so unauthenticated visitors are redirected before filling out the form.
       (async function checkLoginOrRedirect() {
         try {
           var res = await fetch("../api/me.php");
           var raw = await res.text();
-          var result = tryExtractJson(raw); // hàm khai báo bên dưới, nhưng được hoist nên gọi trước vẫn chạy được
+          var result = tryExtractJson(raw); // Hoisted helper defined below
 
           if (!result || !result.success) {
             window.location.href = "login.html?next=booking.html";
@@ -293,8 +314,12 @@
             result.data.full_name +
             " — " +
             result.data.phone;
+          var emailInput = document.getElementById("notify-email");
+          if (emailInput && result.data.email && !emailInput.value) {
+            emailInput.value = result.data.email;
+          }
         } catch (err) {
-          // Không gọi được server -> vẫn đưa về đăng nhập, an toàn hơn để lọt vào form
+          // Redirect to login if the session check request fails
           window.location.href = "login.html?next=booking.html";
         }
       })();
@@ -387,8 +412,8 @@
 
         document.getElementById("service-slug").value = svc;
 
-        // Một số entry (sua-laptop, sua-dien-thoai, sua-tablet) chỉ có device,
-        // không có label/price — bỏ qua phần banner trong trường hợp đó.
+        // Generic device entries (sua-laptop, sua-dien-thoai, sua-tablet) only specify the device type
+        // without a package label/price — skip showing the selected-package banner for those.
         if (!info.label) return;
 
         var issue = document.getElementById("issue");
@@ -413,7 +438,7 @@
         }
       }
 
-      // Cố gắng trích phần JSON trong response, kể cả khi PHP lỡ in thêm chữ thừa phía trước.
+      // Safely extract JSON payload even if PHP emits warnings/notices before the JSON body.
       function tryExtractJson(raw) {
         try {
           return JSON.parse(raw);
@@ -431,7 +456,34 @@
         }
       }
 
-      // Ẩn hiện ô nhập địa chỉ và SĐT dựa vào hình thức nhận máy
+      // Toggle doorstep pickup fields vs. in-store preferred time
+      // Validate store working hours: 07:30 (450 mins) -> 21:00 (1260 mins)
+      function isWithinStoreHours(val) {
+        if (!val) return true;
+        var m = String(val).match(/T(\d{2}):(\d{2})/);
+        if (!m) return false;
+        var totalMins = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+        return totalMins >= 7 * 60 + 30 && totalMins <= 21 * 60;
+      }
+
+      var timeInput = document.getElementById("time");
+      var storeTimeField = timeInput ? timeInput.closest(".field") : null;
+      if (timeInput) {
+        timeInput.addEventListener("change", function () {
+          if (this.value && !isWithinStoreHours(this.value)) {
+            this.setCustomValidity(
+              "Cửa hàng chỉ tiếp nhận máy trong khung giờ làm việc từ 07:30 đến 21:00.",
+            );
+            this.reportValidity();
+          } else {
+            this.setCustomValidity("");
+          }
+        });
+        timeInput.addEventListener("input", function () {
+          this.setCustomValidity("");
+        });
+      }
+
       document.getElementById("method").addEventListener("change", function () {
         var deliveryFields = document.getElementById("delivery-fields");
         var addressInput = document.getElementById("delivery-address");
@@ -439,13 +491,25 @@
 
         var isDelivery = this.value === "Nhận máy tận nơi";
         deliveryFields.classList.toggle("is-open", isDelivery);
-        // inert: khi đóng, ô nhập không nhận focus bàn phím
+        // Prevent keyboard focus on hidden inputs when collapsed
         deliveryFields.inert = !isDelivery;
         addressInput.required = isDelivery;
         phoneInput.required = isDelivery;
         if (isDelivery) {
+          if (storeTimeField) {
+            storeTimeField.style.display = "none";
+            storeTimeField.inert = true;
+          }
+          if (timeInput) {
+            timeInput.value = "";
+            timeInput.setCustomValidity("");
+          }
           addressInput.focus({ preventScroll: true });
         } else {
+          if (storeTimeField) {
+            storeTimeField.style.display = "";
+            storeTimeField.inert = false;
+          }
           addressInput.value = "";
           phoneInput.value = "";
         }
@@ -456,12 +520,25 @@
         .addEventListener("submit", async function (e) {
           e.preventDefault();
           var form = e.target;
-          var formData = new FormData(form); // gom mọi input theo name, kể cả file ảnh
+          var methodVal = document.getElementById("method").value;
+          if (
+            methodVal === "Mang trực tiếp đến cửa hàng" &&
+            timeInput &&
+            timeInput.value &&
+            !isWithinStoreHours(timeInput.value)
+          ) {
+            alert(
+              "Thời gian tiếp nhận tại cửa hàng phải nằm trong giờ làm việc từ 07:30 đến 21:00.",
+            );
+            timeInput.focus();
+            return;
+          }
+          var formData = new FormData(form); // Collect all named inputs including the optional photo file
 
           setFormLoading(form, true);
           try {
-            // Nếu booking.html nằm cùng cấp index.html (không phải thư mục con),
-            // đổi lại thành "api/create_order.php" (bỏ "../").
+            // If booking.html is placed in the root directory instead of public/,
+            // change the endpoint path to "api/create_order.php".
             var res = await fetch("../api/create_order.php", {
               method: "POST",
               body: formData,

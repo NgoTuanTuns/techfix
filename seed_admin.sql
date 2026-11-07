@@ -1,8 +1,7 @@
--- Tạo (hoặc nâng quyền) tài khoản quản trị để chạy thử trên máy local.
--- Chạy SAU techfix_schema.sql, trong phpMyAdmin khi đã chọn database techfix.
--- Đăng nhập bằng SĐT 0123456789, mật khẩu admin123.
--- Chỉ dùng cho môi trường học/demo: đổi mật khẩu trước khi deploy thật,
--- và không nên đưa file này lên repo public.
+-- Seed (or promote) the default admin account for local development.
+-- Run AFTER techfix_schema.sql in phpMyAdmin with the `techfix` database selected.
+-- Default credentials: phone 0123456789 / password admin123.
+-- For local testing/demo only — change the password before deploying to production.
 
 USE techfix;
 
@@ -11,7 +10,7 @@ VALUES (
     'Quản trị viên',
     '0123456789',
     'admin123@gmail.com',
-    -- password_hash('admin123', PASSWORD_DEFAULT)
+    -- Generated via password_hash('admin123', PASSWORD_DEFAULT)
     '$2y$12$o5iov3ONZdikiNzdSH6WTuMpFfHDFZUzAXgjkqZQbUkExUMuozV4u',
     'admin'
 )

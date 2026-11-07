@@ -1,5 +1,5 @@
 <?php
-/** Trả các đơn đã hoàn tất nhưng chưa được khách hiện tại đánh giá. */
+/** Returns completed repair orders that have not yet been reviewed by the current customer. */
 
 session_start();
 require __DIR__ . '/../config/database.php';

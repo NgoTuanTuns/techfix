@@ -1,9 +1,9 @@
 <?php
 /**
  * api/update_part_stock.php
- * Yêu cầu role = admin hoặc technician. Nhận POST: id (hoặc part_id), quantity
- * Cập nhật số lượng tồn kho của 1 linh kiện (nút −, +, ✎ trong admin-inventory.html).
- * Trả JSON: {success: bool, message: string}
+ * Requires role = admin or technician. Accepts POST: id (or part_id), quantity.
+ * Updates stock quantity for a single spare part (used by -, +, and edit buttons in admin-inventory.html).
+ * Returns JSON: {success: bool, message: string}
  */
 
 session_start();
@@ -32,7 +32,7 @@ try {
     $stmt = $pdo->prepare('UPDATE inventory_parts SET quantity = ? WHERE id = ?');
     $stmt->execute([$quantity, $id]);
 
-    // rowCount() = 0 cũng xảy ra khi số lượng không đổi, nên chỉ coi là lỗi nếu id không tồn tại
+    // rowCount() can be 0 when the new quantity equals the existing value; verify whether the part ID exists
     if ($stmt->rowCount() === 0) {
         $exists = $pdo->prepare('SELECT 1 FROM inventory_parts WHERE id = ?');
         $exists->execute([$id]);

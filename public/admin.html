@@ -10,8 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../css/style.css" />
-    <link rel="stylesheet" href="../css/admin-extra.css" />
+    <link rel="stylesheet" href="../css/style.css?v=20261107-5" />
+    <link rel="stylesheet" href="../css/admin-extra.css?v=20261107-2" />
     <script>
       (function () {
         try {
@@ -82,6 +82,7 @@
               Chờ duyệt giá
             </div>
             <div class="chip" data-status="repairing">Đang sửa</div>
+            <div class="chip" data-status="awaiting_payment">Chờ thanh toán</div>
             <div class="chip" data-status="completed">Hoàn tất</div>
             <div class="chip" data-status="cancelled">Đã huỷ</div>
           </div>
@@ -143,19 +144,19 @@
       </div>
     </section>
 
-    <!-- Nạp helper dùng chung -->
-    <script src="../js/admin-common.js?v=20261107-2"></script>
+    <!-- Shared admin utilities -->
+    <script src="../js/admin-common.js?v=20261107-3"></script>
     <script>
       var allOrders = [];
       var technicians = [];
       var currentUser = null;
-      var DELIVERY_FEE = 20000; // khớp update_order_status.php: tự cộng cho đơn nhận tận nơi
+      var DELIVERY_FEE = 20000; // Matches update_order_status.php: auto-added for doorstep pickup orders
 
       function isTechnicianUser() {
         return !!currentUser && currentUser.role === "technician";
       }
 
-      // Admin sửa mọi đơn; kỹ thuật viên chỉ sửa đơn đang giao cho mình (backend cũng chặn)
+      // Admins can edit any order; technicians can only edit orders assigned to them (also enforced on backend)
       function canEditOrder(order) {
         return (
           !isTechnicianUser() ||
@@ -166,27 +167,56 @@
       var currentFilter = "all";
       var currentSearch = "";
 
-      // ---------- Render bảng & Select ----------
-      function statusSelectHtml(order) {
-        var opts = Object.keys(TF.STATUS)
+      // Linear status progression order (forward-only, no backward transitions)
+      var STATUS_STEP = {
+        pending_receipt: 0,
+        received: 1,
+        diagnosing: 2,
+        awaiting_approval: 3,
+        repairing: 4,
+        awaiting_payment: 5,
+        completed: 6,
+        cancelled: 7,
+      };
+
+      function isTerminalStatus(st) {
+        return st === "completed" || st === "cancelled";
+      }
+
+      // ---------- Table & Select Renderers ----------
+      function statusOptionsHtml(order) {
+        var curStep = STATUS_STEP[order.status] != null ? STATUS_STEP[order.status] : 0;
+        var terminal = isTerminalStatus(order.status);
+        return Object.keys(TF.STATUS)
           .map(function (k) {
             var sel = k === order.status ? " selected" : "";
+            var step = STATUS_STEP[k] != null ? STATUS_STEP[k] : 0;
+            var dis = k !== order.status && (terminal || step < curStep) ? " disabled" : "";
             return (
               '<option value="' +
               k +
               '"' +
               sel +
+              dis +
               ">" +
               TF.STATUS[k].label +
               "</option>"
             );
           })
           .join("");
+      }
+
+      function statusSelectHtml(order) {
+        var opts = statusOptionsHtml(order);
         var cls =
           (TF.STATUS[order.status] && TF.STATUS[order.status].cls) || "";
-        var lock = canEditOrder(order)
-          ? ""
-          : ' disabled title="' + CLAIM_FIRST + '"';
+        var editable = canEditOrder(order);
+        var terminal = isTerminalStatus(order.status);
+        var lock = !editable
+          ? ' disabled title="' + CLAIM_FIRST + '"'
+          : terminal
+            ? ' disabled title="Đơn hàng đã kết thúc, không thể quay lại trạng thái trước"'
+            : "";
         return (
           '<select class="status-select ' +
           cls +
@@ -200,9 +230,29 @@
         );
       }
 
+      function refreshStatusSelect(order) {
+        var sel = document.querySelector(
+          '.status-select[data-order-id="' + order.id + '"]',
+        );
+        if (!sel) return;
+        var cls =
+          (TF.STATUS[order.status] && TF.STATUS[order.status].cls) || "";
+        sel.className = "status-select " + cls;
+        sel.innerHTML = statusOptionsHtml(order);
+        sel.value = order.status;
+        var editable = canEditOrder(order);
+        var terminal = isTerminalStatus(order.status);
+        sel.disabled = !editable || terminal;
+        sel.title = !editable
+          ? CLAIM_FIRST
+          : terminal
+            ? "Đơn hàng đã kết thúc, không thể quay lại trạng thái trước"
+            : "";
+      }
+
       function technicianSelectHtml(order) {
         var opts = '<option value="">— Chưa phân công —</option>';
-        // Kỹ thuật viên: chỉ chọn được chính mình cho đơn chưa ai nhận, đơn đã nhận thì khoá
+        // Technicians can only self-assign unassigned orders; assigned orders are locked for technicians
         var choices = isTechnicianUser()
           ? technicians.filter(function (t) {
               return String(t.id) === String(currentUser.id);
@@ -238,9 +288,14 @@
         );
       }
 
-      var LOCKED_TITLE = "Chỉ nhập được giá cuối khi đơn đã hoàn tất";
+      var LOCKED_TITLE =
+        "Chỉ nhập được giá cuối khi đơn ở Chờ thanh toán hoặc Hoàn tất";
       function isPriceLocked(order, field) {
-        return field === "final_cost" && order.status !== "completed";
+        return (
+          field === "final_cost" &&
+          order.status !== "awaiting_payment" &&
+          order.status !== "completed"
+        );
       }
 
       function priceCellHtml(order, field) {
@@ -250,10 +305,10 @@
         var title = !canEditOrder(order)
           ? CLAIM_FIRST
           : locked
-          ? LOCKED_TITLE
-          : isFinal
-            ? "Sửa giá cuối"
-            : "Sửa giá ước tính";
+            ? LOCKED_TITLE
+            : isFinal
+              ? "Sửa giá cuối"
+              : "Sửa giá ước tính";
         return (
           "<td>" +
           '<div class="price-cell' +
@@ -297,10 +352,10 @@
           btn.title = btn.ariaLabel = !editable
             ? CLAIM_FIRST
             : locked
-            ? LOCKED_TITLE
-            : field === "final_cost"
-              ? "Sửa giá cuối"
-              : "Sửa giá ước tính";
+              ? LOCKED_TITLE
+              : field === "final_cost"
+                ? "Sửa giá cuối"
+                : "Sửa giá ước tính";
         }
       }
 
@@ -311,22 +366,64 @@
       var STORE_ICON =
         '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="awning" d="M3 9l1.5-5h15L21 9z"/><path d="M4.5 9v11h15V9"/><path class="door" d="M10 20v-5h4v5"/></svg>';
 
+      var MAIL_ICON =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
+
+      function canSendPaymentEmail(order) {
+        return order.status === "awaiting_payment" && canEditOrder(order);
+      }
+
+      function sendMailBtnTitle(order) {
+        if (!canEditOrder(order)) return CLAIM_FIRST;
+        if (order.status !== "awaiting_payment") {
+          return 'Chỉ có thể gửi email khi đơn đang ở trạng thái "Chờ thanh toán"';
+        }
+        return "Gửi email thông báo cho khách đến kiểm tra máy & thanh toán";
+      }
+
+      function sendMailBtnHtml(order) {
+        var enabled = canSendPaymentEmail(order);
+        var title = sendMailBtnTitle(order);
+        return (
+          '<button type="button" class="btn-send-mail" data-send-email="' +
+          order.id +
+          '"' +
+          (enabled ? "" : " disabled") +
+          ' title="' +
+          TF.esc(title) +
+          '">' +
+          MAIL_ICON +
+          "<span>Gửi mail</span></button>"
+        );
+      }
+
+      function refreshSendMailBtn(order) {
+        var btn = document.querySelector(
+          '[data-send-email="' + order.id + '"]',
+        );
+        if (!btn) return;
+        btn.disabled = !canSendPaymentEmail(order);
+        btn.title = sendMailBtnTitle(order);
+      }
+
       function isDelivery(order) {
         return order.delivery_method === "Nhận máy tận nơi";
       }
 
       function priceState(order, field) {
         var val = order[field];
-        // Kiểm tra xem giá trị có tồn tại và lớn hơn 0 không
+        // Check whether a positive price value is present
         var hasValue =
           val !== null && val !== undefined && val !== "" && Number(val) > 0;
 
         var missing =
-          field === "final_cost" && order.status === "completed" && !hasValue;
+          field === "final_cost" &&
+          (order.status === "awaiting_payment" || order.status === "completed") &&
+          !hasValue;
 
         return {
           missing: missing,
-          // Chỉ lấy thẳng giá trị từ CSDL ra hiển thị, tuyệt đối không cộng thêm 20k ở đây
+          // Render stored database value directly (shipping fee is already included in DB)
           text: !hasValue ? "—" : TF.formatMoney(val),
         };
       }
@@ -368,6 +465,7 @@
           priceCellHtml(order, "estimated_cost") +
           priceCellHtml(order, "final_cost") +
           '<td class="row-actions">' +
+          sendMailBtnHtml(order) +
           '<button class="icon-btn" data-more="' +
           order.id +
           '" title="Khác">⋮</button>' +
@@ -412,7 +510,7 @@
           return o.status === "awaiting_approval";
         }).length;
         var repairing = allOrders.filter(function (o) {
-          return o.status === "repairing";
+          return o.status === "repairing" || o.status === "awaiting_payment";
         }).length;
 
         var completedThisMonth = allOrders.filter(function (o) {
@@ -433,7 +531,7 @@
           " đơn đang chờ khách duyệt giá.";
       }
 
-      // ---------- Cập nhật dữ liệu ----------
+      // ---------- Persist Order Updates ----------
       async function saveOrderField(orderId, fields) {
         fields.order_id = orderId;
         var res = await TF.post("../api/update_order_status.php", fields);
@@ -444,10 +542,13 @@
           );
           return false;
         }
-        return true;
+        if (fields.status === "awaiting_payment" && res.message) {
+          TF.toast(res.message, false);
+        }
+        return res;
       }
 
-      // ---------- Bảng chi tiết đơn ----------
+      // ---------- Order Detail Modal ----------
       var detailOverlay = null;
       var detailOpener = null;
 
@@ -501,7 +602,9 @@
           ).full_name;
         var device = TF.deviceLabel(order);
         var finalText =
-          order.status === "completed" || Number(order.final_cost) > 0
+          order.status === "completed" ||
+          order.status === "awaiting_payment" ||
+          Number(order.final_cost) > 0
             ? TF.formatMoney(order.final_cost) || "Chưa nhập"
             : "—";
 
@@ -523,7 +626,7 @@
         [
           ["customer_phone", "Số điện thoại"],
           ["phone", "Số điện thoại"],
-          ["customer_email", "Email"],
+          ["customer_email", "Email thông báo"],
           ["email", "Email"],
           ["address", "Địa chỉ"],
           ["service_type", "Dịch vụ"],
@@ -532,7 +635,7 @@
           if (order[f[0]]) rows += detailRow(f[1], TF.esc(order[f[0]]));
         });
 
-        // Đơn nhận tận nơi: gom địa chỉ, SĐT người giao máy và phí vận chuyển thành một khối riêng
+        // Doorstep pickup order: group pickup address, contact phone, and shipping fee note into a dedicated block
         var deliveryHtml = "";
         if (isDelivery(order)) {
           var phone = order.delivery_phone
@@ -588,38 +691,130 @@
         detailOverlay.querySelector(".od-close").focus();
       }
 
+      // ---------- Status Transition Confirmation Modal ----------
+      function openStatusConfirmDialog(order, newStatus, onConfirm, onCancel) {
+        var dlg = document.getElementById("tf-status-confirm-dialog");
+        if (!dlg) {
+          dlg = document.createElement("dialog");
+          dlg.id = "tf-status-confirm-dialog";
+          dlg.className = "tf-dialog";
+          dlg.setAttribute("aria-labelledby", "tf-status-confirm-title");
+          dlg.setAttribute("aria-describedby", "tf-status-confirm-body");
+          dlg.innerHTML =
+            '<h3 id="tf-status-confirm-title">Xác nhận chuyển trạng thái</h3>' +
+            '<p id="tf-status-confirm-body" style="line-height:1.55;margin-bottom:8px;"></p>' +
+            '<p style="font-size:0.84rem;color:var(--ink-soft);margin-top:0;">Lưu ý: Trạng thái đơn đi theo chiều tuyến tính, sau khi chuyển sẽ không thể quay lại trạng thái trước.</p>' +
+            '<div class="dialog-actions">' +
+            '<button type="button" class="btn btn-outline btn-sm" data-status-cancel>Không, giữ nguyên</button>' +
+            '<button type="button" class="btn btn-primary btn-sm" data-status-confirm>Đồng ý</button>' +
+            "</div>";
+          document.body.appendChild(dlg);
+        }
+
+        var statusLabel =
+          (TF.STATUS[newStatus] && TF.STATUS[newStatus].label) || newStatus;
+        var bodyEl = dlg.querySelector("#tf-status-confirm-body");
+        bodyEl.innerHTML =
+          "Đơn <strong>#" +
+          TF.esc(order.order_code) +
+          '</strong> sẽ chuyển sang trạng thái <strong>"' +
+          TF.esc(statusLabel) +
+          '"</strong>, bạn có đồng ý không?';
+
+        var settled = false;
+        function finish(confirmed) {
+          if (settled) return;
+          settled = true;
+          if (dlg.open) dlg.close();
+          if (confirmed) onConfirm();
+          else if (onCancel) onCancel();
+        }
+
+        var cancelBtn = dlg.querySelector("[data-status-cancel]");
+        var confirmBtn = dlg.querySelector("[data-status-confirm]");
+        var nextCancel = cancelBtn.cloneNode(true);
+        var nextConfirm = confirmBtn.cloneNode(true);
+        nextConfirm.disabled = false;
+        nextConfirm.textContent = "Đồng ý";
+        cancelBtn.parentNode.replaceChild(nextCancel, cancelBtn);
+        confirmBtn.parentNode.replaceChild(nextConfirm, confirmBtn);
+
+        nextCancel.addEventListener("click", function () {
+          finish(false);
+        });
+        nextConfirm.addEventListener("click", function () {
+          nextConfirm.disabled = true;
+          nextConfirm.textContent = "Đang lưu...";
+          finish(true);
+        });
+        dlg.oncancel = function (e) {
+          e.preventDefault();
+          finish(false);
+        };
+        dlg.onclick = function (ev) {
+          if (ev.target === dlg) finish(false);
+        };
+
+        dlg.showModal();
+      }
+
       function attachRowHandlers() {
         document.querySelectorAll(".status-select").forEach(function (sel) {
-          sel.addEventListener("change", async function () {
+          sel.addEventListener("change", function () {
             var orderId = sel.dataset.orderId;
             var newStatus = sel.value;
 
-            // Tìm thông tin đơn hàng hiện tại trong mảng allOrders
+            // Look up the current order object in allOrders
             var order = allOrders.find(function (o) {
               return String(o.id) === String(orderId);
             });
+            if (!order || newStatus === order.status) return;
 
-            // Ràng buộc trên giao diện: Chỉ khi khách hàng đã duyệt giá (đơn đang ở repairing hoặc completed)
-            // thì mới được phép ở trạng thái Đang sửa hoặc chuyển sang Hoàn tất.
-            // Từ mọi trạng thái khác (pending_receipt, received, diagnosing, awaiting_approval, cancelled) đều chặn lại.
-            if (
-              order &&
-              (newStatus === "repairing" || newStatus === "completed") &&
-              order.status !== "repairing" &&
-              order.status !== "completed"
-            ) {
+            // Rule 0: Linear progression — disallow reverting to a previous status
+            var curStep =
+              STATUS_STEP[order.status] != null ? STATUS_STEP[order.status] : 0;
+            var nextStep =
+              STATUS_STEP[newStatus] != null ? STATUS_STEP[newStatus] : 0;
+            if (isTerminalStatus(order.status) || nextStep < curStep) {
               TF.toast(
-                "Khách chưa duyệt giá nên chưa thể chuyển sang Đang sửa chữa hoặc Hoàn tất.",
+                "Trạng thái đơn đi theo chiều tuyến tính, không thể quay lại trạng thái trước.",
                 true,
               );
-              // Trả lại giá trị select cũ trên giao diện
               sel.value = order.status;
               return;
             }
 
-            // Chặn chuyển sang Chờ duyệt giá khi chưa nhập giá ước tính
+            // Rule 1: Only allow post-approval states (repairing, awaiting_payment, completed)
+            // after the customer has approved the quote.
+            var postApproval = ["repairing", "awaiting_payment", "completed"];
             if (
-              order &&
+              postApproval.indexOf(newStatus) !== -1 &&
+              postApproval.indexOf(order.status) === -1
+            ) {
+              TF.toast(
+                "Khách chưa duyệt giá nên chưa thể chuyển sang Đang sửa chữa, Chờ thanh toán hoặc Hoàn tất.",
+                true,
+              );
+              sel.value = order.status;
+              return;
+            }
+
+            // Rule 2: Require transitioning through "awaiting_payment" before marking an order "completed".
+            if (
+              newStatus === "completed" &&
+              order.status !== "awaiting_payment" &&
+              order.status !== "completed"
+            ) {
+              TF.toast(
+                'Vui lòng chuyển đơn sang "Chờ thanh toán" trước khi Hoàn tất.',
+                true,
+              );
+              sel.value = order.status;
+              return;
+            }
+
+            // Require estimated_cost > 0 before moving to awaiting_approval
+            if (
               newStatus === "awaiting_approval" &&
               !(Number(order.estimated_cost) > 0)
             ) {
@@ -631,21 +826,71 @@
               return;
             }
 
-            var ok = await saveOrderField(orderId, { status: newStatus });
-            if (ok) {
-              if (order) {
-                order.status = newStatus;
-                order.completed_at =
-                  newStatus === "completed" ? new Date().toISOString() : null;
-                refreshPriceCell(order, "final_cost");
-              }
-              var cls =
-                (TF.STATUS[newStatus] && TF.STATUS[newStatus].cls) || "";
-              sel.className = "status-select " + cls;
-              renderStats();
+            // Prompt confirmation dialog before persisting the new status
+            openStatusConfirmDialog(
+              order,
+              newStatus,
+              async function () {
+                var ok = await saveOrderField(orderId, { status: newStatus });
+                if (ok) {
+                  order.status = newStatus;
+                  order.completed_at =
+                    newStatus === "completed" ? new Date().toISOString() : null;
+                  if (ok && ok.data && ok.data.final_cost) {
+                    order.final_cost = ok.data.final_cost;
+                  }
+                  refreshStatusSelect(order);
+                  refreshPriceCell(order, "final_cost");
+                  refreshSendMailBtn(order);
+                  renderStats();
+                } else {
+                  sel.value = order.status;
+                }
+              },
+              function () {
+                sel.value = order.status;
+              },
+            );
+          });
+        });
+
+        document.querySelectorAll("[data-send-email]").forEach(function (btn) {
+          btn.addEventListener("click", async function () {
+            var orderId = btn.dataset.sendEmail;
+            var order = allOrders.find(function (o) {
+              return String(o.id) === String(orderId);
+            });
+            if (!order || order.status !== "awaiting_payment") {
+              TF.toast(
+                'Chỉ có thể gửi email khi đơn đang ở trạng thái "Chờ thanh toán".',
+                true,
+              );
+              return;
+            }
+
+            var labelSpan = btn.querySelector("span");
+            var oldText = labelSpan ? labelSpan.textContent : "Gửi mail";
+            btn.disabled = true;
+            if (labelSpan) labelSpan.textContent = "Đang gửi...";
+
+            var res = await TF.post("../api/update_order_status.php", {
+              order_id: orderId,
+              action: "send_payment_email",
+            });
+
+            if (labelSpan) labelSpan.textContent = oldText;
+            refreshSendMailBtn(order);
+
+            if (res && res.success) {
+              TF.toast(
+                res.message || "Đã gửi email thông báo cho khách hàng!",
+                false,
+              );
             } else {
-              // Nếu API bên dưới từ chối, trả lại select về trạng thái cũ
-              if (order) sel.value = order.status;
+              TF.toast(
+                (res && res.message) || "Không thể gửi email, vui lòng thử lại.",
+                true,
+              );
             }
           });
         });
@@ -663,7 +908,7 @@
               if (order) order.technician_id = sel.value || null;
               if (isTechnicianUser()) renderTable();
             } else {
-              // API từ chối: trả select về người phụ trách cũ
+              // Revert select value if the backend rejects the change
               var prev = allOrders.find(function (o) {
                 return String(o.id) === String(orderId);
               });
@@ -684,12 +929,13 @@
             var isFinal = fieldName === "final_cost";
             if (isPriceLocked(order, fieldName)) {
               alert(
-                LOCKED_TITLE + '. Hãy chuyển trạng thái sang "Hoàn tất" trước.',
+                LOCKED_TITLE +
+                  '. Hãy chuyển trạng thái sang "Chờ thanh toán" hoặc "Hoàn tất" trước.',
               );
               return;
             }
-            // Giá trong DB đã gồm phí ship với đơn tận nơi, còn API nhận giá gốc rồi tự cộng phí.
-            // Điền sẵn giá gốc để lưu lại không bị cộng phí lần nữa.
+            // Database price already includes the pickup fee for doorstep orders, whereas the API expects
+            // the base price and adds the fee automatically. Pre-fill the base price to avoid double-counting.
             var fee = isDelivery(order) ? DELIVERY_FEE : 0;
             var current = Number(order[fieldName]) > 0 ? Number(order[fieldName]) : null;
             var basePrice = current == null ? null : Math.max(current - fee, 0);
@@ -724,7 +970,7 @@
         });
       }
 
-      // ---------- Filter chip + tìm kiếm ----------
+      // ---------- Filter Chips & Search ----------
       document.querySelectorAll(".chip").forEach(function (chip) {
         chip.addEventListener("click", function () {
           document.querySelectorAll(".chip").forEach(function (c) {
@@ -743,14 +989,14 @@
           renderTable();
         });
 
-      // ---------- Khởi tạo trang: kiểm tra quyền & nạp dữ liệu ----------
+      // ---------- Page Initialization: Auth Guard & Data Fetching ----------
       (async function init() {
-        // Dùng TF.guard để tự động check role ("admin" hoặc "technician")
+        // Verify role ("admin" or "technician") via TF.guard
         var user = await TF.guard("admin.html", ["admin", "technician"]);
         if (!user) return;
         currentUser = user;
 
-        // Nếu là kỹ thuật viên, ẩn các menu không đủ quyền
+        // Hide admin-only navigation links when logged in as a technician
         if (user.role === "technician") {
           var dashLink = document.getElementById("admin-dashboard-link");
           var techLink = document.getElementById("admin-technicians-link");
@@ -761,7 +1007,7 @@
         document.getElementById("greeting").textContent =
           "Chào " + user.full_name + " 👋";
 
-        // Lấy danh sách đơn hàng & kỹ thuật viên song song bằng TF.get
+        // Fetch orders and technicians concurrently via TF.get
         var results = await Promise.all([
           TF.get("../api/get_all_orders.php"),
           TF.get("../api/get_technicians.php"),
@@ -783,7 +1029,7 @@
         renderTable();
       })();
 
-      // ---------- Nút cuộn cột giá ----------
+      // ---------- Price Column Horizontal Scroll Button ----------
       (function () {
         var box = document.getElementById("table-scroll");
         var hint = document.getElementById("scroll-hint");

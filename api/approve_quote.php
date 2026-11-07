@@ -1,7 +1,7 @@
 <?php
 /**
  * api/approve_quote.php
- * Khách hàng xử lý báo giá (duyệt, yêu cầu báo giá lại, từ chối/hủy đơn)
+ * Handles customer quote responses (approve, request re-quote, or reject/cancel order).
  */
 
 session_start();
@@ -20,7 +20,7 @@ require_login();
 $customerId = $_SESSION['user_id'];
 
 $orderId = (int)($_POST['order_id'] ?? 0);
-$action = $_POST['action'] ?? ''; // 'approve', 'request_requote', hoặc 'reject'
+$action = $_POST['action'] ?? ''; // 'approve', 'request_requote', or 'reject'
 
 if ($orderId <= 0 || !in_array($action, ['approve', 'request_requote', 'reject'], true)) {
     echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);

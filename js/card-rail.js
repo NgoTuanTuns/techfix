@@ -1,6 +1,6 @@
-/* TechFix — băng chuyền thẻ kéo ngang (khu "Sửa điện thoại" ở trang chủ).
-   Cuộn bằng chuột/ngón tay/phím mũi tên là native (scroll-snap); JS chỉ nối nút ‹ ›
-   và khoá nút khi đã chạm đầu hoặc cuối dải. */
+/* TechFix — Horizontal card carousel ("Phone Repair" section on the home page).
+   Mouse wheel, touch, and keyboard scrolling use native CSS scroll-snap;
+   JS wires up the prev/next buttons and disables them at the start/end bounds. */
 (function () {
   "use strict";
   var behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -23,7 +23,7 @@
       var max = rail.scrollWidth - rail.clientWidth - 2;
       prev.disabled = rail.scrollLeft <= 2;
       next.disabled = rail.scrollLeft >= max;
-      // dải vừa đủ hiển thị hết thì ẩn luôn cụm nút
+      // Hide navigation buttons completely if all cards fit within the container
       section.classList.toggle("rail-fits", max <= 0);
     }
 

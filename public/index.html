@@ -16,7 +16,7 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../css/style.css?v=20261107" />
+    <link rel="stylesheet" href="../css/style.css?v=20261107-5" />
     <script>
       (function () {
         try {
@@ -31,9 +31,9 @@
     <script src="../js/motion.js" defer></script>
     <script src="../js/banner-slider.js" defer></script>
     <script src="../js/card-rail.js" defer></script>
-    <!-- Đổi nút "Đăng nhập" thành "<tên> | Đăng xuất" khi đã có phiên.
-         src: đường dẫn tới auth-ui.js (tính từ file index.html này)
-         data-api: đường dẫn tới thư mục api/ (tính từ file index.html này) -->
+    <!-- Switches the "Đăng nhập" link to "Đăng xuất" when an active session exists. -->
+    <!-- src: relative path to auth-ui.js from index.html -->
+    <!-- src: relative path to auth-ui.js | data-api: relative path to api/ -->
     <script src="../js/auth-ui.js?v=20261107-2" data-api="../api/" defer></script>
   </head>
   <body>
@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <!-- header-overlay: trong suốt, chữ sáng khi nằm trên slider; cuộn xuống thì trở về nền washi -->
+    <!-- header-overlay: transparent with light text over the hero slider; reverts to solid surface on scroll -->
     <header class="site-header header-overlay">
       <div class="wrap">
         <a class="logo" href="index.html">
@@ -64,9 +64,9 @@
       </div>
     </header>
 
-    <!-- Banner ảnh tự lướt, nằm dưới header trong suốt (desktop).
-         Thay ảnh: đổi file trong assets/slides/, giữ tỉ lệ 1672x941 (16:9).
-         data-tone="light|dark" cho biết ảnh sáng/tối để header đổi màu chữ cho dễ đọc. -->
+    <!-- Auto-advancing hero slider positioned beneath the transparent header on desktop. -->
+    <!-- Slide assets live in assets/slides/ with a 1672x941 (16:9) aspect ratio. -->
+    <!-- data-tone="light|dark" informs the overlay header to adjust text contrast for readability. -->
     <section
       class="promo-slider"
       aria-roledescription="carousel"
@@ -157,7 +157,7 @@
       </div>
     </section>
 
-    <!-- Chọn dịch vụ theo thiết bị: tiêu đề bên trái, hàng thẻ ảnh bên phải -->
+    <!-- Browse by device category: intro on the left, category tile grid on the right -->
     <section class="browse" aria-labelledby="browse-title">
       <div class="wrap browse-layout">
         <div class="browse-intro">
@@ -267,8 +267,134 @@
         </div>
       </div>
     </section>
-    <div class="banner"><img src="../assets/banner.png" alt="" /></div>
-    <!-- Ưu đãi: 2 banner lớn (sáng / đêm) + 2 thẻ ngang nhỏ -->
+    <div class="banner">
+      <a
+        href="booking.html"
+        class="dtv-banner"
+        aria-label="Ưu đãi Sinh viên và Giảng viên: Sửa chữa điện thoại laptop giảm 15%, thay pin nâng cấp SSD giảm 20% — Đặt lịch ngay"
+      >
+        <!-- Left column: Two-line promotional headline -->
+        <div class="dtv-banner__copy">
+          <span class="dtv-banner__eyebrow">NGÀY HỘI TỰU TRƯỜNG</span>
+          <strong class="dtv-banner__sub">ƯU ĐÃI CỰC SỐC</strong>
+        </div>
+
+        <!-- Center device cluster (iPhone Pro, MacBook, iPad, Speaker/Dock) in Circuit Grove palette -->
+        <div class="dtv-banner__devices" aria-hidden="true">
+          <svg viewBox="0 0 340 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="dtvWall" x1="110" y1="12" x2="250" y2="96" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#1b2b4b"/>
+                <stop offset="0.55" stop-color="#22415a"/>
+                <stop offset="1" stop-color="#3f6a58"/>
+              </linearGradient>
+              <linearGradient id="dtvTab" x1="118" y1="38" x2="200" y2="112" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#2b4c65"/>
+                <stop offset="0.55" stop-color="#1b2b4b"/>
+                <stop offset="1" stop-color="#0e1830"/>
+              </linearGradient>
+              <linearGradient id="dtvRgb" x1="242" y1="42" x2="310" y2="110" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#f0a35e"/>
+                <stop offset="0.5" stop-color="#fff4b8"/>
+                <stop offset="1" stop-color="#6f8f7a"/>
+              </linearGradient>
+              <filter id="dtvDrop" x="0" y="0" width="340" height="120" filterUnits="userSpaceOnUse">
+                <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#091120" flood-opacity="0.32"/>
+              </filter>
+            </defs>
+            <!-- Decorative background bars -->
+            <rect x="6" y="6" width="22" height="110" rx="3" fill="#6f8f7a" fill-opacity="0.22"/>
+            <rect x="34" y="18" width="16" height="98" rx="3" fill="#f0a35e" fill-opacity="0.18"/>
+            <rect x="296" y="10" width="26" height="106" rx="3" fill="#6f8f7a" fill-opacity="0.22"/>
+
+            <g filter="url(#dtvDrop)">
+              <!-- Wireless mouse (top-left of device cluster) -->
+              <g transform="translate(86, 8) rotate(-18)">
+                <rect x="0" y="0" width="34" height="22" rx="11" fill="#1b2b4b" stroke="#6f8f7a" stroke-width="1.5"/>
+                <path d="M12 3V19" stroke="#0e1830" stroke-width="1.5"/>
+                <rect x="6" y="9" width="5" height="3" rx="1.5" fill="#f0a35e"/>
+              </g>
+
+              <!-- Open MacBook Pro in the back -->
+              <rect x="134" y="10" width="128" height="82" rx="6" fill="#0e1830" stroke="#6f8f7a" stroke-width="2"/>
+              <rect x="139" y="15" width="118" height="72" rx="3" fill="url(#dtvWall)"/>
+              <!-- Screen wave accents -->
+              <path d="M139 68C168 42 198 76 257 26V87H139V68Z" fill="#f0a35e" fill-opacity="0.38"/>
+              <path d="M139 78C172 56 212 82 257 48V87H139V78Z" fill="#fff4b8" fill-opacity="0.32"/>
+              <!-- Laptop keyboard deck -->
+              <rect x="208" y="64" width="48" height="46" rx="4" fill="#182648" stroke="#8fa3b8" stroke-width="1.5"/>
+              <path d="M214 72H250M214 80H250M214 88H250M214 96H250" stroke="#bcd0e0" stroke-width="2.5" stroke-dasharray="4 3"/>
+
+              <!-- iPhone Pro (front display on the left) -->
+              <rect x="34" y="20" width="44" height="92" rx="8" fill="#0e1830" stroke="#f0a35e" stroke-width="1.8"/>
+              <rect x="37" y="24" width="38" height="84" rx="6" fill="url(#dtvTab)"/>
+              <path d="M37 74C48 58 62 72 75 52V108H37V74Z" fill="#a9c1ab" fill-opacity="0.45"/>
+              <rect x="50" y="27" width="12" height="3.5" rx="1.75" fill="#091120"/>
+
+              <!-- iPhone Pro Titanium (rear triple-camera view overlapping on the left) -->
+              <rect x="62" y="34" width="46" height="82" rx="8" fill="#f2f1e6" stroke="#cbd3d6" stroke-width="1.8"/>
+              <rect x="66" y="38" width="22" height="22" rx="5" fill="#e3e9ec" stroke="#8fa3b8" stroke-width="1"/>
+              <circle cx="72" cy="44" r="4" fill="#1b2b4b" stroke="#4a5876" stroke-width="1"/>
+              <circle cx="72" cy="54" r="4" fill="#1b2b4b" stroke="#4a5876" stroke-width="1"/>
+              <circle cx="81" cy="49" r="4" fill="#1b2b4b" stroke="#4a5876" stroke-width="1"/>
+
+              <!-- Center iPad / Tablet -->
+              <rect x="116" y="36" width="88" height="78" rx="7" fill="#0e1830" stroke="#a9c1ab" stroke-width="2"/>
+              <rect x="121" y="41" width="78" height="68" rx="4" fill="url(#dtvTab)"/>
+              <path d="M121 86C144 58 172 90 199 60V109H121V86Z" fill="#f0a35e" fill-opacity="0.5"/>
+              <path d="M121 96C148 74 176 96 199 78V109H121V96Z" fill="#fff4b8" fill-opacity="0.38"/>
+
+              <!-- Portable speaker / charging station on the right -->
+              <path d="M254 44C254 34 306 34 306 44V52" stroke="#c2540f" stroke-width="3.5" stroke-linecap="round"/>
+              <rect x="248" y="48" width="64" height="66" rx="10" fill="#182648" stroke="url(#dtvRgb)" stroke-width="2.5"/>
+              <circle cx="280" cy="82" r="22" fill="#0e1830" stroke="#6f8f7a" stroke-width="2"/>
+              <circle cx="280" cy="82" r="14" fill="#1b2b4b" stroke="#a9c1ab" stroke-width="1.5"/>
+              <circle cx="280" cy="82" r="6" fill="#f0a35e"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Right column: Slanted discount badges + CTA link -->
+        <div class="dtv-banner__deals">
+          <div class="dtv-deal-tag">
+            <div class="dtv-deal-tag__inner">
+              <div class="dtv-deal-tag__label">
+                <span>SỬA CHỮA</span>
+                <span>ĐIỆN THOẠI</span>
+                <span>LAPTOP</span>
+              </div>
+              <div class="dtv-deal-tag__num">
+                <b>15</b>
+                <div class="dtv-deal-tag__unit">
+                  <small>GIẢM</small>
+                  <em>%</em>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dtv-deal-tag">
+            <div class="dtv-deal-tag__inner">
+              <div class="dtv-deal-tag__label">
+                <span>THAY PIN</span>
+                <span>MÀN HÌNH</span>
+                <span>NÂNG SSD</span>
+              </div>
+              <div class="dtv-deal-tag__num">
+                <b>20</b>
+                <div class="dtv-deal-tag__unit">
+                  <small>GIẢM</small>
+                  <em>%</em>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <span class="dtv-banner__cta">ĐẶT LỊCH NGAY</span>
+        </div>
+      </a>
+    </div>
+    <!-- Weekly Deals: 2 featured cards (light / dark) + 2 compact horizontal cards -->
     <section id="uu-dai" class="alt deals">
       <div class="wrap">
         <div class="section-head">
@@ -362,7 +488,7 @@
       </div>
     </section>
 
-    <!-- Sửa laptop: 1 gói nổi bật bên trái + danh sách gói bên phải -->
+    <!-- Laptop Repair: 1 featured package on the left + service list on the right -->
     <section id="sua-laptop" class="device-section">
       <div class="wrap">
         <div class="device-section-head">
@@ -452,7 +578,7 @@
       </div>
     </section>
 
-    <!-- Sửa điện thoại: băng chuyền thẻ ảnh kéo ngang -->
+    <!-- Phone Repair: horizontal scroll-snap card rail -->
     <section id="sua-dienthoai" class="device-section alt">
       <div class="wrap">
         <div class="device-section-head">
@@ -530,7 +656,7 @@
       </div>
     </section>
 
-    <!-- Sửa tablet: minh hoạ đêm bên trái + bảng giá kiểu thực đơn -->
+    <!-- Tablet Repair: night illustration on the left + menu-style price list on the right -->
     <section id="sua-tablet" class="device-section">
       <div class="wrap tablet-layout">
         <div class="tablet-art">
@@ -633,7 +759,7 @@
 
     <section>
       <div class="wrap">
-        <!-- CTA cuối trang: khung mạch điện, motion.js vẽ đường mạch + xung sáng nối các ô tới nút -->
+        <!-- Bottom CTA band: motion.js draws dynamic circuit traces connecting the stats row to the button -->
         <div class="cta-band">
           <div class="cta-copy">
             <h2>Đừng để máy hỏng làm chậm công việc của bạn.</h2>

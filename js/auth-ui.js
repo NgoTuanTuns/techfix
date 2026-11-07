@@ -1,18 +1,14 @@
 /**
  * js/auth-ui.js
- * Khi đã đăng nhập: topbar đổi "Đăng nhập" thành "Đăng xuất",
- * link "Đăng nhập" ở footer bị ẩn. Chưa đăng nhập: giữ nguyên.
+ * Updates navigation links based on authentication state:
+ * - Authenticated: switches the topbar "Đăng nhập" link to "Đăng xuất" and hides the footer login link.
+ * - Unauthenticated: leaves default links intact.
  *
- * Nhúng vào MỌI trang, cạnh motion.js (cùng thư mục js, cùng tiền tố đường dẫn):
- *   <script src="js/auth-ui.js" defer></script>
- *
- * Đường dẫn API tự tính từ vị trí file này:  .../js/auth-ui.js -> .../api/
+ * Included across customer-facing pages alongside motion.js:
+ *   <script src="../js/auth-ui.js" defer></script>
  */
 (function () {
-  // Đường dẫn tới thư mục api/:
-  //  - ưu tiên thuộc tính data-api trên thẻ <script> (tính theo URL của TRANG)
-  //  - nếu không có thì suy ra từ vị trí file này (.../js/auth-ui.js -> .../api/)
-  // currentScript có thể là null ở một số cách nhúng/defer; lấy dự phòng theo src.
+  // Resolve the api/ directory URL from the script's data-api attribute or relative path
   var script =
     document.currentScript ||
     document.querySelector('script[src*="auth-ui.js"]');
@@ -23,7 +19,7 @@
   var topLogin = document.querySelector('.topbar-links a[href="login.html"]');
   var footLogin = document.querySelector('.site-footer a[href="login.html"]');
 
-  // Ẩn tạm trong lúc chờ server trả lời để không bị nháy chữ "Đăng nhập"
+  // Hide login links until session check completes to prevent layout/label flicker
   [topLogin, footLogin].forEach(function (a) {
     if (a) a.style.visibility = "hidden";
   });
@@ -81,7 +77,7 @@
 
   function applyLoggedIn(user) {
     if (topLogin) {
-      // Thay chính liên kết đăng nhập để vị trí và kiểu hiển thị không đổi.
+      // Reuse the existing anchor element so layout and typography remain unchanged
       topLogin.textContent = "Đăng xuất";
       topLogin.href = "#";
       topLogin.title = "Đăng xuất";
@@ -90,11 +86,11 @@
     if (footLogin) {
       (footLogin.closest("li") || footLogin).remove();
     }
-    // Liên kết đã bị ẩn khi chờ API; phải hiện lại sau khi đổi nhãn.
+    // Restore visibility after updating link state
     reveal();
   }
 
-  // Link "Đăng xuất" ở sidebar dashboard phải thật sự huỷ phiên
+  // Bind logout handler to sidebar logout links on customer dashboard
   document
     .querySelectorAll('.dash-side a[href="login.html"]')
     .forEach(function (a) {
@@ -110,14 +106,14 @@
       return r.json();
     })
     .then(function (res) {
-      // api/me.php trả thẳng thông tin người dùng tại res.data.
+      // api/me.php returns the authenticated user object in res.data
       if (res && res.success === true && res.data && res.data.id) {
         applyLoggedIn(res.data);
       }
       else reveal();
     })
     .catch(function (err) {
-      console.error("auth-ui: không lấy được trạng thái đăng nhập", err);
+      console.error("auth-ui: failed to fetch session status", err);
       reveal();
     });
 })();

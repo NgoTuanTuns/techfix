@@ -1,8 +1,8 @@
 <?php
 /**
  * api/login.php
- * Nhận POST: phone, password
- * Trả JSON: {success: bool, message: string, data?: {id, full_name, role}}
+ * Accepts POST: phone, password
+ * Returns JSON: {success: bool, message: string, data?: {id, full_name, role}}
  */
 
 session_start();
@@ -33,13 +33,13 @@ try {
     $stmt->execute([$phone]);
     $user = $stmt->fetch();
 
-    // Không nói rõ "sai SĐT" hay "sai mật khẩu" riêng biệt — tránh lộ thông tin SĐT nào đã đăng ký
+    // Use a unified error message to avoid user enumeration
     if (!$user || !password_verify($password, $user['password_hash'])) {
         echo json_encode(['success' => false, 'message' => 'Số điện thoại hoặc mật khẩu không đúng']);
         exit;
     }
 
-    // Cấp session ID mới sau khi xác thực, chống session fixation
+    // Regenerate session ID after authentication to prevent session fixation
     session_regenerate_id(true);
     $_SESSION['user_id']   = $user['id'];
     $_SESSION['role']      = $user['role'];

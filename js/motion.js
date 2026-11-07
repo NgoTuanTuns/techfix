@@ -1,5 +1,5 @@
-/* TechFix — "Rừng Mạch": chuyển động & trang trí dùng chung cho mọi trang.
-   Không phụ thuộc thư viện. Tôn trọng prefers-reduced-motion. */
+/* TechFix — "Circuit Grove": shared motion and decorative SVG effects across all pages.
+   Dependency-free; respects prefers-reduced-motion. */
 (function () {
   "use strict";
 
@@ -30,7 +30,7 @@
     return d;
   }
 
-  /* ---------- 1. Ngày / đêm ---------- */
+  /* ---------- 1. Light / Dark Theme Toggle ---------- */
   var THEME_KEY = "tf-theme";
   function setTheme(t) {
     document.documentElement.setAttribute("data-theme", t);
@@ -63,7 +63,7 @@
     wrap.appendChild(btn);
   }
 
-  /* ---------- 2. Header: viền khi cuộn + menu mobile ---------- */
+  /* ---------- 2. Header: Scroll Border & Mobile Drawer ---------- */
   function initHeader() {
     var header = $(".site-header");
     if (!header) return;
@@ -103,7 +103,7 @@
     });
   }
 
-  /* ---------- 3. Gợn nước khi bấm ---------- */
+  /* ---------- 3. Button Click Ripple Effect ---------- */
   function initRipple() {
     document.addEventListener("click", function (e) {
       var t = e.target.closest && e.target.closest(".btn, .chip");
@@ -120,7 +120,7 @@
     });
   }
 
-  /* ---------- 4. Cành mọc từ mạch điện ---------- */
+  /* ---------- 4. Organic Branch Growing from Circuit Trace ---------- */
   function bez(p0, c1, c2, p1, t) {
     var u = 1 - t;
     return [
@@ -176,7 +176,7 @@
       var p = el("path", { d: LEAF, class: "leaf" + (light ? " lt" : "") }, g);
       p.style.setProperty("--k", k++);
     }
-    // 1) đường mạch 90°/45°
+    // 1) 90°/45° PCB circuit trace
     var circuit = el(
       "path",
       {
@@ -195,7 +195,7 @@
     });
     el("circle", { class: "via", cx: 214, cy: 186, r: 5 }, svg);
 
-    // 2) thân cành (2 đoạn Bézier)
+    // 2) Main branch stem (2 cubic Bézier segments)
     var g = el("g", { class: "sway" }, svg);
     var P0 = [214, 186],
       C1 = [262, 178],
@@ -233,7 +233,7 @@
     });
     leaf(g, P2, -30, 0.95, false);
 
-    // 3) hai cành nhỏ có lá
+    // 3) Secondary twigs with leaves
     [
       [segs[0], 0.62, -1],
       [segs[1], 0.42, 1],
@@ -298,7 +298,7 @@
     return svg;
   }
 
-  /* ---------- 5. Mưa, đom đóm, cỏ ---------- */
+  /* ---------- 5. Rain, Fireflies, and Grass Layers ---------- */
   function rainInto(host, count) {
     var box = div("rain", host);
     var h = host.clientHeight || 700;
@@ -379,9 +379,9 @@
     });
   }
 
-  /* ---------- 5b. CTA: khung mạch + dòng điện chạy ----------
-     Vẽ theo kích thước thật của khối: viền mạch quanh khung, đường nối hàng ô thông số tới nút,
-     đường từ nút lên viền trên. Mỗi đường có một xung sáng chạy dọc (CSS: stroke-dashoffset). */
+  /* ---------- 5b. CTA Band: Circuit Frame & Animated Pulse ---------- */
+  /* ---------- 5b. CTA Band: Circuit Frame & Animated Pulse ---------- */
+  /* Draws dynamic SVG traces around the CTA container, linking the stats row to the primary button. */
   function initCtaCircuit(cta) {
     var svg = el("svg", { class: "cta-circuit", "aria-hidden": "true" });
     cta.insertBefore(svg, cta.firstChild);
@@ -420,8 +420,8 @@
     function draw() {
       var W = cta.clientWidth;
       var H = cta.clientHeight;
-      var i = 12; // khoảng lùi của viền mạch so với mép khối
-      var r = 26; // bo góc viền, nhỏ hơn bo góc khối một chút
+      var i = 12; // Inset offset of the circuit frame from the container edge
+      var r = 26; // Corner radius of the circuit frame
       svg.setAttribute("viewBox", "0 0 " + W + " " + H);
       svg.textContent = "";
 
@@ -453,7 +453,7 @@
       var y0 = (s.t + s.b) / 2;
       var dy = btnY - y0;
       if (b.l - x0 > Math.abs(dy) + 40) {
-        // đủ rộng: đi ngang, rẽ 45° rồi cắm vào cạnh trái nút
+        // Wide layout: route horizontally, bend at 45°, and connect to the left edge of the button
         var bend = b.l - 28 - Math.abs(dy);
         trace(
           "M" + x0 + " " + y0 + "H" + bend +
@@ -463,19 +463,19 @@
         );
         via(x0, y0);
       } else if (b.l > s.r) {
-        // khe hẹp: đi ngang tới dưới mép trái nút rồi đi thẳng lên đáy nút
+        // Narrow gap: route horizontally under the left edge of the button, then straight up
         var xUp = b.l + 14;
         var yEnd = y0 > btnY ? b.b : b.t;
         trace("M" + x0 + " " + y0 + "H" + xUp + "V" + yEnd, 2.2, 0);
         via(x0, y0);
       } else {
-        // màn hẹp, nút nằm dưới hàng ô: đi thẳng xuống
+        // Stacked mobile layout: connect vertically from stats bottom to button top
         trace("M" + btnX + " " + (s.b + 8) + "V" + b.t, 1.8, 0);
         via(btnX, s.b + 8);
       }
 
-      // từ đỉnh nút lên viền trên: thẳng lên nửa đường rồi rẽ 45°.
-      // Chỉ vẽ khi nút nằm cạnh hàng ô; màn hẹp nút ở dưới, đường này sẽ cắt chéo qua chữ.
+      // Trace from top of button to upper frame border: straight up halfway, then bend at 45°.
+      // Trace from top of button to upper frame border (only drawn in side-by-side layout)
       var rise = b.t - i;
       if (b.l > s.r && rise > 40) {
         var turnY = i + rise * 0.5;
@@ -493,13 +493,13 @@
       clearTimeout(timer);
       timer = setTimeout(draw, 150);
     });
-    // font tải xong làm chữ đổi kích thước, vẽ lại cho khớp
+    // Redraw once web fonts finish loading so text bounding boxes are accurate
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
   }
 
-  /* ---------- 6. Trang trí từng trang ---------- */
+  /* ---------- 6. Page-Level Decorative Mounts ---------- */
   function initDecor() {
-    // bộ lọc mực cho dấu triện
+    // SVG displacement filter for stamp ink edge texture
     var defs = document.createElementNS(NS, "svg");
     defs.setAttribute("width", "0");
     defs.setAttribute("height", "0");
@@ -538,7 +538,7 @@
       watchPause(hero);
     }
 
-    // banner đầu trang chủ: mưa mảnh + đom đóm LED trên nền đêm
+    // Home page promo slider: subtle rain and LED firefly particles
     var slider = $(".promo-slider");
     if (slider) {
       if (!reduce) {
@@ -636,7 +636,7 @@
     }).observe(host);
   }
 
-  /* ---------- 7. Reveal khi cuộn tới ---------- */
+  /* ---------- 7. Scroll Reveal Animations ---------- */
   var REVEAL = [
     ".browse-list > li",
     ".deal-feature",
@@ -675,7 +675,7 @@
         items.push(n);
       });
     });
-    // chỉ số bước cho thanh tiến độ đơn hàng
+    // Assign step index variable for order progress trackers
     $$(".tracker").forEach(function (t) {
       $$(".tracker-step", t).forEach(function (s, i) {
         s.style.setProperty("--k", i);
@@ -687,8 +687,8 @@
       });
       return;
     }
-    // phần tử bị clip-path cắt về 0 thì IntersectionObserver coi như không thấy,
-    // nên với nhóm này ta quan sát khối cha rồi bật .in cho các con.
+    // Elements with zero-area initial clip-paths may not trigger IntersectionObserver directly;
+    // observe their parent container instead and reveal child items together.
     var CLIPPED =
       ".browse-list > li, .deal-feature, .deal-mini, .svc-feature, .tablet-art, " +
       ".order-card, .stat-box, .review-card, .map-box";
@@ -720,7 +720,7 @@
     });
   }
 
-  /* ---------- 8. Số đếm lên + vòng trăng ---------- */
+  /* ---------- 8. Animated Number Counters & Rating Ring ---------- */
   function countUp(node) {
     var raw = node.textContent.trim();
     var m = raw.match(/^([\d.,]+)(.*)$/);
@@ -747,7 +747,7 @@
     var nodes = $$(".rating-summary .num, .stat-box .n");
     if (!nodes.length) return;
 
-    // vòng trăng quanh điểm đánh giá
+    // Circular progress ring around the rating score summary
     $$(".rating-summary").forEach(function (rs) {
       var num = $(".num", rs);
       if (!num) return;
@@ -795,7 +795,7 @@
     });
   }
 
-  /* ---------- 9. Quy trình: dây leo mọc theo cuộn ---------- */
+  /* ---------- 9. Process Timeline: Scroll-Driven Vine ---------- */
   function initVine() {
     var track = $(".process-track");
     if (!track) return;
@@ -893,7 +893,7 @@
       clearTimeout(rt);
       rt = setTimeout(layout, 150);
     });
-    // chờ font + ảnh ổn định rồi mới đo
+    // Wait for web fonts and images to settle before measuring step positions
     (document.fonts && document.fonts.ready
       ? document.fonts.ready
       : Promise.resolve()
@@ -905,8 +905,8 @@
   }
 
   var CONTACT = {
-    zalo: "https://zalo.me/0386520937", // SĐT Zalo (10 số) hoặc ID Official Account
-    messenger: "https://m.me/tu.bu.5011/", // username của Fanpage Facebook
+    zalo: "https://zalo.me/0386520937", // Zalo phone number (10 digits) or Official Account ID
+    messenger: "https://m.me/tu.bu.5011/", // Facebook Page / profile username
   };
   function initContactButtons() {
     var map = {
@@ -922,7 +922,7 @@
     });
   }
 
-  /* ---------- Khởi động ---------- */
+  /* ---------- Bootstrap ---------- */
   function init() {
     initThemeToggle();
     initHeader();

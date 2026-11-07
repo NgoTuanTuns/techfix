@@ -1,7 +1,7 @@
 <?php
 /**
  * api/logout.php
- * Huỷ session hiện tại. Trả JSON: {success: true}
+ * Destroys the active session. Returns JSON: {success: true}
  */
 
 session_start();

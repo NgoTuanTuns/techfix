@@ -1,9 +1,9 @@
 <?php
 /**
  * api/update_profile.php
- * Yêu cầu đã đăng nhập. Nhận POST: full_name, phone, current_password (optional), new_password (optional)
- * Chỉ đổi mật khẩu khi có cả current_password đúng và new_password hợp lệ.
- * Trả JSON: {success: bool, message: string, data?: {full_name, phone}}
+ * Requires an authenticated session. Accepts POST: full_name, phone, current_password (optional), new_password (optional).
+ * Password is only updated when both a valid current_password and new_password are provided.
+ * Returns JSON: {success: bool, message: string, data?: {full_name, phone}}
  */
 
 session_start();
@@ -43,7 +43,7 @@ if (!empty($errors)) {
 }
 
 try {
-    // Số điện thoại không được trùng với tài khoản khác (trừ chính mình)
+    // Ensure the phone number is not already taken by another user
     $check = $pdo->prepare('SELECT id FROM users WHERE phone = ? AND id != ?');
     $check->execute([$phone, $userId]);
     if ($check->fetch()) {
@@ -52,7 +52,7 @@ try {
     }
 
     if ($newPassword !== '') {
-        // Đổi mật khẩu bắt buộc phải xác thực đúng mật khẩu hiện tại trước
+        // Verify current password before setting a new one
         $stmt = $pdo->prepare('SELECT password_hash FROM users WHERE id = ?');
         $stmt->execute([$userId]);
         $row = $stmt->fetch();

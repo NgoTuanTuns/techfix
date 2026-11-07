@@ -1,4 +1,4 @@
-/* TechFix — phần bổ sung cho trang quản trị. Nạp sau style.css, chỉ dùng token có sẵn. */
+/* TechFix — Admin portal stylesheet extension. Loaded after style.css using shared design tokens. */
 
 .split {
   display: grid;
@@ -31,7 +31,7 @@
   padding: 24px;
 }
 
-/* thanh tiến độ */
+/* Progress bar rows */
 .bar-row {
   display: grid;
   grid-template-columns: 130px 1fr 32px;
@@ -63,7 +63,7 @@
   background: var(--error);
 }
 
-/* danh sách cần xử lý */
+/* Actionable to-do list */
 .todo-list li {
   display: flex;
   justify-content: space-between;
@@ -91,9 +91,9 @@
   max-width: 180px;
 }
 
-/* .badge-out đã chuyển sang style.css để trang khách dùng chung */
+/* .badge-out was moved to style.css so customer pages can reuse it */
 
-/* thẻ kỹ thuật viên */
+/* Technician profile cards */
 .tech-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -149,7 +149,7 @@
   padding: 4px 10px;
 }
 
-/* kho linh kiện */
+/* Spare parts inventory */
 .stock {
   display: flex;
   align-items: center;
@@ -164,7 +164,7 @@
   flex: 1;
 }
 
-/* .toast đã chuyển sang style.css để trang khách dùng chung */
+/* .toast was moved to style.css so customer pages can reuse it */
 
 @media (max-width: 860px) {
   .split {
@@ -175,7 +175,7 @@
   }
 }
 
-/* ô giá trong bảng đơn (admin.html): giá ước tính và giá cuối là 2 cột riêng */
+/* Price cells in order table (admin.html): separate columns for estimated and final cost */
 .price-cell {
   display: flex;
   align-items: center;
@@ -198,7 +198,7 @@
   border-color: var(--error);
 }
 
-/* bảng đơn (admin.html): thu gọn để vừa khung, không phải kéo ngang */
+/* Compact order table layout (admin.html) */
 .orders-compact th,
 .orders-compact td {
   padding: 12px 8px;
@@ -215,6 +215,10 @@
   gap: 6px;
 }
 .scroll-hint {
+  position: sticky;
+  top: calc(var(--header-h, 76px) + 12px);
+  z-index: 45;
+  pointer-events: none;
   display: flex;
   justify-content: flex-end;
   margin-bottom: 10px;
@@ -228,7 +232,7 @@
   cursor: not-allowed;
 }
 
-/* ô thao tác cuối dòng: giữ là table-cell để thẳng hàng và đường kẻ không bị lệch */
+/* Row action cell: keep display: table-cell so row borders and vertical alignment stay intact */
 .orders td.row-actions {
   display: table-cell;
   vertical-align: middle;
@@ -238,11 +242,82 @@
 .orders td.row-actions .icon-btn {
   vertical-align: middle;
 }
+.scroll-hint .btn {
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid var(--persimmon);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow:
+    0 10px 26px -6px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.scroll-hint .btn:hover {
+  background: var(--persimmon);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Manual email notification button for orders in Awaiting Payment status */
+.btn-send-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1.5px solid var(--persimmon);
+  background: color-mix(in srgb, var(--persimmon) 16%, var(--surface));
+  color: var(--persimmon);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  vertical-align: middle;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+[data-theme="dark"] .btn-send-mail {
+  color: #fdba74;
+  border-color: #fb923c;
+}
+.btn-send-mail svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.btn-send-mail:hover:not(:disabled) {
+  background: var(--persimmon);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.btn-send-mail:disabled {
+  opacity: 0.32;
+  border-color: var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: not-allowed;
+  transform: none;
+}
+.status-select option:disabled {
+  color: #888;
+}
+
+.orders td.row-actions .btn-send-mail + .icon-btn,
 .orders td.row-actions .icon-btn + .icon-btn {
   margin-left: 6px;
 }
 
-/* bảng chi tiết đơn */
+/* Order detail modal */
 .od-overlay {
   position: fixed;
   inset: 0;
@@ -305,7 +380,7 @@
   overflow-wrap: anywhere;
   line-height: 1.55;
 }
-/* khối nhận máy tận nơi trong bảng chi tiết đơn */
+/* Home pickup info block inside the order detail modal */
 .od-delivery {
   margin-top: 16px;
   padding: 16px 18px 4px;
