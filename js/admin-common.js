@@ -60,9 +60,20 @@
   };
 
   TF.get = async function (url) {
+    var cacheKey = "tf_api_cache_" + url;
     try {
-      return TF.tryExtractJson(await (await fetch(url)).text());
+      var parsed = TF.tryExtractJson(await (await fetch(url)).text());
+      if (parsed && parsed.success) {
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(parsed));
+        } catch (err) {}
+      }
+      return parsed;
     } catch (e) {
+      try {
+        var cached = localStorage.getItem(cacheKey);
+        if (cached) return JSON.parse(cached);
+      } catch (err2) {}
       return null;
     }
   };

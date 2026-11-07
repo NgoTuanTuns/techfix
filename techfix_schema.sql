@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(100) NOT NULL,
     phone VARCHAR(15) NOT NULL,
     email VARCHAR(100) NULL,
+    avatar VARCHAR(255) NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('customer', 'technician', 'admin') NOT NULL DEFAULT 'customer',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -201,10 +202,14 @@ CREATE TABLE IF NOT EXISTS reviews (
 -- IF NOT EXISTS (MariaDB 10.0.2+) ensures idempotency when re-running this script.
 ALTER TABLE repair_orders
 ADD COLUMN IF NOT EXISTS delivery_address VARCHAR(255) NULL AFTER delivery_method,
-ADD COLUMN IF NOT EXISTS delivery_phone VARCHAR(15) NULL AFTER delivery_address;
+ADD COLUMN IF NOT EXISTS delivery_phone VARCHAR(15) NULL AFTER delivery_address,
+ADD COLUMN IF NOT EXISTS customer_email VARCHAR(100) NULL AFTER delivery_phone;
+
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL AFTER email;
 
 ALTER TABLE repair_orders
-MODIFY COLUMN status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'completed', 'cancelled')
+MODIFY COLUMN status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'awaiting_payment', 'completed', 'cancelled')
     NOT NULL DEFAULT 'pending_receipt';
 
 -- Seed service catalog data. INSERT IGNORE avoids duplicate key errors on existing slugs.

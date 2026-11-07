@@ -932,6 +932,39 @@
     initCounters();
     initVine();
     initContactButtons();
+    initPwaOffline();
+  }
+  function initPwaOffline() {
+    if (!document.querySelector('link[rel="manifest"]')) {
+      var link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = "manifest.json";
+      document.head.appendChild(link);
+    }
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js?v=2").catch(function () {});
+    }
+    function updateOfflineBanner() {
+      var banner = document.getElementById("tf-offline-banner");
+      if (!navigator.onLine) {
+        if (!banner) {
+          banner = document.createElement("div");
+          banner.id = "tf-offline-banner";
+          banner.setAttribute("role", "status");
+          banner.style.cssText =
+            "position:fixed;bottom:16px;left:16px;z-index:999;padding:10px 16px;border-radius:12px;background:#9a3f08;color:#fff;font-size:0.84rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.35);";
+          banner.textContent =
+            "⚡ Đang ở chế độ ngoại tuyến (Offline) — Hiển thị dữ liệu đã lưu trên thiết bị";
+          document.body.appendChild(banner);
+        }
+        banner.style.display = "block";
+      } else if (banner) {
+        banner.style.display = "none";
+      }
+    }
+    window.addEventListener("online", updateOfflineBanner);
+    window.addEventListener("offline", updateOfflineBanner);
+    updateOfflineBanner();
   }
   if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", init);
