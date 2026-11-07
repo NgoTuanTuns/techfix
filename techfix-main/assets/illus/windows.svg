@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none" stroke="#1b2b4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title>Cài lại Windows</title>
-  <defs><path id="lf" d="M0 0C5-6 15-6 22 0 15 6 5 6 0 0Z"/></defs>
-
-  <rect x="14" y="18" width="68" height="50" rx="5" fill="#cfe0ee"/>
-  <path d="M34 30l12-2v14H34ZM50 27l14-2v17H50ZM34 46h12v14l-12-2ZM50 46h14v17l-14-2Z" fill="#f2f1e6"/>
-  <path d="M40 76h16M48 68v8"/>
-  <path d="M82 40h6l4-4" stroke-width="1.5"/>
-</svg>
