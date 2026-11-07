@@ -113,6 +113,183 @@
   color-scheme: dark;
 }
 
+/* Nâng cấp nền thẻ icon (.tone-*) với hiệu ứng kính mờ, chuyển sắc đa tầng & ánh sáng tâm điểm */
+.tone-peach,
+.tone-mist,
+.tone-matcha,
+.tone-wisteria {
+  position: relative;
+  isolation: isolate;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 0 0 1px rgba(27, 43, 75, 0.08),
+    0 10px 24px -8px rgba(27, 43, 75, 0.14);
+  transition:
+    transform var(--t-base) var(--ease-leaf),
+    box-shadow var(--t-base) var(--ease-leaf);
+}
+.tone-peach::before,
+.tone-mist::before,
+.tone-matcha::before,
+.tone-wisteria::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.65) 0%, transparent 64%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 52%);
+}
+.tone-peach > *,
+.tone-mist > *,
+.tone-matcha > *,
+.tone-wisteria > * {
+  position: relative;
+  z-index: 1;
+}
+.tone-peach {
+  background: linear-gradient(145deg, #fff1e0 0%, #fed7aa 55%, #fdba74 100%) !important;
+}
+.tone-mist {
+  background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important;
+}
+.tone-matcha {
+  background: linear-gradient(145deg, #dcfce7 0%, #a7f3d0 55%, #6ee7b7 100%) !important;
+}
+.tone-wisteria {
+  background: linear-gradient(145deg, #f3e8ff 0%, #ddd6fe 55%, #c4b5fd 100%) !important;
+}
+
+[data-theme="dark"] .tone-peach::before,
+[data-theme="dark"] .tone-mist::before,
+[data-theme="dark"] .tone-matcha::before,
+[data-theme="dark"] .tone-wisteria::before {
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 50% 48%, var(--tone-glow, rgba(255, 255, 255, 0.12)) 0%, transparent 66%);
+}
+[data-theme="dark"] .tone-peach {
+  --tone-glow: rgba(251, 146, 60, 0.32);
+  background: linear-gradient(145deg, #33202a 0%, #43261e 52%, #1e1624 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(253, 186, 116, 0.28),
+    inset 0 0 0 1px rgba(249, 115, 22, 0.28),
+    0 14px 30px -8px rgba(4, 9, 20, 0.65);
+}
+[data-theme="dark"] .tone-mist {
+  --tone-glow: rgba(56, 189, 248, 0.32);
+  background: linear-gradient(145deg, #172a4a 0%, #163a5f 52%, #111d35 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(125, 211, 252, 0.28),
+    inset 0 0 0 1px rgba(56, 189, 248, 0.28),
+    0 14px 30px -8px rgba(4, 9, 20, 0.65);
+}
+[data-theme="dark"] .tone-matcha {
+  --tone-glow: rgba(52, 211, 153, 0.3);
+  background: linear-gradient(145deg, #153132 0%, #174239 52%, #102129 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(110, 231, 183, 0.26),
+    inset 0 0 0 1px rgba(16, 185, 129, 0.28),
+    0 14px 30px -8px rgba(4, 9, 20, 0.65);
+}
+[data-theme="dark"] .tone-wisteria {
+  --tone-glow: rgba(167, 139, 250, 0.32);
+  background: linear-gradient(145deg, #25224c 0%, #332963 52%, #191936 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(196, 181, 253, 0.28),
+    inset 0 0 0 1px rgba(167, 139, 250, 0.28),
+    0 14px 30px -8px rgba(4, 9, 20, 0.65);
+}
+
+/* Tinh chỉnh đồng bộ bo góc, hiệu ứng nổi & nhãn tag */
+.browse-list > li:first-child .browse-img,
+.svc-feature {
+  border-radius: var(--r-card) !important;
+}
+.browse-tile:hover .browse-img,
+.svc-row:hover .svc-row-icon {
+  transform: translateY(-4px);
+}
+[data-theme="dark"] .browse-tile:hover .tone-peach,
+[data-theme="dark"] .svc-row:hover .tone-peach,
+[data-theme="dark"] .rail-card:hover .tone-peach {
+  box-shadow:
+    inset 0 1px 0 rgba(253, 186, 116, 0.45),
+    inset 0 0 0 1.5px rgba(251, 146, 60, 0.5),
+    0 18px 36px -8px rgba(249, 115, 22, 0.28);
+}
+[data-theme="dark"] .browse-tile:hover .tone-mist,
+[data-theme="dark"] .svc-row:hover .tone-mist,
+[data-theme="dark"] .rail-card:hover .tone-mist {
+  box-shadow:
+    inset 0 1px 0 rgba(125, 211, 252, 0.45),
+    inset 0 0 0 1.5px rgba(56, 189, 248, 0.5),
+    0 18px 36px -8px rgba(56, 189, 248, 0.28);
+}
+[data-theme="dark"] .browse-tile:hover .tone-matcha,
+[data-theme="dark"] .svc-row:hover .tone-matcha,
+[data-theme="dark"] .rail-card:hover .tone-matcha {
+  box-shadow:
+    inset 0 1px 0 rgba(110, 231, 183, 0.45),
+    inset 0 0 0 1.5px rgba(52, 211, 153, 0.5),
+    0 18px 36px -8px rgba(16, 185, 129, 0.28);
+}
+[data-theme="dark"] .browse-tile:hover .tone-wisteria,
+[data-theme="dark"] .svc-row:hover .tone-wisteria,
+[data-theme="dark"] .rail-card:hover .tone-wisteria {
+  box-shadow:
+    inset 0 1px 0 rgba(196, 181, 253, 0.45),
+    inset 0 0 0 1.5px rgba(167, 139, 250, 0.5),
+    0 18px 36px -8px rgba(139, 92, 246, 0.28);
+}
+[data-theme="dark"] .deal-tag {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.22), rgba(234, 88, 12, 0.14));
+  border: 1px solid rgba(251, 146, 60, 0.35);
+  color: #fdba74;
+  padding: 5px 12px;
+}
+.svc-feature {
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+.svc-feature-art.tone-matcha {
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+}
+.svc-rows::before {
+  background: linear-gradient(
+    180deg,
+    rgba(251, 146, 60, 0.5) 0%,
+    rgba(167, 139, 250, 0.5) 50%,
+    rgba(56, 189, 248, 0.5) 100%
+  ) !important;
+  opacity: 0.75;
+}
+.rail-card {
+  border: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
+  transition:
+    transform var(--t-base) var(--ease-leaf),
+    box-shadow var(--t-base) var(--ease-leaf);
+}
+.rail-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-2);
+}
+.rail-tag {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+[data-theme="dark"] {
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 16px -6px rgba(0, 0, 0, 0.45);
+  --shadow-2:
+    0 2px 4px rgba(0, 0, 0, 0.3), 0 24px 48px -16px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
 /* ---------- 2. Base ---------- */
 * {
   box-sizing: border-box;
