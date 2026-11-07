@@ -20,6 +20,7 @@ try {
     $stmt = $pdo->prepare(
         'SELECT ro.id, ro.order_code, ro.issue_description, ro.status,
                 ro.estimated_cost, ro.final_cost, ro.received_at, ro.completed_at,
+                ro.delivery_method, ro.delivery_address, ro.delivery_phone,
                 d.device_type, d.brand, d.model
          FROM repair_orders ro
          JOIN devices d ON d.id = ro.device_id

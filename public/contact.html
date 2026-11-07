@@ -26,8 +26,8 @@
         document.documentElement.classList.add("js");
       })();
     </script>
-    <script src="js/motion.js" defer></script>
-    <script src="../js/auth-ui.js?v=20261028" data-api="../api/" defer></script>
+    <script src="../js/motion.js" defer></script>
+    <script src="../js/auth-ui.js?v=20261107-2" data-api="../api/" defer></script>
   </head>
   <body>
     <div class="topbar">
@@ -103,7 +103,8 @@
               href="https://www.google.com/maps/search/?api=1&query=10.7717%2C106.6680"
               target="_blank"
               rel="noopener noreferrer"
-            >Mở Google Maps ↗</a>
+              >Mở Google Maps ↗</a
+            >
           </div>
         </div>
 
@@ -138,7 +139,9 @@
             <h2>Khách hàng nói gì về TechFix</h2>
             <p>Phản hồi từ những khách hàng đã sử dụng dịch vụ của TechFix.</p>
           </div>
-          <a class="btn btn-primary review-cta" href="#review-form">Viết đánh giá</a>
+          <a class="btn btn-primary review-cta" href="#review-form"
+            >Viết đánh giá</a
+          >
         </div>
 
         <div class="rating-summary">
@@ -151,7 +154,11 @@
 
         <div class="review-grid" id="review-list" aria-live="polite"></div>
 
-        <form class="form-card review-form" id="review-form" style="margin-top: 48px">
+        <form
+          class="form-card review-form"
+          id="review-form"
+          style="margin-top: 48px"
+        >
           <h3>Gửi đánh giá dịch vụ</h3>
           <p class="form-note" id="review-help">
             Đăng nhập và chọn một đơn đã hoàn tất để đánh giá dịch vụ.
@@ -175,9 +182,18 @@
             </div>
             <div class="field">
               <label for="review-comment">Chia sẻ của bạn</label>
-              <textarea id="review-comment" minlength="10" maxlength="1000" required disabled placeholder="Hãy cho TechFix biết trải nghiệm của bạn."></textarea>
+              <textarea
+                id="review-comment"
+                minlength="10"
+                maxlength="1000"
+                required
+                disabled
+                placeholder="Hãy cho TechFix biết trải nghiệm của bạn."
+              ></textarea>
             </div>
-            <button type="submit" class="btn btn-primary" disabled>Gửi đánh giá</button>
+            <button type="submit" class="btn btn-primary" disabled>
+              Gửi đánh giá
+            </button>
           </div>
         </form>
       </div>
@@ -233,7 +249,10 @@
           who.className = "who";
           var avatar = document.createElement("div");
           avatar.className = "avatar";
-          avatar.textContent = (review.full_name || "K").trim().charAt(0).toUpperCase();
+          avatar.textContent = (review.full_name || "K")
+            .trim()
+            .charAt(0)
+            .toUpperCase();
           var name = document.createTextNode(review.full_name || "Khách hàng");
           var via = document.createElement("span");
           via.className = "via";
@@ -245,23 +264,29 @@
 
         function loadReviews() {
           fetch(api + "get_reviews.php", { cache: "no-store" })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+              return r.json();
+            })
             .then(function (result) {
               if (!result.success) throw new Error(result.message);
               var reviews = result.data || [];
               reviewList.replaceChildren();
               if (!reviews.length) {
-                reviewList.textContent = "Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ trải nghiệm.";
+                reviewList.textContent =
+                  "Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ trải nghiệm.";
                 average.textContent = "—";
                 averageStars.textContent = "☆☆☆☆☆";
                 reviewCount.textContent = "Chưa có lượt đánh giá";
                 return;
               }
-              var total = reviews.reduce(function (sum, review) { return sum + Number(review.rating); }, 0);
+              var total = reviews.reduce(function (sum, review) {
+                return sum + Number(review.rating);
+              }, 0);
               var score = total / reviews.length;
               average.textContent = score.toFixed(1);
               averageStars.textContent = stars(Math.round(score));
-              reviewCount.textContent = "từ " + reviews.length + " lượt đánh giá";
+              reviewCount.textContent =
+                "từ " + reviews.length + " lượt đánh giá";
               reviews.forEach(addReviewCard);
             })
             .catch(function () {
@@ -271,7 +296,10 @@
         }
 
         function loadReviewOptions() {
-          fetch(api + "get_review_options.php", { credentials: "same-origin", cache: "no-store" })
+          fetch(api + "get_review_options.php", {
+            credentials: "same-origin",
+            cache: "no-store",
+          })
             .then(function (r) {
               if (!r.ok) throw new Error("Chưa đăng nhập");
               return r.json();
@@ -280,20 +308,25 @@
               if (!result.success) throw new Error(result.message);
               var orders = result.data || [];
               if (!orders.length) {
-                reviewHelp.textContent = "Bạn chưa có đơn hoàn tất nào cần đánh giá.";
+                reviewHelp.textContent =
+                  "Bạn chưa có đơn hoàn tất nào cần đánh giá.";
                 return;
               }
               reviewOrder.replaceChildren();
               orders.forEach(function (order) {
                 var option = document.createElement("option");
                 option.value = order.id;
-                option.textContent = order.order_code + " — " + order.brand + " " + order.model;
+                option.textContent =
+                  order.order_code + " — " + order.brand + " " + order.model;
                 reviewOrder.appendChild(option);
               });
-              reviewHelp.textContent = "Chọn một đơn đã hoàn tất để chia sẻ trải nghiệm.";
-              reviewFields.querySelectorAll("select, textarea, button").forEach(function (field) {
-                field.disabled = false;
-              });
+              reviewHelp.textContent =
+                "Chọn một đơn đã hoàn tất để chia sẻ trải nghiệm.";
+              reviewFields
+                .querySelectorAll("select, textarea, button")
+                .forEach(function (field) {
+                  field.disabled = false;
+                });
             })
             .catch(function () {
               reviewHelp.replaceChildren();
@@ -301,20 +334,36 @@
               var loginLink = document.createElement("a");
               loginLink.href = "login.html?next=contact.html%23review-form";
               loginLink.textContent = "đăng nhập";
-              reviewHelp.append(loginLink, " để đánh giá đơn đã hoàn tất của bạn.");
+              reviewHelp.append(
+                loginLink,
+                " để đánh giá đơn đã hoàn tất của bạn.",
+              );
             });
         }
 
-        document.getElementById("contact-form").addEventListener("submit", function (event) {
-          event.preventDefault();
-          var name = document.getElementById("c-name").value.trim();
-          var contact = document.getElementById("c-email").value.trim();
-          var message = document.getElementById("c-msg").value.trim();
-          var subject = "Liên hệ từ " + name;
-          var body = "Họ tên: " + name + "\nLiên hệ: " + contact + "\n\nNội dung:\n" + message;
-          document.getElementById("contact-status").textContent = "Đang mở ứng dụng email để gửi tin nhắn.";
-          window.location.href = "mailto:hotro@techfix.vn?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-        });
+        document
+          .getElementById("contact-form")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            var name = document.getElementById("c-name").value.trim();
+            var contact = document.getElementById("c-email").value.trim();
+            var message = document.getElementById("c-msg").value.trim();
+            var subject = "Liên hệ từ " + name;
+            var body =
+              "Họ tên: " +
+              name +
+              "\nLiên hệ: " +
+              contact +
+              "\n\nNội dung:\n" +
+              message;
+            document.getElementById("contact-status").textContent =
+              "Đang mở ứng dụng email để gửi tin nhắn.";
+            window.location.href =
+              "mailto:hotro@techfix.vn?subject=" +
+              encodeURIComponent(subject) +
+              "&body=" +
+              encodeURIComponent(body);
+          });
 
         reviewForm.addEventListener("submit", function (event) {
           event.preventDefault();
@@ -323,23 +372,37 @@
           var data = new FormData();
           data.append("order_id", reviewOrder.value);
           data.append("rating", document.getElementById("review-rating").value);
-          data.append("comment", document.getElementById("review-comment").value.trim());
-          fetch(api + "submit_review.php", { method: "POST", body: data, credentials: "same-origin" })
-            .then(function (r) { return r.json(); })
+          data.append(
+            "comment",
+            document.getElementById("review-comment").value.trim(),
+          );
+          fetch(api + "submit_review.php", {
+            method: "POST",
+            body: data,
+            credentials: "same-origin",
+          })
+            .then(function (r) {
+              return r.json();
+            })
             .then(function (result) {
               if (!result.success) throw new Error(result.message);
               reviewForm.reset();
-              reviewFields.querySelectorAll("select, textarea, button").forEach(function (field) {
-                field.disabled = true;
-              });
+              reviewFields
+                .querySelectorAll("select, textarea, button")
+                .forEach(function (field) {
+                  field.disabled = true;
+                });
               reviewHelp.textContent = result.message;
               loadReviews();
               loadReviewOptions();
             })
             .catch(function (error) {
-              reviewHelp.textContent = error.message || "Không thể gửi đánh giá.";
+              reviewHelp.textContent =
+                error.message || "Không thể gửi đánh giá.";
             })
-            .finally(function () { button.disabled = false; });
+            .finally(function () {
+              button.disabled = false;
+            });
         });
 
         loadReviews();

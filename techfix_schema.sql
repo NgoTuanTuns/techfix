@@ -220,3 +220,14 @@ INSERT IGNORE INTO services (slug, device_type, name, base_price) VALUES
 ('thay-pin-tablet', 'tablet', 'Thay pin tablet', 550000),
 ('thay-cong-sac-tablet', 'tablet', 'Thay cổng sạc tablet', 300000),
 ('sua-loi-phan-mem', 'tablet', 'Sửa lỗi phần mềm / treo logo', 150000);
+
+-- Dữ liệu kho linh kiện mẫu cho trang admin-inventory.html (INSERT IGNORE giữ nguyên tồn kho nếu đã có).
+INSERT IGNORE INTO inventory_parts (id, name, compatible_with, quantity, unit_cost) VALUES
+(1, 'Keo tản nhiệt Arctic MX-4 (ống 4g)', 'Laptop Dell, Asus, HP, Lenovo, MacBook', 15, 65000),
+(2, 'Bàn phím laptop Dell Inspiron 15', 'Dell Inspiron 3511 / 3520 / 5510', 6, 180000),
+(3, 'Màn hình laptop 15.6" FHD IPS 30 pin', 'Asus VivoBook, Dell, HP, Lenovo 15.6"', 3, 950000),
+(4, 'Ổ cứng SSD NVMe Kingston 256GB', 'Laptop hỗ trợ khe M.2 NVMe PCIe', 8, 450000),
+(5, 'Pin iPhone 13 dung lượng chuẩn', 'iPhone 13', 2, 320000),
+(6, 'Kính mặt trước iPhone 14 Pro Max', 'iPhone 14 Pro Max', 5, 210000),
+(7, 'Cụm chân sạc Samsung Type-C', 'Samsung Galaxy A52 / A53 / S21', 0, 95000),
+(8, 'Màn hình cảm ứng iPad Gen 9 10.2"', 'iPad Gen 7 / Gen 8 / Gen 9', 4, 1100000);

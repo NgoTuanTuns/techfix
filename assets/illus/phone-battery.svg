@@ -1,13 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none" stroke="#1b2b4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title>Thay pin điện thoại</title>
-  <defs><path id="lf" d="M0 0C5-6 15-6 22 0 15 6 5 6 0 0Z"/></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
+  <defs>
+    <filter id="pbShadow" x="20" y="6" width="200" height="150" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="batCell" x1="88" y1="42" x2="152" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="0.5" stop-color="#10b981"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="boltGold" x1="112" y1="54" x2="130" y2="102" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fef08a"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
 
-  <rect x="60" y="44" width="110" height="64" rx="10" fill="#f2f1e6"/>
-  <rect x="170" y="64" width="10" height="24" rx="3" fill="#1b2b4b"/>
-  <rect x="70" y="54" width="22" height="44" rx="4" fill="#6f8f7a" stroke="none"/>
-  <rect x="96" y="54" width="22" height="44" rx="4" fill="#6f8f7a" stroke="none"/>
-  <rect x="122" y="54" width="22" height="44" rx="4" fill="#a9c1ab" stroke="none"/>
-  <path d="M124 30l-20 36h16l-10 34 28-46h-16l10-24Z" fill="#c2540f"/>
-  <use href="#lf" transform="translate(190 128) rotate(-30)" fill="#6f8f7a" stroke="none"/>
-  <use href="#lf" transform="translate(202 118) rotate(20)" fill="#a9c1ab" stroke="none"/>
+  <g filter="url(#pbShadow)">
+    <!-- Smartphone Chassis -->
+    <rect x="74" y="12" width="92" height="136" rx="16" fill="#1e293b" stroke="#64748b" stroke-width="2.2"/>
+    <rect x="80" y="18" width="80" height="124" rx="12" fill="#0f172a"/>
+
+    <!-- Top Speaker & Sensor -->
+    <rect x="106" y="23" width="28" height="5" rx="2.5" fill="#334155"/>
+
+    <!-- Lithium-Ion Battery Pack Container -->
+    <rect x="92" y="42" width="56" height="82" rx="9" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+    <!-- Battery Positive Terminal Cap -->
+    <rect x="108" y="36" width="24" height="6" rx="2.5" fill="#94a3b8"/>
+
+    <!-- 100% Charge Level Segments -->
+    <rect x="97" y="47" width="46" height="72" rx="6" fill="url(#batCell)"/>
+    <!-- Segment Dividers -->
+    <path d="M97 65H143M97 83H143M97 101H143" stroke="#064e3b" stroke-width="1.5" stroke-opacity="0.35"/>
+
+    <!-- Fast Charge Lightning Bolt -->
+    <path d="M124 54L108 82H121L116 106L134 76H121L124 54Z" fill="url(#boltGold)" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+
+    <!-- 100% Health Floating Pill Badge -->
+    <rect x="144" y="28" width="52" height="24" rx="12" fill="#f97316" stroke="#ffffff" stroke-width="2"/>
+    <text x="170" y="44" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="12" font-weight="800">100%</text>
+
+    <!-- Energy Pulse Rings -->
+    <circle cx="56" cy="84" r="14" fill="#10b981" fill-opacity="0.18" stroke="#10b981" stroke-width="1.5"/>
+    <path d="M51 84H61M56 79V89" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
 </svg>

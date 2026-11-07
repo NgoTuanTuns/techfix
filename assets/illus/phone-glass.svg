@@ -1,14 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none" stroke="#1b2b4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title>Ép kính điện thoại</title>
-  <defs><path id="lf" d="M0 0C5-6 15-6 22 0 15 6 5 6 0 0Z"/></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
+  <defs>
+    <filter id="pgShadow" x="15" y="6" width="210" height="150" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="oledScreen" x1="56" y1="16" x2="132" y2="144" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0284c7"/>
+      <stop offset="0.5" stop-color="#1e40af"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="temperedGlass" x1="108" y1="12" x2="188" y2="136" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e0f2fe" stop-opacity="0.88"/>
+      <stop offset="0.5" stop-color="#7dd3fc" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0.75"/>
+    </linearGradient>
+  </defs>
 
-  <rect x="78" y="14" width="70" height="136" rx="13" fill="#f2f1e6" transform="rotate(-8 113 82)"/>
-  <rect x="86" y="24" width="54" height="114" rx="6" fill="#2a3a62" transform="rotate(-8 113 82)"/>
-  <path d="M96 110l10-12 6 8 12-14 8 10" stroke="#ffffff" stroke-width="1.5" transform="rotate(-8 113 82)"/>
-  <rect x="104" y="10" width="64" height="126" rx="12" fill="#ffffff" fill-opacity=".55" stroke="#ffffff" transform="rotate(6 136 73)"/>
-  <circle cx="176" cy="26" r="9" fill="#c2540f" stroke="none"/>
-  <path d="M176 26l18-18" stroke-width="5" stroke="#4a5876"/>
-  <use href="#lf" transform="translate(40 130) rotate(-40)" fill="#6f8f7a" stroke="none"/>
-  <use href="#lf" transform="translate(52 118) rotate(20)" fill="#a9c1ab" stroke="none"/>
-  <use href="#lf" transform="translate(60 104) rotate(-60)" fill="#6f8f7a" stroke="none"/>
+  <g filter="url(#pgShadow)">
+    <!-- Base Smartphone Body -->
+    <rect x="52" y="14" width="76" height="132" rx="14" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+    <rect x="57" y="19" width="66" height="122" rx="10" fill="url(#oledScreen)"/>
+    <!-- Dynamic Island -->
+    <rect x="78" y="23" width="24" height="5" rx="2.5" fill="#090d16"/>
+    <!-- Display Wallpaper Waves -->
+    <circle cx="90" cy="76" r="22" fill="#38bdf8" fill-opacity="0.25"/>
+    <path d="M57 108C72 96 104 114 123 98V141H57V108Z" fill="#f97316" fill-opacity="0.75"/>
+
+    <!-- Separation / Alignment Connectors -->
+    <path d="M124 38L142 30" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3"/>
+    <path d="M124 122L142 114" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3"/>
+
+    <!-- New Floating 9H Tempered Glass Layer (Being Laminated) -->
+    <g transform="translate(8, -4)">
+      <rect x="112" y="16" width="74" height="130" rx="13" fill="url(#temperedGlass)" stroke="#ffffff" stroke-width="2.2"/>
+      <!-- Black Bezel Rim on Glass -->
+      <rect x="115" y="19" width="68" height="124" rx="10" stroke="#0f172a" stroke-width="2" stroke-opacity="0.45"/>
+      <!-- Earpiece Cutout -->
+      <rect x="139" y="23" width="20" height="4" rx="2" fill="#0f172a" fill-opacity="0.6"/>
+      <!-- High-Gloss Specular Diagonal Shine -->
+      <path d="M150 20H170L138 140H118L150 20Z" fill="#ffffff" fill-opacity="0.45"/>
+      <!-- Sparkle Stars -->
+      <path d="M172 40L174 46L180 48L174 50L172 56L170 50L164 48L170 46L172 40Z" fill="#ffffff"/>
+      <path d="M130 106L131.5 110.5L136 112L131.5 113.5L130 118L128.5 113.5L124 112L128.5 110.5L130 106Z" fill="#ffffff"/>
+    </g>
+
+    <!-- OCA Vacuum Clean Badge -->
+    <circle cx="56" cy="126" r="16" fill="#10b981" stroke="#ffffff" stroke-width="2.5"/>
+    <path d="M49 126L54 131L63 121" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>

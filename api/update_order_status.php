@@ -54,9 +54,9 @@ if ($hasStatus && !in_array($_POST['status'], $allowedStatus, true)) {
 try {
     $pdo->beginTransaction();
 
-    // Lấy trạng thái cũ, hình thức nhận máy và người phụ trách (khoá dòng tới khi commit)
+    // Lấy trạng thái cũ, hình thức nhận máy, người phụ trách và chi phí (khoá dòng tới khi commit)
     $check = $pdo->prepare(
-        'SELECT status, delivery_method, technician_id FROM repair_orders WHERE id = ? FOR UPDATE'
+        'SELECT status, delivery_method, technician_id, estimated_cost, final_cost FROM repair_orders WHERE id = ? FOR UPDATE'
     );
     $check->execute([$orderId]);
     $existing = $check->fetch();
@@ -102,19 +102,33 @@ try {
         }
     }
 
-    // RÀNG BUỘC: Nếu đơn đang chờ duyệt giá (awaiting_approval) mà cố chuyển sang repairing hoặc completed thì chặn[cite: 22]
-    if ($hasStatus) {
-        $newStatus = $_POST['status'];
-        if ($existing['status'] === 'awaiting_approval' && in_array($newStatus, ['repairing', 'completed'], true)) {
-            $pdo->rollBack();
-            echo json_encode(['success' => false, 'message' => 'Khách hàng chưa duyệt giá, không thể chuyển sang trạng thái này!']);
-            exit;
-        }
-    }
-
     // Kiểm tra xem đơn có phải nhận tận nơi không để tự động cộng 20k phí ship vào CSDL
     $isDelivery = ($existing['delivery_method'] === 'Nhận máy tận nơi');
     $shippingFee = $isDelivery ? 20000 : 0;
+
+    // RÀNG BUỘC: Chỉ khi khách hàng đã duyệt giá (đơn đã chuyển sang repairing qua approve_quote.php)
+    // thì mới được ở trạng thái repairing hoặc chuyển sang completed.
+    // Mọi trạng thái trước đó (pending_receipt, received, diagnosing, awaiting_approval, cancelled) đều bị chặn.
+    if ($hasStatus) {
+        $newStatus = $_POST['status'];
+        if (in_array($newStatus, ['repairing', 'completed'], true)
+            && !in_array($existing['status'], ['repairing', 'completed'], true)) {
+            $pdo->rollBack();
+            echo json_encode([
+                'success' => false,
+                'message' => 'Khách hàng chưa duyệt giá, không thể chuyển sang Đang sửa chữa hoặc Hoàn tất!',
+            ]);
+            exit;
+        }
+        $effectiveEstimated = $hasEstimated
+            ? ((int)$_POST['estimated_cost'] + $shippingFee)
+            : (int)($existing['estimated_cost'] ?? 0);
+        if ($newStatus === 'awaiting_approval' && $effectiveEstimated <= 0) {
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'message' => 'Vui lòng nhập giá ước tính trước khi chuyển sang Chờ duyệt giá!']);
+            exit;
+        }
+    }
 
     $sets = [];
     $params = [];
@@ -124,6 +138,8 @@ try {
         $params[] = $_POST['status'];
         if ($_POST['status'] === 'completed') {
             $sets[] = 'completed_at = NOW()';
+        } elseif ($existing['status'] === 'completed') {
+            $sets[] = 'completed_at = NULL';
         }
     }
     if ($hasTechnician) {
@@ -144,6 +160,28 @@ try {
     $params[] = $orderId;
     $pdo->prepare('UPDATE repair_orders SET ' . implode(', ', $sets) . ' WHERE id = ?')
         ->execute($params);
+
+    // Ghi nhận/cập nhật bảng payments khi đơn ở trạng thái completed và đã có giá cuối > 0
+    $effectiveStatus = $hasStatus ? $_POST['status'] : $existing['status'];
+    $effectiveFinal  = $hasFinal
+        ? ((int)$_POST['final_cost'] + $shippingFee)
+        : (int)($existing['final_cost'] ?? 0);
+    if ($effectiveStatus === 'completed' && $effectiveFinal > 0) {
+        $allowedMethods = ['cash', 'bank_transfer', 'momo'];
+        $payMethod = in_array($_POST['payment_method'] ?? '', $allowedMethods, true)
+            ? $_POST['payment_method']
+            : 'cash';
+        $payCheck = $pdo->prepare('SELECT id FROM payments WHERE order_id = ? LIMIT 1');
+        $payCheck->execute([$orderId]);
+        $payRow = $payCheck->fetch();
+        if ($payRow) {
+            $pdo->prepare('UPDATE payments SET amount = ?, paid_at = NOW() WHERE id = ?')
+                ->execute([$effectiveFinal, $payRow['id']]);
+        } else {
+            $pdo->prepare('INSERT INTO payments (order_id, amount, method) VALUES (?, ?, ?)')
+                ->execute([$orderId, $effectiveFinal, $payMethod]);
+        }
+    }
 
     // Chỉ ghi lịch sử khi status thực sự thay đổi (để dashboard khách hàng vẽ đúng stepper)[cite: 22]
     if ($hasStatus && $_POST['status'] !== $existing['status']) {

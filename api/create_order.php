@@ -118,7 +118,7 @@ try {
     $insOrder = $pdo->prepare(
         'INSERT INTO repair_orders
             (order_code, customer_id, device_id, issue_description, delivery_method, delivery_address, delivery_phone, preferred_time, estimated_cost, status)
-         VALUES ("", ?, ?, ?, ?, ?, ?, ?, NULL, "pending_receipt")' 
+         VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, NULL, "pending_receipt")' 
     );
     $insOrder->execute([
         $userId, 
@@ -135,7 +135,7 @@ try {
     $pdo->prepare('UPDATE repair_orders SET order_code = ? WHERE id = ?')
         ->execute([$orderCode, $orderId]);
 
-    // 3. Nếu khách chọn gói đề cử từ trang chủ -> gắn vào order_services và lưu đúng giá trị gốc
+    // 3. Nếu khách chọn gói đề cử từ trang chủ -> gắn vào order_services và lưu giá dự kiến
     if ($serviceSlug !== '') {
         $svc = $pdo->prepare('SELECT id, base_price FROM services WHERE slug = ? AND is_active = 1');
         $svc->execute([$serviceSlug]);
@@ -146,9 +146,13 @@ try {
             $pdo->prepare('INSERT INTO order_services (order_id, service_id, price) VALUES (?, ?, ?)')
                 ->execute([$orderId, $serviceRow['id'], $servicePrice]);
 
-            // Cập nhật giá gốc dịch vụ vào estimated_cost
-            $pdo->prepare('UPDATE repair_orders SET estimated_cost = ? WHERE id = ?')
-                ->execute([$servicePrice, $orderId]);
+            // Chỉ gán estimated_cost khi gói có giá > 0 (gói 0đ là kiểm tra miễn phí, chờ báo giá sau)
+            // Cộng thêm 20.000đ phí vận chuyển nếu chọn Nhận máy tận nơi để đồng nhất với update_order_status.php
+            if ($servicePrice > 0) {
+                $shippingFee = ($method === 'Nhận máy tận nơi') ? 20000 : 0;
+                $pdo->prepare('UPDATE repair_orders SET estimated_cost = ? WHERE id = ?')
+                    ->execute([$servicePrice + $shippingFee, $orderId]);
+            }
         }
     }
 

@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$phone    = trim($_POST['phone'] ?? '');
+$phone    = preg_replace('/[\s.\-]/', '', trim($_POST['phone'] ?? ''));
 $password = (string)($_POST['password'] ?? '');
 
 if (!preg_match('/^0[0-9]{9}$/', $phone)) {

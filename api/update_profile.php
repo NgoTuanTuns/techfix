@@ -22,7 +22,7 @@ require_login();
 $userId = $_SESSION['user_id'];
 
 $fullName        = trim($_POST['full_name'] ?? '');
-$phone           = trim($_POST['phone'] ?? '');
+$phone           = preg_replace('/[\s.\-]/', '', trim($_POST['phone'] ?? ''));
 $currentPassword = (string)($_POST['current_password'] ?? '');
 $newPassword     = (string)($_POST['new_password'] ?? '');
 

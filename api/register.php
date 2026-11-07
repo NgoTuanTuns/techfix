@@ -77,6 +77,7 @@ try {
             'id'        => $userId,
             'full_name' => $full_name,
             'phone'     => $phone,
+            'role'      => 'customer',
         ],
     ]);
 

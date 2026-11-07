@@ -135,15 +135,52 @@
     }, 30);
   };
 
+  TF.openLogoutDialog = function (onConfirm) {
+    var dlg = document.getElementById("tf-logout-dialog");
+    if (!dlg) {
+      dlg = document.createElement("dialog");
+      dlg.id = "tf-logout-dialog";
+      dlg.className = "tf-dialog";
+      dlg.setAttribute("aria-labelledby", "tf-logout-title");
+      dlg.setAttribute("aria-describedby", "tf-logout-body");
+      dlg.innerHTML =
+        '<h3 id="tf-logout-title">Bạn có chắc muốn đăng xuất?</h3>' +
+        '<p id="tf-logout-body">Phiên làm việc hiện tại sẽ kết thúc. Bạn sẽ cần đăng nhập lại để tiếp tục quản lý hệ thống.</p>' +
+        '<div class="dialog-actions">' +
+        '<button type="button" class="btn btn-outline btn-sm" data-logout-cancel>Ở lại</button>' +
+        '<button type="button" class="btn btn-danger btn-sm" data-logout-confirm>Đăng xuất</button>' +
+        "</div>";
+      dlg.addEventListener("click", function (ev) {
+        if (ev.target === dlg || ev.target.closest("[data-logout-cancel]")) {
+          dlg.close();
+        }
+      });
+      document.body.appendChild(dlg);
+    }
+    var confirmBtn = dlg.querySelector("[data-logout-confirm]");
+    var nextBtn = confirmBtn.cloneNode(true);
+    nextBtn.disabled = false;
+    nextBtn.textContent = "Đăng xuất";
+    confirmBtn.parentNode.replaceChild(nextBtn, confirmBtn);
+    nextBtn.addEventListener("click", function () {
+      nextBtn.disabled = true;
+      nextBtn.textContent = "Đang đăng xuất...";
+      onConfirm();
+    });
+    dlg.showModal();
+  };
+
   document.addEventListener("DOMContentLoaded", function () {
     var out = document.getElementById("nav-logout");
     if (!out) return;
-    out.addEventListener("click", async function (e) {
+    out.addEventListener("click", function (e) {
       e.preventDefault();
-      try {
-        await fetch("../api/logout.php");
-      } catch (err) {}
-      location.href = "login.html";
+      TF.openLogoutDialog(async function () {
+        try {
+          await fetch("../api/logout.php");
+        } catch (err) {}
+        location.href = "login.html";
+      });
     });
   });
 })();

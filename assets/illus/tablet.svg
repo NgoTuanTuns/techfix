@@ -1,12 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none" stroke="#1b2b4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title>Tablet</title>
-  <defs><path id="lf" d="M0 0C5-6 15-6 22 0 15 6 5 6 0 0Z"/></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none">
+  <title>Sửa chữa Tablet</title>
+  <defs>
+    <linearGradient id="tb-body" x1="34" y1="10" x2="122" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#374863"/>
+      <stop offset="1" stop-color="#172336"/>
+    </linearGradient>
+    <linearGradient id="tb-scr" x1="40" y1="16" x2="114" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1d3b38"/>
+      <stop offset="0.55" stop-color="#142b33"/>
+      <stop offset="1" stop-color="#101f2d"/>
+    </linearGradient>
+    <linearGradient id="tb-pen" x1="92" y1="24" x2="138" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="tb-acc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0a35e"/>
+      <stop offset="1" stop-color="#c2540f"/>
+    </linearGradient>
+    <filter id="tb-sh" x="22" y="4" width="124" height="114" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#0a1224" flood-opacity="0.35"/>
+    </filter>
+  </defs>
 
-  <rect x="40" y="14" width="80" height="94" rx="9" fill="#f2f1e6"/>
-  <rect x="48" y="22" width="64" height="74" rx="3" fill="#d5e5cf"/>
-  <path d="M56 80c10-10 22-12 34-24" stroke="#6f8f7a"/>
-  <use href="#lf" transform="translate(64 74) rotate(-50)" fill="#6f8f7a" stroke="none"/>
-  <use href="#lf" transform="translate(80 66) rotate(10)" fill="#a9c1ab" stroke="none"/>
-  <use href="#lf" transform="translate(90 56) rotate(-60)" fill="#6f8f7a" stroke="none"/>
-  <circle cx="80" cy="102" r="2" fill="#1b2b4b"/>
+  <ellipse cx="78" cy="108" rx="46" ry="5.5" fill="#0a1224" opacity="0.28"/>
+
+  <g filter="url(#tb-sh)">
+    <!-- Thân máy Tablet viền kim loại mỏng -->
+    <rect x="35" y="11" width="84" height="96" rx="11" fill="url(#tb-body)" stroke="#e2e8f0" stroke-width="1.6"/>
+    <!-- Màn hình cảm ứng lớn -->
+    <rect x="40" y="16" width="74" height="86" rx="7" fill="url(#tb-scr)"/>
+    <!-- Camera trước -->
+    <circle cx="77" cy="13.5" r="1.2" fill="#60a5fa"/>
+
+    <!-- Vệt phản quang mặt kính -->
+    <path d="M42 18h36L42 82V18Z" fill="#ffffff" opacity="0.07"/>
+
+    <!-- Lưới cân chỉnh cảm ứng & màu sắc trên màn hình -->
+    <g stroke="#a9c1ab" stroke-opacity="0.2" stroke-width="1">
+      <path d="M46 36h62M46 54h62M46 72h62"/>
+      <path d="M62 24v64M80 24v64M98 24v64"/>
+    </g>
+
+    <!-- Đồ thị sóng cảm ứng & điểm chạm -->
+    <path d="M48 76C58 72 64 52 76 54s16-18 28-22" stroke="#f0a35e" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="76" cy="54" r="3.5" fill="#fff4b8" stroke="#c2540f" stroke-width="1.5"/>
+    <circle cx="104" cy="32" r="5" fill="#f0a35e" opacity="0.35"/>
+    <circle cx="104" cy="32" r="2.5" fill="#fff4b8"/>
+
+    <!-- Bảng màu / thanh công cụ dưới màn hình -->
+    <rect x="50" y="88" width="54" height="8" rx="4" fill="#1e3448" stroke="#36536d" stroke-width="1"/>
+    <circle cx="57" cy="92" r="2.2" fill="#f0a35e"/>
+    <circle cx="65" cy="92" r="2.2" fill="#a9c1ab"/>
+    <circle cx="73" cy="92" r="2.2" fill="#93c5fd"/>
+    <rect x="81" y="90.5" width="18" height="3" rx="1.5" fill="#e2e8f0"/>
+
+    <!-- Bút cảm ứng Stylus chạm vào màn hình -->
+    <g transform="translate(104 32) rotate(38)">
+      <path d="M0 0l3.2-7.5h-6.4L0 0Z" fill="url(#tb-acc)"/>
+      <path d="M-3.2-7.5h6.4v-42a3.2 3.2 0 0 0-6.4 0v42Z" fill="url(#tb-pen)" stroke="#1b2b4b" stroke-width="1.3"/>
+      <rect x="-3.2" y="-42" width="6.4" height="3.5" fill="url(#tb-acc)"/>
+    </g>
+  </g>
 </svg>

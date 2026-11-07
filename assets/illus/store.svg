@@ -1,12 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none" stroke="#1b2b4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title>Cửa hàng</title>
-  <defs><path id="lf" d="M0 0C5-6 15-6 22 0 15 6 5 6 0 0Z"/></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none">
+  <title>Hệ thống cửa hàng TechFix</title>
+  <defs>
+    <linearGradient id="st-wall" x1="30" y1="46" x2="130" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fafaf3"/>
+      <stop offset="1" stop-color="#dfe4e8"/>
+    </linearGradient>
+    <linearGradient id="st-roof" x1="24" y1="26" x2="136" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e06d25"/>
+      <stop offset="1" stop-color="#b54809"/>
+    </linearGradient>
+    <linearGradient id="st-win" x1="80" y1="62" x2="118" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff7c2"/>
+      <stop offset="1" stop-color="#f4c96b"/>
+    </linearGradient>
+    <linearGradient id="st-door" x1="44" y1="62" x2="70" y2="102" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5a8ab8"/>
+      <stop offset="1" stop-color="#284c73"/>
+    </linearGradient>
+    <filter id="st-sh" x="14" y="8" width="132" height="108" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#0a1224" flood-opacity="0.35"/>
+    </filter>
+  </defs>
 
-  <path d="M36 50h88v54H36Z" fill="#f2f1e6"/>
-  <path d="M30 50l10-24h80l10 24Z" fill="#f6d8be"/>
-  <path d="M30 50c0 8 14 8 14 0 0 8 14 8 14 0 0 8 14 8 14 0 0 8 14 8 14 0 0 8 14 8 14 0 0 8 14 8 14 0" fill="#f2f1e6"/>
-  <rect x="50" y="70" width="22" height="34" fill="#cfe0ee"/>
-  <rect x="84" y="70" width="26" height="18" fill="#fff4b8"/>
-  <use href="#lf" transform="translate(118 100) rotate(-40)" fill="#6f8f7a" stroke="none"/>
-  <use href="#lf" transform="translate(126 92) rotate(20)" fill="#a9c1ab" stroke="none"/>
+  <ellipse cx="80" cy="105" rx="58" ry="5.5" fill="#0a1224" opacity="0.28"/>
+
+  <g filter="url(#st-sh)">
+    <!-- Bảng hiệu trên mái cửa hàng -->
+    <rect x="48" y="14" width="64" height="15" rx="4" fill="#1b2b4b" stroke="#e2e8f0" stroke-width="1.4"/>
+    <circle cx="58" cy="21.5" r="3.5" fill="#f0a35e"/>
+    <path d="M66 20h36M66 23.5h22" stroke="#fff4b8" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Tường chính của cửa hàng -->
+    <rect x="32" y="48" width="96" height="54" rx="3" fill="url(#st-wall)" stroke="#1b2b4b" stroke-width="1.8"/>
+
+    <!-- Mái hiên sọc 3D -->
+    <path d="M24 50l9-21h94l9 21H24Z" fill="url(#st-roof)" stroke="#1b2b4b" stroke-width="1.8" stroke-linejoin="round"/>
+    <!-- Các dải sọc sáng trên mái hiên -->
+    <path d="M45 29l-4 21h14l2-21H45ZM73 29l-1 21h16l-1-21H73ZM103 29l2 21h14l-4-21h-12Z" fill="#fafaf3" opacity="0.88"/>
+    <!-- Diềm lượn sóng dưới mái hiên -->
+    <path d="M24 50a8 7 0 0 0 16 0 8 7 0 0 0 16 0 8 7 0 0 0 16 0 8 7 0 0 0 16 0 8 7 0 0 0 16 0 8 7 0 0 0 16 0 8 7 0 0 0 16 0" fill="#c2540f" stroke="#1b2b4b" stroke-width="1.6"/>
+
+    <!-- Cửa kính ra vào bên trái -->
+    <rect x="44" y="63" width="26" height="39" rx="2" fill="url(#st-door)" stroke="#1b2b4b" stroke-width="1.6"/>
+    <path d="M47 66l10 33" stroke="#ffffff" stroke-opacity="0.25" stroke-width="3"/>
+    <!-- Tay nắm cửa & biển OPEN -->
+    <rect x="64" y="80" width="2.2" height="7" rx="1" fill="#fff4b8"/>
+    <rect x="51" y="69" width="12" height="5" rx="1.5" fill="#7ec89b"/>
+
+    <!-- Khung cửa sổ trưng bày ấm sáng bên phải -->
+    <rect x="78" y="63" width="38" height="25" rx="2.5" fill="url(#st-win)" stroke="#1b2b4b" stroke-width="1.6"/>
+    <!-- Hình chiếc laptop trưng bày trong tủ kính -->
+    <rect x="88" y="70" width="18" height="11" rx="1.5" fill="#1b2b4b"/>
+    <rect x="90" y="72" width="14" height="7" rx="0.8" fill="#60a5fa"/>
+    <path d="M85 81h24l-2 2.5H87L85 81Z" fill="#33415f"/>
+    <!-- Bệ cửa sổ -->
+    <rect x="76" y="88" width="42" height="3.5" rx="1.5" fill="#94a3b8" stroke="#1b2b4b" stroke-width="1.2"/>
+
+    <!-- Chậu cây xanh trang trí trước cửa -->
+    <path d="M121 93h10l-1.5 9h-7L121 93Z" fill="#c2540f" stroke="#1b2b4b" stroke-width="1.3"/>
+    <circle cx="126" cy="89" r="5.5" fill="#52946b" stroke="#1b2b4b" stroke-width="1.3"/>
+    <circle cx="123" cy="86" r="3.5" fill="#a9c1ab"/>
+
+    <!-- Bậc thềm cửa hàng -->
+    <rect x="26" y="101" width="108" height="4" rx="2" fill="#94a3b8" stroke="#1b2b4b" stroke-width="1.5"/>
+
+    <!-- Ghim định vị cửa hàng góc trên phải -->
+    <path d="M128 12c-5.5 0-10 4.3-10 9.6 0 6.8 10 15.4 10 15.4s10-8.6 10-15.4c0-5.3-4.5-9.6-10-9.6Z" fill="#c2540f" stroke="#fafaf3" stroke-width="1.8"/>
+    <circle cx="128" cy="21.5" r="3.6" fill="#fff4b8"/>
+  </g>
 </svg>

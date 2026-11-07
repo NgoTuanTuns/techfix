@@ -77,11 +77,13 @@
               Chưa tiếp nhận
             </div>
             <div class="chip" data-status="received">Đã tiếp nhận</div>
-            <div class="chip" data-status="repairing">Đang sửa</div>
+            <div class="chip" data-status="diagnosing">Đang chẩn đoán</div>
             <div class="chip" data-status="awaiting_approval">
               Chờ duyệt giá
             </div>
+            <div class="chip" data-status="repairing">Đang sửa</div>
             <div class="chip" data-status="completed">Hoàn tất</div>
+            <div class="chip" data-status="cancelled">Đã huỷ</div>
           </div>
           <input
             type="search"
@@ -142,7 +144,7 @@
     </section>
 
     <!-- Nạp helper dùng chung -->
-    <script src="../js/admin-common.js?v=20261101"></script>
+    <script src="../js/admin-common.js?v=20261107-2"></script>
     <script>
       var allOrders = [];
       var technicians = [];
@@ -597,17 +599,34 @@
               return String(o.id) === String(orderId);
             });
 
-            // Ràng buộc trên giao diện: Đang chờ duyệt giá mà chọn Sang Đang sửa hoặc Hoàn tất thì chặn lại
+            // Ràng buộc trên giao diện: Chỉ khi khách hàng đã duyệt giá (đơn đang ở repairing hoặc completed)
+            // thì mới được phép ở trạng thái Đang sửa hoặc chuyển sang Hoàn tất.
+            // Từ mọi trạng thái khác (pending_receipt, received, diagnosing, awaiting_approval, cancelled) đều chặn lại.
             if (
               order &&
-              order.status === "awaiting_approval" &&
-              (newStatus === "repairing" || newStatus === "completed")
+              (newStatus === "repairing" || newStatus === "completed") &&
+              order.status !== "repairing" &&
+              order.status !== "completed"
             ) {
               TF.toast(
-                "Khách chưa duyệt giá nên chưa chuyển sang Đang sửa hoặc Hoàn tất được.",
+                "Khách chưa duyệt giá nên chưa thể chuyển sang Đang sửa chữa hoặc Hoàn tất.",
                 true,
               );
               // Trả lại giá trị select cũ trên giao diện
+              sel.value = order.status;
+              return;
+            }
+
+            // Chặn chuyển sang Chờ duyệt giá khi chưa nhập giá ước tính
+            if (
+              order &&
+              newStatus === "awaiting_approval" &&
+              !(Number(order.estimated_cost) > 0)
+            ) {
+              TF.toast(
+                "Vui lòng nhập giá ước tính trước khi chuyển sang Chờ duyệt giá.",
+                true,
+              );
               sel.value = order.status;
               return;
             }
@@ -616,8 +635,8 @@
             if (ok) {
               if (order) {
                 order.status = newStatus;
-                if (newStatus === "completed")
-                  order.completed_at = new Date().toISOString();
+                order.completed_at =
+                  newStatus === "completed" ? new Date().toISOString() : null;
                 refreshPriceCell(order, "final_cost");
               }
               var cls =

@@ -33,13 +33,50 @@
     });
   }
 
+  function openLogoutDialog(onConfirm) {
+    var dlg = document.getElementById("tf-logout-dialog");
+    if (!dlg) {
+      dlg = document.createElement("dialog");
+      dlg.id = "tf-logout-dialog";
+      dlg.className = "tf-dialog";
+      dlg.setAttribute("aria-labelledby", "tf-logout-title");
+      dlg.setAttribute("aria-describedby", "tf-logout-body");
+      dlg.innerHTML =
+        '<h3 id="tf-logout-title">Bạn có chắc muốn đăng xuất?</h3>' +
+        '<p id="tf-logout-body">Phiên đăng nhập hiện tại sẽ kết thúc. Bạn có thể đăng nhập lại bất cứ lúc nào.</p>' +
+        '<div class="dialog-actions">' +
+        '<button type="button" class="btn btn-outline btn-sm" data-logout-cancel>Ở lại</button>' +
+        '<button type="button" class="btn btn-danger btn-sm" data-logout-confirm>Đăng xuất</button>' +
+        "</div>";
+      dlg.addEventListener("click", function (ev) {
+        if (ev.target === dlg || ev.target.closest("[data-logout-cancel]")) {
+          dlg.close();
+        }
+      });
+      document.body.appendChild(dlg);
+    }
+    var confirmBtn = dlg.querySelector("[data-logout-confirm]");
+    var nextBtn = confirmBtn.cloneNode(true);
+    nextBtn.disabled = false;
+    nextBtn.textContent = "Đăng xuất";
+    confirmBtn.parentNode.replaceChild(nextBtn, confirmBtn);
+    nextBtn.addEventListener("click", function () {
+      nextBtn.disabled = true;
+      nextBtn.textContent = "Đang đăng xuất...";
+      onConfirm();
+    });
+    dlg.showModal();
+  }
+
   function logout(e) {
     if (e) e.preventDefault();
-    fetch(API + "logout.php", { method: "POST", credentials: "same-origin" })
-      .catch(function () {})
-      .then(function () {
-        window.location.href = "index.html";
-      });
+    openLogoutDialog(function () {
+      fetch(API + "logout.php", { method: "POST", credentials: "same-origin" })
+        .catch(function () {})
+        .then(function () {
+          window.location.href = "index.html";
+        });
+    });
   }
 
   function applyLoggedIn(user) {

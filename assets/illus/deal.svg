@@ -1,12 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none" stroke="#1b2b4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title>Ưu đãi</title>
-  <defs><path id="lf" d="M0 0C5-6 15-6 22 0 15 6 5 6 0 0Z"/></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none">
+  <title>Ưu đãi tuần này</title>
+  <defs>
+    <linearGradient id="dl-card" x1="26" y1="24" x2="134" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f0a35e"/>
+      <stop offset="0.45" stop-color="#d96b27"/>
+      <stop offset="1" stop-color="#a83e08"/>
+    </linearGradient>
+    <linearGradient id="dl-seal" x1="88" y1="20" x2="134" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff8cc"/>
+      <stop offset="1" stop-color="#f3c65f"/>
+    </linearGradient>
+    <filter id="dl-sh" x="14" y="10" width="134" height="104" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#0a1224" flood-opacity="0.35"/>
+    </filter>
+  </defs>
 
-  <circle cx="80" cy="58" r="34" fill="#c2540f" stroke="none"/>
-  <circle cx="80" cy="58" r="27" stroke="#f2f1e6" stroke-width="2"/>
-  <path d="M66 70l28-24" stroke="#ffffff" stroke-width="3"/>
-  <circle cx="68" cy="48" r="5" stroke="#ffffff" stroke-width="3"/>
-  <circle cx="92" cy="68" r="5" stroke="#ffffff" stroke-width="3"/>
-  <use href="#lf" transform="translate(112 90) rotate(-30)" fill="#6f8f7a" stroke="none"/>
-  <use href="#lf" transform="translate(120 82) rotate(20)" fill="#a9c1ab" stroke="none"/>
+  <ellipse cx="80" cy="104" rx="52" ry="5.5" fill="#0a1224" opacity="0.26"/>
+
+  <g filter="url(#dl-sh)">
+    <!-- Thẻ vé phụ phía sau tạo chiều sâu -->
+    <g transform="rotate(-9 80 60)">
+      <rect x="30" y="28" width="96" height="58" rx="9" fill="#28385e" stroke="#94a3b8" stroke-width="1.3"/>
+    </g>
+
+    <!-- Thẻ Voucher chính có khuyết tròn 2 bên -->
+    <g transform="rotate(3 80 62)">
+      <path d="M26 37a8 8 0 0 1 8-8h92a8 8 0 0 1 8 8v13a9 9 0 0 0 0 18v13a8 8 0 0 1-8 8H34a8 8 0 0 1-8-8V68a9 9 0 0 0 0-18V37Z" fill="url(#dl-card)" stroke="#fafaf3" stroke-width="1.8"/>
+
+      <!-- Khung viền mảnh bên trong vé -->
+      <rect x="33" y="35" width="94" height="48" rx="5" stroke="#fff4b8" stroke-opacity="0.55" stroke-width="1.2"/>
+
+      <!-- Đường răng cưa tách cuống vé -->
+      <path d="M98 32v54" stroke="#fafaf3" stroke-width="1.8" stroke-dasharray="3.5 3.5" stroke-linecap="round"/>
+
+      <!-- Ký hiệu % nổi khối bên trái vé -->
+      <circle cx="52" cy="50" r="6" stroke="#ffffff" stroke-width="3"/>
+      <circle cx="74" cy="68" r="6" stroke="#ffffff" stroke-width="3"/>
+      <path d="M50 71L76 47" stroke="#fff4b8" stroke-width="3.6" stroke-linecap="round"/>
+
+      <!-- Cuống vé bên phải -->
+      <rect x="105" y="43" width="16" height="5" rx="2.5" fill="#fff4b8"/>
+      <rect x="105" y="52" width="12" height="4" rx="2" fill="#ffffff" opacity="0.85"/>
+      <rect x="105" y="60" width="16" height="4" rx="2" fill="#ffffff" opacity="0.65"/>
+      <rect x="105" y="68" width="10" height="4" rx="2" fill="#ffffff" opacity="0.65"/>
+    </g>
+
+    <!-- Huy hiệu ngôi sao lấp lánh góc phải trên -->
+    <circle cx="118" cy="30" r="14" fill="url(#dl-seal)" stroke="#1b2b4b" stroke-width="1.6"/>
+    <path d="M118 21l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8L118 21Z" fill="#c2540f"/>
+
+    <!-- Tia lấp lánh -->
+    <path d="M30 22v6M27 25h6M136 74v6M133 77h6" stroke="#fff4b8" stroke-width="2" stroke-linecap="round"/>
+  </g>
 </svg>
