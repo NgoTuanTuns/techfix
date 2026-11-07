@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quản trị đơn — TechFix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/admin-extra.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("tf-theme");
+          if (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            t = "dark";
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        document.documentElement.classList.add("js");
+      })();
+    </script>
+    <script src="../js/motion.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="index.html">
+          <img src="../assets/logo.png" alt="" class="logo-icon" />
+        </a>
+        <nav class="main-nav">
+          <a href="admin-dashboard.html" id="admin-dashboard-link"
+            >Bảng điều khiển</a
+          ><a href="admin.html" class="active">Đơn sửa chữa</a
+          ><a href="admin-inventory.html">Kho linh kiện</a
+          ><a href="admin-technicians.html" id="admin-technicians-link"
+            >Kỹ thuật viên</a
+          >
+          <a href="#" id="nav-logout" class="nav-cta">Đăng xuất</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-header wrap">
+      <h1 id="greeting">Chào bạn 👋</h1>
+      <p id="greeting-sub">Đang tải số liệu cửa hàng...</p>
+    </div>
+
+    <section style="padding-top: 20px">
+      <div class="wrap">
+        <div class="stat-row">
+          <div class="stat-box">
+            <div class="n" id="stat-open">—</div>
+            <div class="l">Đơn đang mở</div>
+          </div>
+          <div class="stat-box">
+            <div class="n" id="stat-awaiting">—</div>
+            <div class="l">Chờ khách duyệt giá</div>
+          </div>
+          <div class="stat-box">
+            <div class="n" id="stat-repairing">—</div>
+            <div class="l">Đang sửa chữa</div>
+          </div>
+          <div class="stat-box">
+            <div class="n" id="stat-completed">—</div>
+            <div class="l">Hoàn tất trong tháng</div>
+          </div>
+        </div>
+
+        <div class="admin-toolbar">
+          <div class="admin-filters">
+            <div class="chip active" data-status="all">Tất cả</div>
+            <div class="chip" data-status="pending_receipt">
+              Chưa tiếp nhận
+            </div>
+            <div class="chip" data-status="received">Đã tiếp nhận</div>
+            <div class="chip" data-status="repairing">Đang sửa</div>
+            <div class="chip" data-status="awaiting_approval">
+              Chờ duyệt giá
+            </div>
+            <div class="chip" data-status="completed">Hoàn tất</div>
+          </div>
+          <input
+            type="search"
+            id="order-search"
+            placeholder="Tìm theo mã đơn hoặc tên khách hàng"
+            style="
+              padding: 9px 14px;
+              border: 1px solid var(--line);
+              border-radius: 7px;
+              width: 260px;
+              background: #fff;
+            "
+          />
+        </div>
+
+        <div class="scroll-hint" id="scroll-hint" hidden>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm"
+            id="scroll-price"
+          >
+            Xem cột giá →
+          </button>
+        </div>
+        <div class="table-scroll" id="table-scroll">
+          <table class="orders orders-compact">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Thiết bị</th>
+                <th>Lỗi</th>
+                <th>Hình thức</th>
+                <th>Kỹ thuật viên</th>
+                <th>Trạng thái</th>
+                <th>Giá ước tính</th>
+                <th>Giá cuối</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr>
+                <td
+                  colspan="10"
+                  style="
+                    text-align: center;
+                    color: var(--ink-soft);
+                    padding: 24px;
+                  "
+                >
+                  Đang tải danh sách đơn...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nạp helper dùng chung -->
+    <script src="../js/admin-common.js?v=20261101"></script>
+    <script>
+      var allOrders = [];
+      var technicians = [];
+      var currentUser = null;
+      var DELIVERY_FEE = 20000; // khớp update_order_status.php: tự cộng cho đơn nhận tận nơi
+
+      function isTechnicianUser() {
+        return !!currentUser && currentUser.role === "technician";
+      }
+
+      // Admin sửa mọi đơn; kỹ thuật viên chỉ sửa đơn đang giao cho mình (backend cũng chặn)
+      function canEditOrder(order) {
+        return (
+          !isTechnicianUser() ||
+          String(order.technician_id) === String(currentUser.id)
+        );
+      }
+      var CLAIM_FIRST = "Nhận đơn về mình trước khi cập nhật";
+      var currentFilter = "all";
+      var currentSearch = "";
+
+      // ---------- Render bảng & Select ----------
+      function statusSelectHtml(order) {
+        var opts = Object.keys(TF.STATUS)
+          .map(function (k) {
+            var sel = k === order.status ? " selected" : "";
+            return (
+              '<option value="' +
+              k +
+              '"' +
+              sel +
+              ">" +
+              TF.STATUS[k].label +
+              "</option>"
+            );
+          })
+          .join("");
+        var cls =
+          (TF.STATUS[order.status] && TF.STATUS[order.status].cls) || "";
+        var lock = canEditOrder(order)
+          ? ""
+          : ' disabled title="' + CLAIM_FIRST + '"';
+        return (
+          '<select class="status-select ' +
+          cls +
+          '" data-order-id="' +
+          order.id +
+          '"' +
+          lock +
+          ' style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
+          opts +
+          "</select>"
+        );
+      }
+
+      function technicianSelectHtml(order) {
+        var opts = '<option value="">— Chưa phân công —</option>';
+        // Kỹ thuật viên: chỉ chọn được chính mình cho đơn chưa ai nhận, đơn đã nhận thì khoá
+        var choices = isTechnicianUser()
+          ? technicians.filter(function (t) {
+              return String(t.id) === String(currentUser.id);
+            })
+          : technicians;
+        var lock =
+          isTechnicianUser() && order.technician_id
+            ? ' disabled title="Chỉ quản trị viên mới đổi người phụ trách"'
+            : "";
+        opts += choices
+          .map(function (t) {
+            var sel =
+              String(t.id) === String(order.technician_id) ? " selected" : "";
+            return (
+              '<option value="' +
+              t.id +
+              '"' +
+              sel +
+              ">" +
+              TF.esc(t.full_name) +
+              "</option>"
+            );
+          })
+          .join("");
+        return (
+          '<select class="technician-select" data-order-id="' +
+          order.id +
+          '"' +
+          lock +
+          ' style="padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:0.85rem;">' +
+          opts +
+          "</select>"
+        );
+      }
+
+      var LOCKED_TITLE = "Chỉ nhập được giá cuối khi đơn đã hoàn tất";
+      function isPriceLocked(order, field) {
+        return field === "final_cost" && order.status !== "completed";
+      }
+
+      function priceCellHtml(order, field) {
+        var st = priceState(order, field);
+        var isFinal = field === "final_cost";
+        var locked = isPriceLocked(order, field) || !canEditOrder(order);
+        var title = !canEditOrder(order)
+          ? CLAIM_FIRST
+          : locked
+          ? LOCKED_TITLE
+          : isFinal
+            ? "Sửa giá cuối"
+            : "Sửa giá ước tính";
+        return (
+          "<td>" +
+          '<div class="price-cell' +
+          (st.missing ? " missing" : "") +
+          '" data-price-cell="' +
+          order.id +
+          ":" +
+          field +
+          '">' +
+          "<span>" +
+          st.text +
+          "</span>" +
+          '<button class="icon-btn" data-edit-price="' +
+          order.id +
+          '" data-field="' +
+          field +
+          '"' +
+          (locked ? " disabled" : "") +
+          ' title="' +
+          title +
+          '" aria-label="' +
+          title +
+          '">✎</button>' +
+          "</div></td>"
+        );
+      }
+
+      function refreshPriceCell(order, field) {
+        var cell = document.querySelector(
+          '[data-price-cell="' + order.id + ":" + field + '"]',
+        );
+        if (!cell) return;
+        var st = priceState(order, field);
+        cell.classList.toggle("missing", st.missing);
+        cell.querySelector("span").textContent = st.text;
+        var btn = cell.querySelector("[data-edit-price]");
+        if (btn) {
+          var editable = canEditOrder(order);
+          var locked = isPriceLocked(order, field) || !editable;
+          btn.disabled = locked;
+          btn.title = btn.ariaLabel = !editable
+            ? CLAIM_FIRST
+            : locked
+            ? LOCKED_TITLE
+            : field === "final_cost"
+              ? "Sửa giá cuối"
+              : "Sửa giá ước tính";
+        }
+      }
+
+      var VAN_ICON =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>';
+
+      // Storefront icon: awning + shop body + door (animated via CSS in admin-extra.css)
+      var STORE_ICON =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="awning" d="M3 9l1.5-5h15L21 9z"/><path d="M4.5 9v11h15V9"/><path class="door" d="M10 20v-5h4v5"/></svg>';
+
+      function isDelivery(order) {
+        return order.delivery_method === "Nhận máy tận nơi";
+      }
+
+      function priceState(order, field) {
+        var val = order[field];
+        // Kiểm tra xem giá trị có tồn tại và lớn hơn 0 không
+        var hasValue =
+          val !== null && val !== undefined && val !== "" && Number(val) > 0;
+
+        var missing =
+          field === "final_cost" && order.status === "completed" && !hasValue;
+
+        return {
+          missing: missing,
+          // Chỉ lấy thẳng giá trị từ CSDL ra hiển thị, tuyệt đối không cộng thêm 20k ở đây
+          text: !hasValue ? "—" : TF.formatMoney(val),
+        };
+      }
+
+      function renderRow(order) {
+        var methodLabel = isDelivery(order)
+          ? '<span class="delivery-tag" title="' +
+            TF.esc(order.delivery_address || "") +
+            '">' +
+            VAN_ICON +
+            "Tận nơi</span>"
+          : '<span class="method-store">' + STORE_ICON + "Tại cửa hàng</span>";
+
+        return (
+          "<tr>" +
+          "<td>#" +
+          TF.esc(order.order_code) +
+          "</td>" +
+          "<td>" +
+          TF.esc(order.customer_name) +
+          "</td>" +
+          "<td>" +
+          TF.esc(TF.deviceLabel(order)) +
+          "</td>" +
+          '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' +
+          TF.esc(order.issue_description) +
+          '">' +
+          TF.esc(order.issue_description) +
+          "</td>" +
+          "<td>" +
+          methodLabel +
+          "</td>" +
+          "<td>" +
+          technicianSelectHtml(order) +
+          "</td>" +
+          "<td>" +
+          statusSelectHtml(order) +
+          "</td>" +
+          priceCellHtml(order, "estimated_cost") +
+          priceCellHtml(order, "final_cost") +
+          '<td class="row-actions">' +
+          '<button class="icon-btn" data-more="' +
+          order.id +
+          '" title="Khác">⋮</button>' +
+          "</td>" +
+          "</tr>"
+        );
+      }
+
+      function matchesFilter(order) {
+        if (currentFilter !== "all" && order.status !== currentFilter)
+          return false;
+        if (currentSearch) {
+          var haystack = (
+            order.order_code +
+            " " +
+            order.customer_name
+          ).toLowerCase();
+          if (haystack.indexOf(currentSearch.toLowerCase()) === -1)
+            return false;
+        }
+        return true;
+      }
+
+      function renderTable() {
+        var tbody = document.getElementById("orders-tbody");
+        var filtered = allOrders.filter(matchesFilter);
+
+        if (!filtered.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:24px;">Không có đơn nào khớp.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = filtered.map(renderRow).join("");
+        attachRowHandlers();
+      }
+
+      function renderStats() {
+        var open = allOrders.filter(function (o) {
+          return TF.OPEN_STATUS(o.status);
+        }).length;
+        var awaiting = allOrders.filter(function (o) {
+          return o.status === "awaiting_approval";
+        }).length;
+        var repairing = allOrders.filter(function (o) {
+          return o.status === "repairing";
+        }).length;
+
+        var completedThisMonth = allOrders.filter(function (o) {
+          return o.status === "completed" && TF.thisMonth(o.completed_at);
+        }).length;
+
+        document.getElementById("stat-open").textContent = open;
+        document.getElementById("stat-awaiting").textContent = awaiting;
+        document.getElementById("stat-repairing").textContent = repairing;
+        document.getElementById("stat-completed").textContent =
+          completedThisMonth;
+
+        document.getElementById("greeting-sub").textContent =
+          "Cửa hàng hiện có " +
+          open +
+          " đơn đang mở, trong đó " +
+          awaiting +
+          " đơn đang chờ khách duyệt giá.";
+      }
+
+      // ---------- Cập nhật dữ liệu ----------
+      async function saveOrderField(orderId, fields) {
+        fields.order_id = orderId;
+        var res = await TF.post("../api/update_order_status.php", fields);
+        if (!res || !res.success) {
+          TF.toast(
+            (res && res.message) || "Lưu thất bại, vui lòng thử lại.",
+            true,
+          );
+          return false;
+        }
+        return true;
+      }
+
+      // ---------- Bảng chi tiết đơn ----------
+      var detailOverlay = null;
+      var detailOpener = null;
+
+      function fmtDate(v) {
+        if (!v) return "—";
+        var d = new Date(String(v).replace(" ", "T"));
+        return isNaN(d.getTime()) ? TF.esc(v) : d.toLocaleString("vi-VN");
+      }
+
+      function closeOrderDetail() {
+        if (!detailOverlay) return;
+        detailOverlay.remove();
+        detailOverlay = null;
+        document.removeEventListener("keydown", detailKeyHandler);
+        document.body.style.overflow = "";
+        if (detailOpener) detailOpener.focus();
+      }
+
+      function detailKeyHandler(e) {
+        if (e.key === "Escape") closeOrderDetail();
+      }
+
+      function detailRow(label, valueHtml) {
+        return (
+          '<div class="od-item"><span class="od-label">' +
+          label +
+          '</span><span class="od-value">' +
+          valueHtml +
+          "</span></div>"
+        );
+      }
+
+      function openOrderDetail(orderId, opener) {
+        var order = allOrders.find(function (o) {
+          return String(o.id) === String(orderId);
+        });
+        if (!order) return;
+        closeOrderDetail();
+        detailOpener = opener || null;
+
+        var statusObj = TF.STATUS[order.status] || {
+          label: order.status,
+          cls: "",
+        };
+        var techName =
+          order.technician_name ||
+          (
+            technicians.find(function (t) {
+              return String(t.id) === String(order.technician_id);
+            }) || {}
+          ).full_name;
+        var device = TF.deviceLabel(order);
+        var finalText =
+          order.status === "completed" || Number(order.final_cost) > 0
+            ? TF.formatMoney(order.final_cost) || "Chưa nhập"
+            : "—";
+
+        var rows =
+          detailRow("Khách hàng", TF.esc(order.customer_name) || "—") +
+          detailRow("Thiết bị", TF.esc(device) || "—") +
+          detailRow(
+            "Kỹ thuật viên",
+            techName ? TF.esc(techName) : "Chưa phân công",
+          ) +
+          detailRow("Ngày tiếp nhận", fmtDate(order.received_at)) +
+          detailRow("Ngày hoàn tất", fmtDate(order.completed_at)) +
+          detailRow(
+            "Giá ước tính",
+            TF.formatMoney(order.estimated_cost) || "—",
+          ) +
+          detailRow("Giá cuối", finalText);
+
+        [
+          ["customer_phone", "Số điện thoại"],
+          ["phone", "Số điện thoại"],
+          ["customer_email", "Email"],
+          ["email", "Email"],
+          ["address", "Địa chỉ"],
+          ["service_type", "Dịch vụ"],
+          ["note", "Ghi chú"],
+        ].forEach(function (f) {
+          if (order[f[0]]) rows += detailRow(f[1], TF.esc(order[f[0]]));
+        });
+
+        // Đơn nhận tận nơi: gom địa chỉ, SĐT người giao máy và phí vận chuyển thành một khối riêng
+        var deliveryHtml = "";
+        if (isDelivery(order)) {
+          var phone = order.delivery_phone
+            ? '<a href="tel:' +
+              TF.esc(order.delivery_phone) +
+              '">' +
+              TF.esc(order.delivery_phone) +
+              "</a>"
+            : "Chưa có";
+          deliveryHtml =
+            '<div class="od-delivery">' +
+            '<div class="od-delivery-head"><span class="delivery-tag">' +
+            VAN_ICON +
+            "Nhận máy tận nơi</span>" +
+            '<span class="od-fee">Phí vận chuyển 20.000đ, tự cộng vào giá khi lưu</span></div>' +
+            '<div class="od-grid">' +
+            detailRow("Địa chỉ nhận máy", TF.esc(order.delivery_address) || "Chưa có") +
+            detailRow("SĐT liên lạc", phone) +
+            "</div></div>";
+        } else {
+          rows += detailRow("Hình thức nhận máy", "Mang đến cửa hàng");
+        }
+
+        detailOverlay = document.createElement("div");
+        detailOverlay.className = "od-overlay";
+        detailOverlay.innerHTML =
+          '<div class="od-dialog" role="dialog" aria-modal="true" aria-labelledby="od-title">' +
+          '<div class="od-head"><h3 id="od-title">Đơn #' +
+          TF.esc(order.order_code) +
+          "</h3>" +
+          '<span class="badge ' +
+          statusObj.cls +
+          '">' +
+          statusObj.label +
+          "</span>" +
+          '<button type="button" class="icon-btn od-close" aria-label="Đóng">✕</button></div>' +
+          '<div class="od-grid">' +
+          rows +
+          "</div>" +
+          deliveryHtml +
+          '<div class="od-issue"><span class="od-label">Mô tả lỗi</span>' +
+          "<p>" +
+          (TF.esc(order.issue_description) || "—") +
+          "</p></div></div>";
+
+        detailOverlay.addEventListener("click", function (e) {
+          if (e.target === detailOverlay || e.target.closest(".od-close"))
+            closeOrderDetail();
+        });
+        document.body.appendChild(detailOverlay);
+        document.body.style.overflow = "hidden";
+        document.addEventListener("keydown", detailKeyHandler);
+        detailOverlay.querySelector(".od-close").focus();
+      }
+
+      function attachRowHandlers() {
+        document.querySelectorAll(".status-select").forEach(function (sel) {
+          sel.addEventListener("change", async function () {
+            var orderId = sel.dataset.orderId;
+            var newStatus = sel.value;
+
+            // Tìm thông tin đơn hàng hiện tại trong mảng allOrders
+            var order = allOrders.find(function (o) {
+              return String(o.id) === String(orderId);
+            });
+
+            // Ràng buộc trên giao diện: Đang chờ duyệt giá mà chọn Sang Đang sửa hoặc Hoàn tất thì chặn lại
+            if (
+              order &&
+              order.status === "awaiting_approval" &&
+              (newStatus === "repairing" || newStatus === "completed")
+            ) {
+              TF.toast(
+                "Khách chưa duyệt giá nên chưa chuyển sang Đang sửa hoặc Hoàn tất được.",
+                true,
+              );
+              // Trả lại giá trị select cũ trên giao diện
+              sel.value = order.status;
+              return;
+            }
+
+            var ok = await saveOrderField(orderId, { status: newStatus });
+            if (ok) {
+              if (order) {
+                order.status = newStatus;
+                if (newStatus === "completed")
+                  order.completed_at = new Date().toISOString();
+                refreshPriceCell(order, "final_cost");
+              }
+              var cls =
+                (TF.STATUS[newStatus] && TF.STATUS[newStatus].cls) || "";
+              sel.className = "status-select " + cls;
+              renderStats();
+            } else {
+              // Nếu API bên dưới từ chối, trả lại select về trạng thái cũ
+              if (order) sel.value = order.status;
+            }
+          });
+        });
+
+        document.querySelectorAll(".technician-select").forEach(function (sel) {
+          sel.addEventListener("change", async function () {
+            var orderId = sel.dataset.orderId;
+            var ok = await saveOrderField(orderId, {
+              technician_id: sel.value,
+            });
+            if (ok) {
+              var order = allOrders.find(function (o) {
+                return String(o.id) === String(orderId);
+              });
+              if (order) order.technician_id = sel.value || null;
+              if (isTechnicianUser()) renderTable();
+            } else {
+              // API từ chối: trả select về người phụ trách cũ
+              var prev = allOrders.find(function (o) {
+                return String(o.id) === String(orderId);
+              });
+              sel.value = (prev && prev.technician_id) || "";
+            }
+          });
+        });
+
+        document.querySelectorAll("[data-edit-price]").forEach(function (btn) {
+          btn.addEventListener("click", async function () {
+            var orderId = btn.dataset.editPrice;
+            var order = allOrders.find(function (o) {
+              return String(o.id) === String(orderId);
+            });
+            if (!order) return;
+
+            var fieldName = btn.dataset.field;
+            var isFinal = fieldName === "final_cost";
+            if (isPriceLocked(order, fieldName)) {
+              alert(
+                LOCKED_TITLE + '. Hãy chuyển trạng thái sang "Hoàn tất" trước.',
+              );
+              return;
+            }
+            // Giá trong DB đã gồm phí ship với đơn tận nơi, còn API nhận giá gốc rồi tự cộng phí.
+            // Điền sẵn giá gốc để lưu lại không bị cộng phí lần nữa.
+            var fee = isDelivery(order) ? DELIVERY_FEE : 0;
+            var current = Number(order[fieldName]) > 0 ? Number(order[fieldName]) : null;
+            var basePrice = current == null ? null : Math.max(current - fee, 0);
+            var label =
+              (isFinal ? "Nhập giá cuối cùng (đ)" : "Nhập giá ước tính (đ)") +
+              (fee
+                ? ", chưa gồm phí nhận máy tận nơi. Hệ thống tự cộng 20.000đ:"
+                : ":");
+
+            var input = prompt(label, basePrice == null ? "" : basePrice);
+            if (input === null || input.trim() === "") return;
+            var num = parseInt(input.replace(/\D/g, ""), 10);
+            if (isNaN(num) || num < 0) {
+              alert("Giá không hợp lệ");
+              return;
+            }
+
+            var fields = {};
+            fields[fieldName] = num;
+            var ok = await saveOrderField(orderId, fields);
+            if (ok) {
+              order[fieldName] = num + fee;
+              refreshPriceCell(order, fieldName);
+            }
+          });
+        });
+
+        document.querySelectorAll("[data-more]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            openOrderDetail(btn.dataset.more, btn);
+          });
+        });
+      }
+
+      // ---------- Filter chip + tìm kiếm ----------
+      document.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          document.querySelectorAll(".chip").forEach(function (c) {
+            c.classList.remove("active");
+          });
+          chip.classList.add("active");
+          currentFilter = chip.dataset.status;
+          renderTable();
+        });
+      });
+
+      document
+        .getElementById("order-search")
+        .addEventListener("input", function (e) {
+          currentSearch = e.target.value;
+          renderTable();
+        });
+
+      // ---------- Khởi tạo trang: kiểm tra quyền & nạp dữ liệu ----------
+      (async function init() {
+        // Dùng TF.guard để tự động check role ("admin" hoặc "technician")
+        var user = await TF.guard("admin.html", ["admin", "technician"]);
+        if (!user) return;
+        currentUser = user;
+
+        // Nếu là kỹ thuật viên, ẩn các menu không đủ quyền
+        if (user.role === "technician") {
+          var dashLink = document.getElementById("admin-dashboard-link");
+          var techLink = document.getElementById("admin-technicians-link");
+          if (dashLink) dashLink.style.display = "none";
+          if (techLink) techLink.style.display = "none";
+        }
+
+        document.getElementById("greeting").textContent =
+          "Chào " + user.full_name + " 👋";
+
+        // Lấy danh sách đơn hàng & kỹ thuật viên song song bằng TF.get
+        var results = await Promise.all([
+          TF.get("../api/get_all_orders.php"),
+          TF.get("../api/get_technicians.php"),
+        ]);
+
+        var ordersRes = results[0];
+        var techRes = results[1];
+
+        if (!ordersRes || !ordersRes.success) {
+          document.getElementById("orders-tbody").innerHTML =
+            '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:24px;">Không tải được danh sách đơn.</td></tr>';
+          return;
+        }
+
+        allOrders = ordersRes.data;
+        technicians = techRes && techRes.success ? techRes.data : [];
+
+        renderStats();
+        renderTable();
+      })();
+
+      // ---------- Nút cuộn cột giá ----------
+      (function () {
+        var box = document.getElementById("table-scroll");
+        var hint = document.getElementById("scroll-hint");
+        var btn = document.getElementById("scroll-price");
+        function check() {
+          var overflow = box.scrollWidth > box.clientWidth + 4;
+          var atEnd = box.scrollLeft + box.clientWidth >= box.scrollWidth - 4;
+          hint.hidden = !overflow;
+          btn.textContent = atEnd ? "← Về đầu bảng" : "Xem cột giá →";
+        }
+        btn.addEventListener("click", function () {
+          var atEnd = box.scrollLeft + box.clientWidth >= box.scrollWidth - 4;
+          box.scrollTo({
+            left: atEnd ? 0 : box.scrollWidth,
+            behavior: "smooth",
+          });
+        });
+        box.addEventListener("scroll", check);
+        window.addEventListener("resize", check);
+        new MutationObserver(check).observe(
+          document.getElementById("orders-tbody"),
+          { childList: true },
+        );
+        check();
+      })();
+    </script>
+  </body>
+</html>
