@@ -331,12 +331,82 @@
   color: var(--accent-text);
 }
 .method-store {
-  color: var(--ink-soft);
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  border-radius: var(--r-chip);
+  background: color-mix(in srgb, var(--persimmon) 16%, var(--surface));
+  color: #8a3a08;
+  font-size: 0.78rem;
+  font-weight: 600;
   white-space: nowrap;
+}
+[data-theme="dark"] .method-store {
+  color: #f5c29c;
+}
+.method-store svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .orders .delivery-tag {
   font-size: 0.78rem;
+}
+
+/* Icon animations: the van drives in place, the shop awning bounces and the door pulses */
+.orders .delivery-tag svg {
+  animation: van-drive 1.6s ease-in-out infinite;
+}
+.method-store .awning {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: awning-bounce 2.4s ease-in-out infinite;
+}
+.method-store .door {
+  animation: door-glow 2.4s ease-in-out infinite;
+}
+@keyframes van-drive {
+  0%,
+  100% {
+    transform: translateX(-1px);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+}
+@keyframes awning-bounce {
+  0%,
+  60%,
+  100% {
+    transform: scaleY(1);
+  }
+  75% {
+    transform: scaleY(1.18);
+  }
+  88% {
+    transform: scaleY(0.94);
+  }
+}
+@keyframes door-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orders .delivery-tag svg,
+  .method-store .awning,
+  .method-store .door {
+    animation: none;
+  }
 }
 
 @media (max-width: 520px) {

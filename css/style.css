@@ -770,6 +770,10 @@ section {
   .header-overlay.on-light:not(.scrolled) .main-nav a::before {
     background: var(--persimmon);
   }
+  /* logo.png có chữ "TECH" màu trắng: đảo sáng/tối rồi xoay lại sắc độ để chữ thành đen, màu cam giữ nguyên tông */
+  .header-overlay.on-light:not(.scrolled) .logo-icon {
+    filter: invert(1) hue-rotate(180deg);
+  }
   .header-overlay.on-light:not(.scrolled) .theme-toggle {
     border-color: rgba(27, 43, 75, 0.35);
   }

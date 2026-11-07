@@ -305,6 +305,10 @@
       var VAN_ICON =
         '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>';
 
+      // Storefront icon: awning + shop body + door (animated via CSS in admin-extra.css)
+      var STORE_ICON =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="awning" d="M3 9l1.5-5h15L21 9z"/><path d="M4.5 9v11h15V9"/><path class="door" d="M10 20v-5h4v5"/></svg>';
+
       function isDelivery(order) {
         return order.delivery_method === "Nhận máy tận nơi";
       }
@@ -332,7 +336,7 @@
             '">' +
             VAN_ICON +
             "Tận nơi</span>"
-          : '<span class="method-store">Tại cửa hàng</span>';
+          : '<span class="method-store">' + STORE_ICON + "Tại cửa hàng</span>";
 
         return (
           "<tr>" +
