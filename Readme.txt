@@ -63,8 +63,14 @@ All seeded accounts below use the password:  admin123
 5. KEY FEATURES SUMMARY
 ------------------------------------------------------------------------
 - Account Management:
-  + Registration with bcrypt password hashing, double password confirmation,
-    and automatic login after sign-up (`api/register.php`).
+  + Registration with valid email address, bcrypt password hashing, double
+    password confirmation, and automatic login after sign-up (`api/register.php`).
+  + Account activation via email verification link with a persistent notification
+    banner on the dashboard until verified, plus a resend option (`api/activate_account.php`,
+    `api/resend_activation.php`, `public/dashboard.html`).
+  + Password recovery via time-limited secure email link (30 min expiration),
+    dedicated reset password screen with double confirmation (`api/forgot_password.php`,
+    `public/reset-password.html`, `api/reset_password.php`).
   + Role-based access control (`customer`, `technician`, `admin`) and
     session protection (`includes/auth.php`).
   + Profile & Avatar management (upload custom avatar with MIME/size validation

@@ -1,4 +1,4 @@
-/* ==========================================================
+﻿/* ==========================================================
    TechFix — "Circuit Grove" Design System
    Main stylesheet. Preserves legacy class names for backward compatibility.
    Table of Contents:
@@ -1918,24 +1918,53 @@ section.browse {
 .browse-img {
   width: 100%;
   aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  border-radius: var(--r-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 22px;
   overflow: hidden;
-  transition: box-shadow var(--t-base);
+  background: #ffffff;
+  border: 1px solid rgba(27, 43, 75, 0.08);
+  box-shadow: 0 6px 20px -4px rgba(27, 43, 75, 0.12);
+  transition: transform var(--t-base) var(--ease-spring), box-shadow var(--t-base) var(--ease-spring), border-color var(--t-base) var(--ease-leaf);
 }
 .browse-list > li:first-child .browse-img {
-  border-radius: var(--r-leaf);
+  border-radius: 22px;
 }
 .browse-img img {
-  width: 82%;
-  transition: transform var(--t-base) var(--ease-spring);
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(10, 18, 36, 0.16));
+  transition: transform var(--t-base) var(--ease-spring), filter var(--t-base) ease;
 }
 .browse-tile:hover .browse-img {
-  box-shadow: var(--shadow-1);
+  transform: translateY(-5px);
+  box-shadow: 0 14px 28px -6px rgba(27, 43, 75, 0.22);
+  border-color: var(--primary);
 }
 .browse-tile:hover .browse-img img {
-  transform: scale(1.08) rotate(-2deg);
+  transform: scale(1.1);
+  filter: drop-shadow(0 10px 18px rgba(10, 18, 36, 0.26));
+}
+[data-theme="dark"] .browse-img {
+  background: linear-gradient(145deg, #182648, #0f1a33);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="dark"] .browse-img img {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45));
+}
+[data-theme="dark"] .browse-tile:hover .browse-img {
+  border-color: rgba(240, 163, 94, 0.6);
+  box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.7), 0 0 16px -2px rgba(240, 163, 94, 0.25);
+}
+[data-theme="dark"] .browse-tile:hover .browse-img img {
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.65));
 }
 .browse-tile:focus-visible {
   outline: none;
@@ -2133,16 +2162,21 @@ section.browse {
   box-shadow: var(--shadow-1);
 }
 .svc-feature-art {
+  position: relative;
   aspect-ratio: 4 / 3;
-  display: grid;
-  place-items: center;
+  overflow: hidden;
+  background: #0f172a;
+  border-bottom: 1px solid var(--line);
 }
 .svc-feature-art img {
-  width: 82%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
   transition: transform var(--t-slow) var(--ease-leaf);
 }
 .svc-feature:hover .svc-feature-art img {
-  transform: rotate(-1.5deg) scale(1.03);
+  transform: scale(1.05);
 }
 .svc-feature-body {
   flex: 1;
@@ -2213,16 +2247,38 @@ section.browse {
   z-index: 1;
   width: 80px;
   height: 80px;
-  display: grid;
-  place-items: center;
-  border-radius: 20px;
+  display: block;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  box-shadow: 0 4px 16px -4px rgba(27, 43, 75, 0.16);
+  transition: transform var(--t-base) var(--ease-spring), box-shadow var(--t-base) var(--ease-spring), border-color var(--t-base) var(--ease-leaf);
 }
 .svc-row-icon img {
-  width: 76%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
   transition: transform var(--t-base) var(--ease-spring);
 }
+.svc-row:hover .svc-row-icon {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px -4px rgba(27, 43, 75, 0.25);
+  border-color: var(--primary);
+}
 .svc-row:hover .svc-row-icon img {
-  transform: rotate(-6deg) scale(1.06);
+  transform: scale(1.08);
+}
+[data-theme="dark"] .svc-row-icon {
+  background: #090d16;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] .svc-row:hover .svc-row-icon {
+  border-color: rgba(240, 163, 94, 0.6);
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.7);
 }
 .svc-row-text h3 {
   font-size: 1.12rem;
@@ -2312,28 +2368,52 @@ section.browse {
 .rail-art {
   position: relative;
   aspect-ratio: 3 / 2;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
   overflow: hidden;
+  border-radius: 16px;
+  background: #0f172a;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  box-shadow: 0 4px 14px -4px rgba(27, 43, 75, 0.12);
+  transition: border-color var(--t-base) var(--ease-leaf), box-shadow var(--t-base) var(--ease-leaf);
 }
 .rail-art img {
-  width: 88%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
   transition: transform var(--t-base) var(--ease-spring);
 }
+.rail-card:hover .rail-art {
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px -4px rgba(27, 43, 75, 0.22);
+}
 .rail-card:hover .rail-art img {
-  transform: translateY(-4px) scale(1.04);
+  transform: scale(1.06);
+}
+[data-theme="dark"] .rail-art {
+  background: #090d16;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .rail-card:hover .rail-art {
+  border-color: rgba(240, 163, 94, 0.6);
 }
 .rail-tag {
   position: absolute;
   top: 10px;
   left: 10px;
+  z-index: 2;
   padding: 4px 10px;
   border-radius: var(--r-chip);
-  background: var(--surface);
-  color: var(--accent-text);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  color: #1b2b4b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   font-size: 0.76rem;
   font-weight: 700;
+}
+[data-theme="dark"] .rail-tag {
+  background: rgba(20, 30, 48, 0.88);
+  color: #f0a35e;
 }
 .rail-card h3 {
   margin: 14px 6px 4px;

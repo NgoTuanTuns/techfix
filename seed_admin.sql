@@ -7,7 +7,7 @@
 
 USE techfix;
 
-INSERT INTO users (full_name, phone, email, password_hash, role)
+INSERT INTO users (full_name, phone, email, password_hash, role, is_active)
 VALUES
 (
     'Quản trị viên',
@@ -15,24 +15,28 @@ VALUES
     'admin123@gmail.com',
     -- Generated via password_hash('admin123', PASSWORD_DEFAULT)
     '$2y$12$o5iov3ONZdikiNzdSH6WTuMpFfHDFZUzAXgjkqZQbUkExUMuozV4u',
-    'admin'
+    'admin',
+    1
 ),
 (
     'Lý Đại Bác',
     '0911222333',
     'tech.lydaibac@techfix.vn',
     '$2y$12$o5iov3ONZdikiNzdSH6WTuMpFfHDFZUzAXgjkqZQbUkExUMuozV4u',
-    'technician'
+    'technician',
+    1
 ),
 (
     'Ngô Tuấn Tú',
     '0988777666',
     'customer.demo@techfix.vn',
     '$2y$12$o5iov3ONZdikiNzdSH6WTuMpFfHDFZUzAXgjkqZQbUkExUMuozV4u',
-    'customer'
+    'customer',
+    1
 )
 ON DUPLICATE KEY UPDATE
     full_name     = VALUES(full_name),
     email         = VALUES(email),
     password_hash = VALUES(password_hash),
-    role          = VALUES(role);
+    role          = VALUES(role),
+    is_active     = VALUES(is_active);

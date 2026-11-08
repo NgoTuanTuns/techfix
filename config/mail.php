@@ -39,7 +39,7 @@ techfix_load_dotenv(__DIR__ . '/../.env');
 
 return [
     'smtp_host' => getenv('TECHFIX_SMTP_HOST') ?: 'smtp.gmail.com',
-    'smtp_port' => (int)(getenv('TECHFIX_SMTP_PORT') ?: 465), // 465 (SSL) or 587 (TLS)
+    'smtp_port' => (int)(getenv('TECHFIX_SMTP_PORT') ?: 587), // 587 (TLS/STARTTLS) or 465 (SSL)
     'smtp_user' => getenv('TECHFIX_SMTP_USER') ?: '',        // Sender Gmail address
     'smtp_pass' => getenv('TECHFIX_SMTP_PASS') ?: '',        // 16-character Gmail App Password
     'from_name' => getenv('TECHFIX_MAIL_FROM_NAME') ?: 'TechFix — Hệ thống sửa chữa thiết bị',

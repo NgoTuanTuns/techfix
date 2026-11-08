@@ -6,6 +6,8 @@
  * or via TECHFIX_DB_HOST / TECHFIX_DB_NAME / TECHFIX_DB_USER / TECHFIX_DB_PASS.
  */
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 if (!function_exists('techfix_load_dotenv')) {
     function techfix_load_dotenv(string $envPath): void
     {

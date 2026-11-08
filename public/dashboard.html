@@ -60,6 +60,19 @@
     </div>
 
     <section style="padding-top: 20px">
+      <div class="wrap" id="activation-banner-wrap" style="display: none; margin-bottom: 20px;">
+        <div id="activation-banner" style="background: color-mix(in srgb, var(--persimmon) 14%, var(--surface)); border: 1.5px solid var(--persimmon); color: var(--ink); padding: 14px 20px; border-radius: var(--r-card); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-1);">
+          <div>
+            <strong style="color: var(--persimmon); font-size: 1rem;">⚠️ Tài khoản của bạn chưa được kích hoạt!</strong>
+            <div style="font-size: 0.88rem; color: var(--ink-soft); margin-top: 4px;">
+              Hệ thống đã gửi liên kết kích hoạt đến email của bạn. Vui lòng kiểm tra hộp thư để hoàn tất kích hoạt tài khoản.
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline" id="btn-resend-activation">
+            Gửi lại email kích hoạt
+          </button>
+        </div>
+      </div>
       <div class="wrap dash-layout">
         <aside class="dash-side">
           <div class="profile">
@@ -123,6 +136,10 @@
               <div class="field">
                 <label for="acc-phone">Số điện thoại</label>
                 <input type="tel" id="acc-phone" required />
+              </div>
+              <div class="field">
+                <label for="acc-email">Địa chỉ Email</label>
+                <input type="email" id="acc-email" readonly style="opacity: 0.85; cursor: not-allowed; background: var(--washi-alt);" />
               </div>
               <div class="divider-row">
                 Đổi mật khẩu (bỏ qua nếu không muốn đổi)
@@ -786,6 +803,10 @@
           // Pre-fill account form inputs from the initial session check
           document.getElementById("acc-name").value = currentUser.full_name;
           document.getElementById("acc-phone").value = currentUser.phone;
+          if (document.getElementById("acc-email")) {
+            document.getElementById("acc-email").value = currentUser.email || "";
+          }
+          updateActivationBanner();
         } catch (err) {
           var cachedUser = null;
           try {
@@ -999,14 +1020,50 @@
         showToast("Đã kết nối mạng trở lại — đang đồng bộ dữ liệu...");
         loadOrders();
       });
-      if (false)
-        document.addEventListener("x", function () {
-          openLogoutDialog(function () {
-            if (true) {
+            function updateActivationBanner() {
+        var wrap = document.getElementById("activation-banner-wrap");
+        if (!wrap) return;
+        if (currentUser && Number(currentUser.is_active) === 0) {
+          wrap.style.display = "block";
+        } else {
+          wrap.style.display = "none";
+        }
+      }
+
+      var btnResend = document.getElementById("btn-resend-activation");
+      if (btnResend) {
+        btnResend.addEventListener("click", async function () {
+          var btn = this;
+          btn.disabled = true;
+          btn.textContent = "Đang gửi...";
+          try {
+            var res = await fetch("../api/resend_activation.php", { method: "POST" });
+            var raw = await res.text();
+            var result = tryExtractJson(raw);
+            if (result && result.success) {
+              showToast(result.message);
+            } else {
+              showToast((result && result.message) || "Không thể gửi lại email.", true);
             }
-            window.location.href = "login.html";
-          });
+          } catch (e) {
+            showToast("Không kết nối được tới máy chủ.", true);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Gửi lại email kích hoạt";
+          }
         });
+      }
+
+      (function checkActivationNotice() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("activated") === "1") {
+          showToast("🎉 Tài khoản của bạn đã được kích hoạt thành công!");
+          if (currentUser) {
+            currentUser.is_active = 1;
+            updateActivationBanner();
+          }
+        }
+      })();
     </script>
   </body>
 </html>

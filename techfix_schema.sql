@@ -17,6 +17,10 @@ CREATE TABLE IF NOT EXISTS users (
     avatar VARCHAR(255) NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('customer', 'technician', 'admin') NOT NULL DEFAULT 'customer',
+    is_active TINYINT(1) NOT NULL DEFAULT 0,
+    activation_token VARCHAR(64) NULL,
+    reset_token VARCHAR(64) NULL,
+    reset_token_expires_at DATETIME NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -206,7 +210,11 @@ ADD COLUMN IF NOT EXISTS delivery_phone VARCHAR(15) NULL AFTER delivery_address,
 ADD COLUMN IF NOT EXISTS customer_email VARCHAR(100) NULL AFTER delivery_phone;
 
 ALTER TABLE users
-ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL AFTER email;
+ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL AFTER email,
+ADD COLUMN IF NOT EXISTS is_active TINYINT(1) NOT NULL DEFAULT 0 AFTER role,
+ADD COLUMN IF NOT EXISTS activation_token VARCHAR(64) NULL AFTER is_active,
+ADD COLUMN IF NOT EXISTS reset_token VARCHAR(64) NULL AFTER activation_token,
+ADD COLUMN IF NOT EXISTS reset_token_expires_at DATETIME NULL AFTER reset_token;
 
 ALTER TABLE repair_orders
 MODIFY COLUMN status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting_approval', 'repairing', 'awaiting_payment', 'completed', 'cancelled')

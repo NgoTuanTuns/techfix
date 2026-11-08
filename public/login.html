@@ -52,7 +52,7 @@
 
     <div class="auth-shell">
       <div class="auth-card">
-        <div class="auth-tabs">
+        <div class="auth-tabs" id="auth-tabs-bar">
           <button
             type="button"
             id="tab-login"
@@ -71,11 +71,25 @@
         </div>
 
         <div class="form-card">
+          <!-- Notification message container (e.g. activation, reset, etc.) -->
+          <div
+            id="auth-alert"
+            style="
+              display: none;
+              padding: 12px 14px;
+              border-radius: 10px;
+              margin-bottom: 16px;
+              font-size: 0.88rem;
+              line-height: 1.45;
+            "
+          ></div>
+
+          <!-- Panel: Login -->
           <div id="panel-login" class="auth-panel active">
             <form id="login-form">
               <div class="field">
-                <label for="l-phone">Số điện thoại</label
-                ><input
+                <label for="l-phone">Số điện thoại</label>
+                <input
                   type="tel"
                   id="l-phone"
                   placeholder="09xx xxx xxx"
@@ -83,8 +97,8 @@
                 />
               </div>
               <div class="field">
-                <label for="l-pass">Mật khẩu</label
-                ><input
+                <label for="l-pass">Mật khẩu</label>
+                <input
                   type="password"
                   id="l-pass"
                   placeholder="••••••••"
@@ -107,12 +121,16 @@
                     gap: 6px;
                     font-weight: 400;
                   "
-                  ><input type="checkbox" style="width: auto" /> Ghi nhớ đăng
-                  nhập</label
                 >
-                <a href="#" style="color: var(--primary); font-weight: 600"
-                  >Quên mật khẩu?</a
+                  <input type="checkbox" style="width: auto" /> Ghi nhớ đăng nhập
+                </label>
+                <a
+                  href="#"
+                  id="link-forgot-pass"
+                  style="color: var(--primary); font-weight: 600"
                 >
+                  Quên mật khẩu?
+                </a>
               </div>
               <button type="submit" class="btn btn-primary btn-block">
                 Đăng nhập
@@ -120,11 +138,12 @@
             </form>
           </div>
 
+          <!-- Panel: Register -->
           <div id="panel-register" class="auth-panel">
             <form id="register-form">
               <div class="field">
-                <label for="r-name">Họ và tên</label
-                ><input
+                <label for="r-name">Họ và tên</label>
+                <input
                   type="text"
                   id="r-name"
                   placeholder="Nguyễn Văn A"
@@ -132,8 +151,8 @@
                 />
               </div>
               <div class="field">
-                <label for="r-phone">Số điện thoại</label
-                ><input
+                <label for="r-phone">Số điện thoại</label>
+                <input
                   type="tel"
                   id="r-phone"
                   placeholder="09xx xxx xxx"
@@ -141,8 +160,17 @@
                 />
               </div>
               <div class="field">
-                <label for="r-pass">Mật khẩu</label
-                ><input
+                <label for="r-email">Địa chỉ Email</label>
+                <input
+                  type="email"
+                  id="r-email"
+                  placeholder="name@example.com"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="r-pass">Mật khẩu</label>
+                <input
                   type="password"
                   id="r-pass"
                   placeholder="Tối thiểu 8 ký tự"
@@ -150,8 +178,8 @@
                 />
               </div>
               <div class="field">
-                <label for="r-pass2">Nhập lại mật khẩu</label
-                ><input type="password" id="r-pass2" required />
+                <label for="r-pass2">Nhập lại mật khẩu</label>
+                <input type="password" id="r-pass2" required />
               </div>
               <button type="submit" class="btn btn-primary btn-block">
                 Tạo tài khoản
@@ -159,10 +187,51 @@
             </form>
           </div>
 
-          <div class="divider-row">hoặc</div>
-          <button type="button" class="btn btn-outline btn-block">
-            Tiếp tục với Google
-          </button>
+          <!-- Panel: Forgot Password -->
+          <div id="panel-forgot" class="auth-panel" style="display: none">
+            <form id="forgot-form">
+              <h3 style="margin-top: 0; font-size: 1.15rem; font-weight: 700">
+                Khôi phục mật khẩu
+              </h3>
+              <p
+                style="
+                  font-size: 0.88rem;
+                  color: var(--ink-soft);
+                  margin-top: 4px;
+                  margin-bottom: 16px;
+                  line-height: 1.5;
+                "
+              >
+                Nhập địa chỉ email đăng ký tài khoản của bạn. TechFix sẽ gửi liên
+                kết để bạn đặt lại mật khẩu mới.
+              </p>
+              <div class="field">
+                <label for="f-email">Email tài khoản</label>
+                <input
+                  type="email"
+                  id="f-email"
+                  placeholder="name@example.com"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                Gửi liên kết đặt lại mật khẩu
+              </button>
+              <div style="text-align: center; margin-top: 14px">
+                <a
+                  href="#"
+                  id="link-back-login"
+                  style="
+                    font-size: 0.85rem;
+                    color: var(--ink-soft);
+                    font-weight: 600;
+                  "
+                >
+                  ← Quay lại đăng nhập
+                </a>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -178,20 +247,69 @@
     </div>
 
     <script>
+      function showAlert(msg, isSuccess) {
+        var el = document.getElementById("auth-alert");
+        if (!el) return;
+        el.style.display = "block";
+        el.textContent = msg;
+        if (isSuccess) {
+          el.style.background = "color-mix(in srgb, var(--ok, #3f7a4f) 15%, var(--surface))";
+          el.style.border = "1px solid var(--ok, #3f7a4f)";
+          el.style.color = "var(--ok, #3f7a4f)";
+        } else {
+          el.style.background = "color-mix(in srgb, var(--error, #a63a2b) 15%, var(--surface))";
+          el.style.border = "1px solid var(--error, #a63a2b)";
+          el.style.color = "var(--error, #a63a2b)";
+        }
+      }
+
       function switchTab(name) {
+        var tabsBar = document.getElementById("auth-tabs-bar");
+        var panelLogin = document.getElementById("panel-login");
+        var panelRegister = document.getElementById("panel-register");
+        var panelForgot = document.getElementById("panel-forgot");
+
+        if (name === "forgot") {
+          tabsBar.style.display = "none";
+          panelLogin.style.display = "none";
+          panelLogin.classList.remove("active");
+          panelRegister.style.display = "none";
+          panelRegister.classList.remove("active");
+          panelForgot.style.display = "block";
+          panelForgot.classList.add("active");
+          return;
+        }
+
+        tabsBar.style.display = "flex";
+        panelForgot.style.display = "none";
+        panelForgot.classList.remove("active");
+
+        panelLogin.style.display = "";
+        panelRegister.style.display = "";
+
         document
           .getElementById("tab-login")
           .classList.toggle("active", name === "login");
         document
           .getElementById("tab-register")
           .classList.toggle("active", name === "register");
-        document
-          .getElementById("panel-login")
-          .classList.toggle("active", name === "login");
-        document
-          .getElementById("panel-register")
-          .classList.toggle("active", name === "register");
+        panelLogin.classList.toggle("active", name === "login");
+        panelRegister.classList.toggle("active", name === "register");
       }
+
+      document
+        .getElementById("link-forgot-pass")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          switchTab("forgot");
+        });
+
+      document
+        .getElementById("link-back-login")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          switchTab("login");
+        });
 
       function setFormLoading(form, loading) {
         var btn = form.querySelector('button[type="submit"]');
@@ -206,8 +324,6 @@
         }
       }
 
-      // Attempt to extract and parse the JSON payload from the response, even if PHP
-      // prepended stray Warnings or Notices before the JSON body.
       function tryExtractJson(raw) {
         try {
           return JSON.parse(raw);
@@ -225,6 +341,13 @@
         }
       }
 
+      function safeNextPage() {
+        var next = new URLSearchParams(window.location.search).get("next");
+        return next && /^[a-z0-9_-]+\.html(\?[^#\s]*)?$/i.test(next)
+          ? next
+          : null;
+      }
+
       async function submitAuthForm(form, url, fields) {
         var formData = new FormData();
         Object.keys(fields).forEach(function (key) {
@@ -237,17 +360,7 @@
           var raw = await res.text();
           var result = tryExtractJson(raw);
 
-          // Only allow internal .html pages in ?next= (e.g. "booking.html") to prevent open redirects.
-          // Rejects external URLs such as ?next=https://... or //evil.com.
-          function safeNextPage() {
-            var next = new URLSearchParams(window.location.search).get("next");
-            return next && /^[a-z0-9_-]+\.html(\?[^#\s]*)?$/i.test(next)
-              ? next
-              : null;
-          }
-
           if (!result) {
-            // Fallback generic message when response cannot be parsed as JSON
             console.error("Response không parse được:", raw);
             alert("Có lỗi xảy ra, vui lòng thử lại sau.");
             return;
@@ -261,11 +374,9 @@
               window.location.href = safeNextPage() || "dashboard.html";
             }
           } else {
-            // Display the specific validation/auth message returned by the server
             alert(result.message || "Thao tác thất bại, vui lòng thử lại.");
           }
         } catch (networkErr) {
-          // Network-level failure (e.g. local server is offline)
           console.error(networkErr);
           alert(
             "Không kết nối được tới máy chủ. Kiểm tra lại XAMPP đã bật chưa.",
@@ -292,10 +403,67 @@
           submitAuthForm(e.target, "../api/register.php", {
             full_name: "r-name",
             phone: "r-phone",
+            email: "r-email",
             password: "r-pass",
             password2: "r-pass2",
           });
         });
+
+      document
+        .getElementById("forgot-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var form = e.target;
+          var emailVal = document.getElementById("f-email").value;
+          var formData = new FormData();
+          formData.append("email", emailVal);
+
+          setFormLoading(form, true);
+          try {
+            var res = await fetch("../api/forgot_password.php", {
+              method: "POST",
+              body: formData,
+            });
+            var raw = await res.text();
+            var result = tryExtractJson(raw);
+            if (result && result.success) {
+              showAlert(result.message, true);
+              form.reset();
+            } else {
+              showAlert(
+                (result && result.message) || "Không thể gửi yêu cầu.",
+                false,
+              );
+            }
+          } catch (err) {
+            showAlert("Không kết nối được tới máy chủ.", false);
+          } finally {
+            setFormLoading(form, false);
+          }
+        });
+
+      // Check query parameters on page load
+      (function checkUrlNotice() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("activated") === "1") {
+          showAlert(
+            "🎉 Tài khoản của bạn đã được kích hoạt thành công! Hãy đăng nhập để bắt đầu trải nghiệm.",
+            true,
+          );
+        } else if (params.get("reset") === "1") {
+          showAlert(
+            "✅ Mật khẩu đã được đặt lại thành công! Vui lòng đăng nhập với mật khẩu mới.",
+            true,
+          );
+        } else if (params.get("activation_error")) {
+          var err = params.get("activation_error");
+          var msg =
+            err === "invalid"
+              ? "Liên kết kích hoạt không hợp lệ hoặc tài khoản đã được kích hoạt từ trước."
+              : "Có lỗi khi kích hoạt tài khoản. Vui lòng thử lại.";
+          showAlert(msg, false);
+        }
+      })();
     </script>
   </body>
 </html>
