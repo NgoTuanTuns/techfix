@@ -2766,14 +2766,23 @@ section.browse {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.95rem;
-  box-shadow: var(--shadow-2);
+  box-shadow: 0 4px 18px -2px rgba(10, 18, 36, 0.28);
   border: 2px solid var(--surface);
   position: relative;
   cursor: pointer;
   animation: bob 3s var(--ease-drift) infinite;
+  transition: transform var(--t-base) var(--ease-spring), box-shadow var(--t-base) var(--ease-spring);
+  padding: 0;
+  overflow: visible;
+  text-decoration: none;
+}
+.float-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 50%;
+  pointer-events: none;
   transition: transform var(--t-base) var(--ease-spring);
 }
 .float-btn:nth-child(2) {
@@ -2783,8 +2792,12 @@ section.browse {
   animation-delay: -2s;
 }
 .float-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.12);
+  box-shadow: 0 8px 24px -2px rgba(10, 18, 36, 0.38);
   animation-play-state: paused;
+}
+.float-btn:hover img {
+  transform: scale(1.06);
 }
 @keyframes bob {
   0%,
@@ -2796,23 +2809,42 @@ section.browse {
   }
 }
 .float-btn.call {
-  background: var(--persimmon);
-  font-size: 1.25rem;
+  background: transparent;
+  border: none;
+}
+.float-btn.call img {
+  border-radius: 50%;
 }
 .float-btn.call::after {
   content: "";
   position: absolute;
-  inset: -5px;
+  inset: -4px;
   border-radius: 50%;
-  border: 2px solid var(--persimmon);
+  border: 2px solid #5073ff;
   opacity: 0;
-  animation: pingring 8s ease-out infinite;
+  animation: pingring 6s ease-out infinite;
+  pointer-events: none;
 }
 .float-btn.zalo {
-  background: var(--blue);
+  background: #ffffff;
+  padding: 9px;
+  border-color: rgba(0, 104, 255, 0.22);
+}
+.float-btn.zalo img {
+  border-radius: 0;
 }
 .float-btn.msg {
-  background: linear-gradient(135deg, #00b2ff, #006aff);
+  background: #ffffff;
+  padding: 7px;
+  border-color: rgba(168, 85, 247, 0.22);
+}
+.float-btn.msg img {
+  border-radius: 0;
+}
+[data-theme="dark"] .float-btn.zalo,
+[data-theme="dark"] .float-btn.msg {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 @keyframes pingring {
   0% {
