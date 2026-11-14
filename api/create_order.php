@@ -162,6 +162,14 @@ try {
 
     // 3. Link selected service package (if any) and pre-fill estimated_cost
     if ($serviceSlug !== '') {
+        // Ensure weekly deal packages exist in the services catalog
+        $pdo->exec(
+            "INSERT IGNORE INTO services (slug, device_type, name, base_price) VALUES
+             ('thay-pin-laptop', 'laptop', 'Thay pin laptop Dell, Asus, HP (Ưu đãi -20%)', 450000),
+             ('thay-man-hinh-dt', 'phone', 'Thay màn hình iPhone, Samsung, Oppo (Ưu đãi -20%)', 1050000),
+             ('nang-cap-ssd', 'laptop', 'Nâng cấp SSD 256GB cho laptop (Ưu đãi -15%)', 590000)"
+        );
+
         $svc = $pdo->prepare('SELECT id, base_price FROM services WHERE slug = ? AND is_active = 1');
         $svc->execute([$serviceSlug]);
         $serviceRow = $svc->fetch();

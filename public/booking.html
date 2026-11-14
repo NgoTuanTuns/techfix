@@ -314,13 +314,16 @@
       // Require authentication before booking — verified on page load
       // so unauthenticated visitors are redirected before filling out the form.
       (async function checkLoginOrRedirect() {
+        var nextTarget =
+          "booking.html" + (window.location.search || "");
         try {
           var res = await fetch("../api/me.php");
           var raw = await res.text();
           var result = tryExtractJson(raw); // Hoisted helper defined below
 
           if (!result || !result.success) {
-            window.location.href = "login.html?next=booking.html";
+            window.location.href =
+              "login.html?next=" + encodeURIComponent(nextTarget);
             return;
           }
 
@@ -336,11 +339,27 @@
           }
         } catch (err) {
           // Redirect to login if the session check request fails
-          window.location.href = "login.html?next=booking.html";
+          window.location.href =
+            "login.html?next=" + encodeURIComponent(nextTarget);
         }
       })();
 
       var SERVICES = {
+        "thay-pin-laptop": {
+          device: "laptop",
+          label: "Thay pin laptop Dell, Asus, HP (Ưu đãi -20%)",
+          price: "450.000đ",
+        },
+        "thay-man-hinh-dt": {
+          device: "phone",
+          label: "Thay màn hình iPhone, Samsung, Oppo (Ưu đãi -20%)",
+          price: "1.050.000đ",
+        },
+        "nang-cap-ssd": {
+          device: "laptop",
+          label: "Nâng cấp SSD 256GB cho laptop (Ưu đãi -15%)",
+          price: "590.000đ",
+        },
         "ve-sinh-tan-nhiet": {
           device: "laptop",
           label: "Vệ sinh và tra keo tản nhiệt",

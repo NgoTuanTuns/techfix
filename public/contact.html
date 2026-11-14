@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../css/style.css?v=20261109" />
+    <link rel="stylesheet" href="../css/style.css?v=20261114-modal" />
     <script>
       (function () {
         try {
@@ -137,67 +137,125 @@
         <div class="section-head">
           <div>
             <h2>Khách hàng nói gì về TechFix</h2>
-            <p>Phản hồi từ những khách hàng đã sử dụng dịch vụ của TechFix.</p>
+            <p>Phản hồi thực tế từ những khách hàng đã hoàn tất sửa chữa tại TechFix.</p>
           </div>
-          <a class="btn btn-primary review-cta" href="#review-form"
-            >Viết đánh giá</a
+          <button
+            type="button"
+            class="btn btn-primary review-cta"
+            id="open-review-modal"
           >
+            Viết đánh giá
+          </button>
         </div>
 
         <div class="rating-summary">
           <div class="num" id="average-rating">—</div>
-          <div>
+          <div class="rating-overview">
             <div class="stars" id="average-stars">★★★★★</div>
             <div class="sub" id="review-count">Đang tải đánh giá...</div>
+            <div class="rating-verified-pill">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>100% đánh giá từ đơn sửa chữa thực tế</span>
+            </div>
+          </div>
+          <div class="rating-bars" id="rating-bars" aria-label="Phân bổ số sao">
+            <div class="r-bar-row" data-star="5">
+              <span class="r-bar-label">5 ★</span>
+              <div class="r-bar-track"><div class="r-bar-fill" style="width: 0%"></div></div>
+              <span class="r-bar-count">0</span>
+            </div>
+            <div class="r-bar-row" data-star="4">
+              <span class="r-bar-label">4 ★</span>
+              <div class="r-bar-track"><div class="r-bar-fill" style="width: 0%"></div></div>
+              <span class="r-bar-count">0</span>
+            </div>
+            <div class="r-bar-row" data-star="3">
+              <span class="r-bar-label">3 ★</span>
+              <div class="r-bar-track"><div class="r-bar-fill" style="width: 0%"></div></div>
+              <span class="r-bar-count">0</span>
+            </div>
+            <div class="r-bar-row" data-star="2">
+              <span class="r-bar-label">2 ★</span>
+              <div class="r-bar-track"><div class="r-bar-fill" style="width: 0%"></div></div>
+              <span class="r-bar-count">0</span>
+            </div>
+            <div class="r-bar-row" data-star="1">
+              <span class="r-bar-label">1 ★</span>
+              <div class="r-bar-track"><div class="r-bar-fill" style="width: 0%"></div></div>
+              <span class="r-bar-count">0</span>
+            </div>
           </div>
         </div>
 
         <div class="review-grid" id="review-list" aria-live="polite"></div>
+      </div>
+    </section>
 
-        <form
-          class="form-card review-form"
-          id="review-form"
-          style="margin-top: 48px"
-        >
-          <h3>Gửi đánh giá dịch vụ</h3>
-          <p class="form-note" id="review-help">
-            Đăng nhập và chọn một đơn đã hoàn tất để đánh giá dịch vụ.
-          </p>
-          <div id="review-fields">
-            <div class="field">
-              <label for="review-order">Đơn sửa chữa</label>
-              <select id="review-order" required disabled>
-                <option>Đăng nhập để chọn đơn sửa chữa</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="review-rating">Số sao</label>
-              <select id="review-rating" required disabled>
-                <option value="5">★★★★★ — Rất hài lòng</option>
-                <option value="4">★★★★☆ — Hài lòng</option>
-                <option value="3">★★★☆☆ — Bình thường</option>
-                <option value="2">★★☆☆☆ — Chưa hài lòng</option>
-                <option value="1">★☆☆☆☆ — Không hài lòng</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="review-comment">Chia sẻ của bạn</label>
-              <textarea
-                id="review-comment"
-                minlength="10"
-                maxlength="1000"
-                required
-                disabled
-                placeholder="Hãy cho TechFix biết trải nghiệm của bạn."
-              ></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" disabled>
+    <dialog
+      class="tf-dialog review-dialog"
+      id="review-dialog"
+      aria-labelledby="review-dialog-title"
+    >
+      <form class="review-form" id="review-form">
+        <div class="review-dialog-head">
+          <h3 id="review-dialog-title">Gửi đánh giá dịch vụ</h3>
+          <button
+            type="button"
+            class="review-dialog-close"
+            id="close-review-modal"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
+        <p class="form-note" id="review-help">
+          Đăng nhập và chọn một đơn đã hoàn tất để đánh giá dịch vụ.
+        </p>
+        <div id="review-fields">
+          <div class="field">
+            <label for="review-order">Đơn sửa chữa</label>
+            <select id="review-order" required disabled>
+              <option>Đăng nhập để chọn đơn sửa chữa</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="review-rating">Mức độ hài lòng</label>
+            <select id="review-rating" required disabled>
+              <option value="5">★★★★★ — Rất hài lòng</option>
+              <option value="4">★★★★☆ — Hài lòng</option>
+              <option value="3">★★★☆☆ — Bình thường</option>
+              <option value="2">★★☆☆☆ — Chưa hài lòng</option>
+              <option value="1">★☆☆☆☆ — Không hài lòng</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="review-comment">Chia sẻ của bạn</label>
+            <textarea
+              id="review-comment"
+              minlength="10"
+              maxlength="1000"
+              required
+              disabled
+              placeholder="Hãy cho TechFix biết trải nghiệm của bạn (tối thiểu 10 ký tự)."
+            ></textarea>
+          </div>
+          <div class="dialog-actions">
+            <button
+              type="button"
+              class="btn btn-outline btn-sm"
+              id="cancel-review-modal"
+            >
+              Huỷ
+            </button>
+            <button type="submit" class="btn btn-primary btn-sm" disabled>
               Gửi đánh giá
             </button>
           </div>
-        </form>
-      </div>
-    </section>
+        </div>
+      </form>
+    </dialog>
 
     <footer class="site-footer" style="padding-top: 0">
       <div class="footer-legal">
@@ -244,38 +302,247 @@
         var average = document.getElementById("average-rating");
         var averageStars = document.getElementById("average-stars");
         var reviewCount = document.getElementById("review-count");
+        var reviewDialog = document.getElementById("review-dialog");
+        var openModalBtn = document.getElementById("open-review-modal");
+        var closeModalBtn = document.getElementById("close-review-modal");
+        var cancelModalBtn = document.getElementById("cancel-review-modal");
         var reviewForm = document.getElementById("review-form");
         var reviewFields = document.getElementById("review-fields");
         var reviewHelp = document.getElementById("review-help");
         var reviewOrder = document.getElementById("review-order");
 
-        function stars(rating) {
-          return "★★★★★".slice(0, rating) + "☆☆☆☆☆".slice(0, 5 - rating);
+        function showToast(msg, isError) {
+          var t = document.getElementById("tf-toast");
+          if (!t) {
+            t = document.createElement("div");
+            t.id = "tf-toast";
+            t.className = "toast";
+            t.setAttribute("role", "status");
+            document.body.appendChild(t);
+          }
+          t.textContent = msg;
+          t.classList.toggle("err", !!isError);
+          t.classList.add("show");
+          clearTimeout(showToast.timer);
+          showToast.timer = setTimeout(function () {
+            t.classList.remove("show");
+          }, 3200);
         }
 
-        function addReviewCard(review) {
+        function openReviewModal() {
+          loadReviewOptions();
+          if (reviewDialog && typeof reviewDialog.showModal === "function") {
+            reviewDialog.showModal();
+          }
+        }
+
+        function closeReviewModal() {
+          if (reviewDialog && reviewDialog.open) {
+            reviewDialog.close();
+          }
+        }
+
+        if (openModalBtn) {
+          openModalBtn.addEventListener("click", openReviewModal);
+        }
+        if (closeModalBtn) {
+          closeModalBtn.addEventListener("click", closeReviewModal);
+        }
+        if (cancelModalBtn) {
+          cancelModalBtn.addEventListener("click", closeReviewModal);
+        }
+        if (reviewDialog) {
+          reviewDialog.addEventListener("click", function (ev) {
+            if (ev.target === reviewDialog) closeReviewModal();
+          });
+        }
+
+        function stars(rating) {
+          var r = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+          return "★★★★★".slice(0, r) + "☆☆☆☆☆".slice(0, 5 - r);
+        }
+
+        function ratingLabel(rating) {
+          var r = Math.round(Number(rating) || 5);
+          if (r >= 5) return "Rất hài lòng";
+          if (r === 4) return "Hài lòng";
+          if (r === 3) return "Bình thường";
+          if (r === 2) return "Chưa hài lòng";
+          return "Không hài lòng";
+        }
+
+        function formatReviewDate(dateStr) {
+          if (!dateStr) return "";
+          var d = new Date(String(dateStr).replace(" ", "T"));
+          if (isNaN(d.getTime())) return "";
+          var day = String(d.getDate()).padStart(2, "0");
+          var month = String(d.getMonth() + 1).padStart(2, "0");
+          var year = d.getFullYear();
+          return day + "/" + month + "/" + year;
+        }
+
+        function getInitials(name) {
+          var parts = String(name || "Khách hàng")
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+          if (!parts.length) return "K";
+          if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+          return (
+            parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+          ).toUpperCase();
+        }
+
+        function resolveAvatarUrl(raw) {
+          if (!raw) return "";
+          var s = String(raw).trim();
+          if (!s) return "";
+          if (s.indexOf("http://") === 0 || s.indexOf("https://") === 0 || s.indexOf("data:") === 0) {
+            return s;
+          }
+          return "../" + s.replace(/^(\.\.\/|\/)+/, "");
+        }
+
+        function addReviewCard(review, idx) {
           var card = document.createElement("article");
-          card.className = "review-card";
+          card.className = "review-card rv in";
+          card.style.setProperty("--i", Math.min(idx || 0, 6));
+
+          // Decorative quote watermark
+          var quoteMark = document.createElement("span");
+          quoteMark.className = "review-quote-mark";
+          quoteMark.setAttribute("aria-hidden", "true");
+          quoteMark.textContent = "“";
+
+          // Header: Stars + Rating pill + Date
+          var head = document.createElement("div");
+          head.className = "review-head";
+
+          var starsWrap = document.createElement("div");
+          starsWrap.className = "review-stars-wrap";
+
+          var numRating = Math.max(1, Math.min(5, Math.round(Number(review.rating) || 5)));
           var starLine = document.createElement("div");
           starLine.className = "stars";
-          starLine.textContent = stars(Number(review.rating));
+          starLine.setAttribute("aria-label", numRating + " trên 5 sao");
+          for (var i = 1; i <= 5; i++) {
+            var sp = document.createElement("span");
+            sp.className = i <= numRating ? "star-on" : "star-off";
+            sp.textContent = "★";
+            starLine.appendChild(sp);
+          }
+
+          var badge = document.createElement("span");
+          badge.className = "rating-pill";
+          badge.textContent = numRating.toFixed(1) + " · " + ratingLabel(numRating);
+
+          starsWrap.append(starLine, badge);
+          head.appendChild(starsWrap);
+
+          var dateFormatted = formatReviewDate(review.created_at);
+          if (dateFormatted) {
+            var dateEl = document.createElement("time");
+            dateEl.className = "review-date";
+            dateEl.textContent = dateFormatted;
+            head.appendChild(dateEl);
+          }
+
+          // Comment body
           var comment = document.createElement("p");
+          comment.className = "review-text";
           comment.textContent = review.comment;
+
+          // Meta tags (Device + Order code + Verified)
+          var tags = document.createElement("div");
+          tags.className = "review-tags";
+
+          var verifiedTag = document.createElement("span");
+          verifiedTag.className = "review-tag is-verified";
+          verifiedTag.innerHTML =
+            '<svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13" aria-hidden="true"><path fill-rule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.354-8.646a.5.5 0 00-.708-.708L7.25 9.043 5.354 7.146a.5.5 0 10-.708.708l2.25 2.25a.5.5 0 00.708 0l3.75-3.75z" clip-rule="evenodd"/></svg>' +
+            "<span>Đã sửa chữa</span>";
+          tags.appendChild(verifiedTag);
+
+          var deviceName = [review.brand, review.model]
+            .filter(Boolean)
+            .join(" ")
+            .trim();
+          if (deviceName) {
+            var devTag = document.createElement("span");
+            devTag.className = "review-tag is-device";
+            devTag.textContent = deviceName;
+            tags.appendChild(devTag);
+          }
+
+          if (review.order_code) {
+            var orderTag = document.createElement("span");
+            orderTag.className = "review-tag is-order";
+            orderTag.textContent = "#" + review.order_code;
+            tags.appendChild(orderTag);
+          }
+
+          // Footer: User Avatar + Name & subtitle
           var who = document.createElement("div");
           who.className = "who";
+
           var avatar = document.createElement("div");
           avatar.className = "avatar";
-          avatar.textContent = (review.full_name || "K")
-            .trim()
-            .charAt(0)
-            .toUpperCase();
-          var name = document.createTextNode(review.full_name || "Khách hàng");
-          var via = document.createElement("span");
-          via.className = "via";
-          via.textContent = "· " + (review.order_code || "Đơn sửa chữa");
-          who.append(avatar, name, via);
-          card.append(starLine, comment, who);
+          var initials = getInitials(review.full_name);
+          var avatarUrl = resolveAvatarUrl(review.avatar);
+
+          if (avatarUrl) {
+            avatar.classList.add("has-img");
+            var img = document.createElement("img");
+            img.src = avatarUrl;
+            img.alt = review.full_name || "Khách hàng";
+            img.loading = "lazy";
+            img.addEventListener("error", function () {
+              avatar.classList.remove("has-img");
+              img.remove();
+              avatar.textContent = initials;
+            });
+            avatar.appendChild(img);
+          } else {
+            avatar.textContent = initials;
+          }
+
+          var whoInfo = document.createElement("div");
+          whoInfo.className = "who-info";
+
+          var whoName = document.createElement("div");
+          whoName.className = "who-name";
+          whoName.textContent = review.full_name || "Khách hàng";
+
+          var whoSub = document.createElement("div");
+          whoSub.className = "who-sub";
+          whoSub.textContent = "Khách hàng xác thực tại TechFix";
+
+          whoInfo.append(whoName, whoSub);
+          who.append(avatar, whoInfo);
+
+          card.append(quoteMark, head, comment, tags, who);
           reviewList.appendChild(card);
+        }
+
+        function updateRatingBars(reviews) {
+          var counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          var totalCount = reviews.length;
+          reviews.forEach(function (r) {
+            var s = Math.max(1, Math.min(5, Math.round(Number(r.rating) || 5)));
+            counts[s] = (counts[s] || 0) + 1;
+          });
+          var barsHost = document.getElementById("rating-bars");
+          if (!barsHost) return;
+          [5, 4, 3, 2, 1].forEach(function (star) {
+            var row = barsHost.querySelector('.r-bar-row[data-star="' + star + '"]');
+            if (!row) return;
+            var c = counts[star] || 0;
+            var pct = totalCount > 0 ? Math.round((c / totalCount) * 100) : 0;
+            var fill = row.querySelector(".r-bar-fill");
+            var countEl = row.querySelector(".r-bar-count");
+            if (fill) fill.style.width = pct + "%";
+            if (countEl) countEl.textContent = c;
+          });
         }
 
         function loadReviews() {
@@ -287,6 +554,7 @@
               if (!result.success) throw new Error(result.message);
               var reviews = result.data || [];
               reviewList.replaceChildren();
+              updateRatingBars(reviews);
               if (!reviews.length) {
                 reviewList.textContent =
                   "Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ trải nghiệm.";
@@ -302,8 +570,10 @@
               average.textContent = score.toFixed(1);
               averageStars.textContent = stars(Math.round(score));
               reviewCount.textContent =
-                "từ " + reviews.length + " lượt đánh giá";
-              reviews.forEach(addReviewCard);
+                "Dựa trên " + reviews.length + " lượt đánh giá";
+              reviews.forEach(function (rv, idx) {
+                addReviewCard(rv, idx);
+              });
             })
             .catch(function () {
               reviewList.textContent = "Không thể tải đánh giá lúc này.";
@@ -404,15 +674,19 @@
               if (!result.success) throw new Error(result.message);
               reviewForm.reset();
               reviewFields
-                .querySelectorAll("select, textarea, button")
+                .querySelectorAll("select, textarea, button[type='submit']")
                 .forEach(function (field) {
                   field.disabled = true;
                 });
+              reviewHelp.classList.remove("is-error");
               reviewHelp.textContent = result.message;
+              closeReviewModal();
+              showToast(result.message || "Cảm ơn bạn đã gửi đánh giá!", false);
               loadReviews();
               loadReviewOptions();
             })
             .catch(function (error) {
+              reviewHelp.classList.add("is-error");
               reviewHelp.textContent =
                 error.message || "Không thể gửi đánh giá.";
             })
@@ -423,6 +697,9 @@
 
         loadReviews();
         loadReviewOptions();
+        if (window.location.hash === "#review-form") {
+          openReviewModal();
+        }
       })();
     </script>
   </body>

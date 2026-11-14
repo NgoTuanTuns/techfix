@@ -145,7 +145,7 @@
     </section>
 
     <!-- Shared admin utilities -->
-    <script src="../js/admin-common.js?v=20261107-3"></script>
+    <script src="../js/admin-common.js?v=20261114"></script>
     <script>
       var allOrders = [];
       var technicians = [];
@@ -410,11 +410,20 @@
         return order.delivery_method === "Nhận máy tận nơi";
       }
 
+      function hasPriceValue(val) {
+        return (
+          val !== null &&
+          val !== undefined &&
+          val !== "" &&
+          !isNaN(Number(val)) &&
+          Number(val) >= 0
+        );
+      }
+
       function priceState(order, field) {
         var val = order[field];
-        // Check whether a positive price value is present
-        var hasValue =
-          val !== null && val !== undefined && val !== "" && Number(val) > 0;
+        // Check whether a non-negative price value (including 0 VND free service) is present
+        var hasValue = hasPriceValue(val);
 
         var missing =
           field === "final_cost" &&
@@ -604,7 +613,7 @@
         var finalText =
           order.status === "completed" ||
           order.status === "awaiting_payment" ||
-          Number(order.final_cost) > 0
+          hasPriceValue(order.final_cost)
             ? TF.formatMoney(order.final_cost) || "Chưa nhập"
             : "—";
 
@@ -813,10 +822,10 @@
               return;
             }
 
-            // Require estimated_cost > 0 before moving to awaiting_approval
+            // Require estimated_cost >= 0 before moving to awaiting_approval
             if (
               newStatus === "awaiting_approval" &&
-              !(Number(order.estimated_cost) > 0)
+              !hasPriceValue(order.estimated_cost)
             ) {
               TF.toast(
                 "Vui lòng nhập giá ước tính trước khi chuyển sang Chờ duyệt giá.",
@@ -836,7 +845,12 @@
                   order.status = newStatus;
                   order.completed_at =
                     newStatus === "completed" ? new Date().toISOString() : null;
-                  if (ok && ok.data && ok.data.final_cost) {
+                  if (
+                    ok &&
+                    ok.data &&
+                    ok.data.final_cost !== undefined &&
+                    ok.data.final_cost !== null
+                  ) {
                     order.final_cost = ok.data.final_cost;
                   }
                   refreshStatusSelect(order);
@@ -937,7 +951,9 @@
             // Database price already includes the pickup fee for doorstep orders, whereas the API expects
             // the base price and adds the fee automatically. Pre-fill the base price to avoid double-counting.
             var fee = isDelivery(order) ? DELIVERY_FEE : 0;
-            var current = Number(order[fieldName]) > 0 ? Number(order[fieldName]) : null;
+            var current = hasPriceValue(order[fieldName])
+              ? Number(order[fieldName])
+              : null;
             var basePrice = current == null ? null : Math.max(current - fee, 0);
             var label =
               (isFinal ? "Nhập giá cuối cùng (đ)" : "Nhập giá ước tính (đ)") +

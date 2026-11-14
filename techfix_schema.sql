@@ -222,6 +222,9 @@ MODIFY COLUMN status ENUM('pending_receipt', 'received', 'diagnosing', 'awaiting
 
 -- Seed service catalog data. INSERT IGNORE avoids duplicate key errors on existing slugs.
 INSERT IGNORE INTO services (slug, device_type, name, base_price) VALUES
+('thay-pin-laptop', 'laptop', 'Thay pin laptop Dell, Asus, HP (Ưu đãi -20%)', 450000),
+('thay-man-hinh-dt', 'phone', 'Thay màn hình iPhone, Samsung, Oppo (Ưu đãi -20%)', 1050000),
+('nang-cap-ssd', 'laptop', 'Nâng cấp SSD 256GB cho laptop (Ưu đãi -15%)', 590000),
 ('ve-sinh-tan-nhiet', 'laptop', 'Vệ sinh + tra keo tản nhiệt', 99000),
 ('thay-ban-phim', 'laptop', 'Thay bàn phím laptop', 250000),
 ('thay-man-hinh-laptop', 'laptop', 'Thay màn hình laptop', 1200000),

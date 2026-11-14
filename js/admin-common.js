@@ -37,8 +37,11 @@
     return d.innerHTML;
   };
   TF.formatMoney = function (n) {
-    if (n === null || n === undefined) return null;
-    return Number(n).toLocaleString("vi-VN") + "đ";
+    if (n === null || n === undefined || n === "") return null;
+    var num = Number(n);
+    if (isNaN(num)) return null;
+    if (num === 0) return "0đ (Miễn phí)";
+    return num.toLocaleString("vi-VN") + "đ";
   };
   // Format compact currency: 12500000 -> "12,5tr", 850000 -> "850k" (matches motion.js counter regex)
   TF.shortMoney = function (n) {

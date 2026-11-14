@@ -215,10 +215,11 @@ try {
             exit;
         }
 
+        $hasExistingEstimated = $existing['estimated_cost'] !== null && $existing['estimated_cost'] !== '';
         $effectiveEstimated = $hasEstimated
             ? ((int)$_POST['estimated_cost'] + $shippingFee)
-            : (int)($existing['estimated_cost'] ?? 0);
-        if ($newStatus === 'awaiting_approval' && $effectiveEstimated <= 0) {
+            : ($hasExistingEstimated ? (int)$existing['estimated_cost'] : null);
+        if ($newStatus === 'awaiting_approval' && ($effectiveEstimated === null || $effectiveEstimated < 0)) {
             $pdo->rollBack();
             echo json_encode(['success' => false, 'message' => 'Vui lòng nhập giá ước tính trước khi chuyển sang Chờ duyệt giá!']);
             exit;
@@ -239,10 +240,12 @@ try {
         }
 
         // Default final_cost to estimated_cost when entering awaiting_payment or completed if final_cost is unset
+        $hasExistingFinal = $existing['final_cost'] !== null && $existing['final_cost'] !== '';
+        $hasExistingEst   = $existing['estimated_cost'] !== null && $existing['estimated_cost'] !== '' && (int)$existing['estimated_cost'] >= 0;
         if (in_array($_POST['status'], ['awaiting_payment', 'completed'], true)
             && !$hasFinal
-            && (int)($existing['final_cost'] ?? 0) <= 0
-            && (int)($existing['estimated_cost'] ?? 0) > 0) {
+            && !$hasExistingFinal
+            && $hasExistingEst) {
             $autoFilledFinalCost = (int)$existing['estimated_cost'];
             $sets[] = 'final_cost = ?';
             $params[] = $autoFilledFinalCost;
@@ -305,11 +308,15 @@ try {
         $msg = 'Đã chuyển sang Chờ thanh toán. Nút Gửi mail đã được mở khoá để bạn gửi thông báo cho khách.';
     }
 
+    $hasEffectiveFinal = $hasFinal
+        || $autoFilledFinalCost !== null
+        || ($existing['final_cost'] !== null && $existing['final_cost'] !== '');
+
     echo json_encode([
         'success' => true,
         'message' => $msg,
         'data'    => [
-            'final_cost' => $effectiveFinal > 0 ? $effectiveFinal : null,
+            'final_cost' => $hasEffectiveFinal ? $effectiveFinal : null,
         ],
     ]);
 

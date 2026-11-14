@@ -322,8 +322,11 @@
       }
 
       function formatMoney(n) {
-        if (n === null || n === undefined) return null;
-        return Number(n).toLocaleString("vi-VN") + "đ";
+        if (n === null || n === undefined || n === "") return null;
+        var num = Number(n);
+        if (isNaN(num)) return null;
+        if (num === 0) return "0đ (Miễn phí)";
+        return num.toLocaleString("vi-VN") + "đ";
       }
 
       function setFormLoading(form, loading) {
@@ -443,11 +446,22 @@
         );
       }
 
+      function hasPrice(val) {
+        return (
+          val !== null &&
+          val !== undefined &&
+          val !== "" &&
+          !isNaN(Number(val)) &&
+          Number(val) >= 0
+        );
+      }
+
       function costLineHtml(order) {
         if (order.status === "awaiting_approval") return ""; // Price is displayed inside the quote approval box
-        var hasFinal = Number(order.final_cost) > 0;
+        var hasFinal = hasPrice(order.final_cost);
+        var hasEst = hasPrice(order.estimated_cost);
         var cost = formatMoney(hasFinal ? order.final_cost : order.estimated_cost);
-        if (!cost || (!hasFinal && !(Number(order.estimated_cost) > 0))) {
+        if (!cost || (!hasFinal && !hasEst)) {
           return '<p class="cost-line">Đang chờ kỹ thuật viên kiểm tra và báo giá.</p>';
         }
 
@@ -501,7 +515,7 @@
         if (order.status !== "awaiting_payment") return "";
         var price =
           formatMoney(
-            Number(order.final_cost) > 0
+            hasPrice(order.final_cost)
               ? order.final_cost
               : order.estimated_cost,
           ) || "Theo báo giá tại quầy";
