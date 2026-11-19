@@ -80,6 +80,64 @@
         </div>
 
         <div
+          id="booking-activation-warning"
+          style="
+            display: none;
+            background: color-mix(in srgb, var(--persimmon) 14%, var(--surface));
+            border: 1.5px solid var(--persimmon);
+            color: var(--ink);
+            padding: 16px 20px;
+            border-radius: var(--r-card);
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-1);
+          "
+        >
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 12px;
+            "
+          >
+            <div style="flex: 1; min-width: 240px">
+              <strong style="color: var(--persimmon); font-size: 1rem">
+                ⚠️ Tài khoản của bạn chưa được kích hoạt!
+              </strong>
+              <div
+                style="
+                  font-size: 0.88rem;
+                  color: var(--ink-soft);
+                  margin-top: 4px;
+                  line-height: 1.5;
+                "
+              >
+                Bạn cần kích hoạt tài khoản qua email trước khi đặt lịch sửa
+                chữa. Vui lòng kiểm tra hộp thư email đã đăng ký và bấm vào liên
+                kết kích hoạt.
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              id="btn-booking-resend-activation"
+            >
+              Gửi lại email kích hoạt
+            </button>
+          </div>
+          <div
+            id="booking-activation-status"
+            style="
+              display: none;
+              font-size: 0.84rem;
+              margin-top: 10px;
+              font-weight: 600;
+            "
+          ></div>
+        </div>
+
+        <div
           id="account-info"
           style="
             background: var(--bg-alt);
@@ -337,12 +395,77 @@
           if (emailInput && result.data.email && !emailInput.value) {
             emailInput.value = result.data.email;
           }
+
+          // Block booking form if account is not yet activated via email
+          if (Number(result.data.is_active) === 0) {
+            var warnBox = document.getElementById("booking-activation-warning");
+            if (warnBox) warnBox.style.display = "block";
+            var form = document.getElementById("booking-form");
+            if (form) {
+              form.dataset.unactivated = "1";
+              form
+                .querySelectorAll("input, select, textarea, button[type='submit']")
+                .forEach(function (el) {
+                  el.disabled = true;
+                });
+              var submitBtn = form.querySelector("button[type='submit']");
+              if (submitBtn) {
+                submitBtn.textContent =
+                  "Vui lòng kích hoạt tài khoản để đặt lịch";
+              }
+              form.style.opacity = "0.65";
+            }
+          }
         } catch (err) {
           // Redirect to login if the session check request fails
           window.location.href =
             "login.html?next=" + encodeURIComponent(nextTarget);
         }
       })();
+
+      var resendBtnBooking = document.getElementById(
+        "btn-booking-resend-activation",
+      );
+      if (resendBtnBooking) {
+        resendBtnBooking.addEventListener("click", async function () {
+          var btn = this;
+          var statusEl = document.getElementById("booking-activation-status");
+          btn.disabled = true;
+          btn.textContent = "Đang gửi...";
+          if (statusEl) statusEl.style.display = "none";
+          try {
+            var res = await fetch("../api/resend_activation.php", {
+              method: "POST",
+            });
+            var raw = await res.text();
+            var result = tryExtractJson(raw);
+            if (statusEl) {
+              statusEl.style.display = "block";
+              if (result && result.success) {
+                statusEl.style.color = "var(--ok)";
+                statusEl.textContent =
+                  "✓ " +
+                  (result.message ||
+                    "Đã gửi lại email kích hoạt. Vui lòng kiểm tra hộp thư.");
+              } else {
+                statusEl.style.color = "var(--error)";
+                statusEl.textContent =
+                  (result && result.message) ||
+                  "Không thể gửi lại email kích hoạt.";
+              }
+            }
+          } catch (e) {
+            if (statusEl) {
+              statusEl.style.display = "block";
+              statusEl.style.color = "var(--error)";
+              statusEl.textContent = "Không kết nối được tới máy chủ.";
+            }
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Gửi lại email kích hoạt";
+          }
+        });
+      }
 
       var SERVICES = {
         "thay-pin-laptop": {
@@ -555,6 +678,12 @@
         .addEventListener("submit", async function (e) {
           e.preventDefault();
           var form = e.target;
+          if (form.dataset.unactivated === "1") {
+            alert(
+              "Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email và kích hoạt tài khoản trước khi đặt lịch sửa chữa!",
+            );
+            return;
+          }
           var methodVal = document.getElementById("method").value;
           if (
             methodVal === "Mang trực tiếp đến cửa hàng" &&

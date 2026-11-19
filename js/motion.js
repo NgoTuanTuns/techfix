@@ -499,17 +499,7 @@
 
   /* ---------- 6. Page-Level Decorative Mounts ---------- */
   function initDecor() {
-    // SVG displacement filter for stamp ink edge texture
-    var defs = document.createElementNS(NS, "svg");
-    defs.setAttribute("width", "0");
-    defs.setAttribute("height", "0");
-    defs.setAttribute("style", "position:absolute");
-    defs.setAttribute("aria-hidden", "true");
-    defs.innerHTML =
-      '<filter id="ink-edge"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4"/></filter>';
-    document.body.appendChild(defs);
-
-    var rainN = small ? 9 : 22;
+    var rainN = small ? 8 : 14;
 
     var hero = $(".hero");
     if (hero) {
@@ -603,7 +593,7 @@
         window.addEventListener(
           "scroll",
           function () {
-            if (!ticking) {
+            if (!ticking && !cta.classList.contains("paused")) {
               ticking = true;
               requestAnimationFrame(upd);
             }
@@ -722,27 +712,68 @@
 
   /* ---------- 8. Animated Number Counters & Rating Ring ---------- */
   function countUp(node) {
+    if (node._counting) return;
     var raw = node.textContent.trim();
     var m = raw.match(/^([\d.,]+)(.*)$/);
     if (!m) return;
+    if (node._lastTarget === raw) return;
+    node._lastTarget = raw;
+
     var numStr = m[1],
       suffix = m[2];
-    var dec = (numStr.split(".")[1] || "").length;
+    var useComma = numStr.indexOf(",") !== -1;
+    var dec = (numStr.split(/[.,]/)[1] || "").length;
     var target = parseFloat(numStr.replace(",", "."));
     if (isNaN(target) || reduce) return;
-    var dur = 1200,
-      start = null;
-    node.textContent = (0).toFixed(dec) + suffix;
+
+    var box = node.closest && node.closest(".stat-box");
+    var idx = box ? parseInt(box.style.getPropertyValue("--i") || "0", 10) || 0 : 0;
+    var delay = idx * 95;
+
+    node._counting = true;
+    node.classList.remove("is-counting");
+    void node.offsetWidth;
+    node.style.animationDelay = delay + "ms";
+    node.classList.add("is-counting");
+
+    var dur = target <= 4 && dec === 0 ? 750 : 1100;
+    var start = null;
+
+    function fmt(val) {
+      var s = val.toFixed(dec);
+      if (useComma) s = s.replace(".", ",");
+      return s + suffix;
+    }
+
     function step(ts) {
       if (start === null) start = ts;
-      var p = clamp((ts - start) / dur, 0, 1);
+      var elapsed = ts - start - delay;
+      if (elapsed < 0) {
+        requestAnimationFrame(step);
+        return;
+      }
+      var p = clamp(elapsed / dur, 0, 1);
       var e = 1 - Math.pow(1 - p, 3);
-      node.textContent = (target * e).toFixed(dec) + suffix;
-      if (p < 1) requestAnimationFrame(step);
-      else node.textContent = raw;
+
+      if (p < 1) {
+        if (target <= 3 && dec === 0 && p < 0.72) {
+          // Brief odometer reel for 0..3 so small counts still visibly roll
+          var reel = Math.floor(p * 12) % 6;
+          node.textContent = reel + suffix;
+        } else {
+          node.textContent = fmt(target * e);
+        }
+        requestAnimationFrame(step);
+      } else {
+        node.textContent = raw;
+        setTimeout(function () {
+          node._counting = false;
+        }, 50);
+      }
     }
     requestAnimationFrame(step);
   }
+
   function initCounters() {
     var nodes = $$(".rating-summary .num, .stat-box .n");
     if (!nodes.length) return;
@@ -779,16 +810,41 @@
       num.style.position = "relative";
     });
 
-    if (!("IntersectionObserver" in window)) return;
+    function tryTrigger(n) {
+      if (!n._inView || n._counting) return;
+      if (/^[\d.,]+/.test(n.textContent.trim())) {
+        countUp(n);
+      }
+    }
+
+    if ("MutationObserver" in window) {
+      nodes.forEach(function (n) {
+        var mo = new MutationObserver(function () {
+          if (!n._counting) {
+            tryTrigger(n);
+          }
+        });
+        mo.observe(n, { childList: true, characterData: true, subtree: true });
+      });
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      nodes.forEach(function (n) {
+        n._inView = true;
+        tryTrigger(n);
+      });
+      return;
+    }
     var io = new IntersectionObserver(
       function (es) {
         es.forEach(function (e) {
           if (!e.isIntersecting) return;
-          countUp(e.target);
+          e.target._inView = true;
+          tryTrigger(e.target);
           io.unobserve(e.target);
         });
       },
-      { threshold: 0.6 },
+      { threshold: 0.4 },
     );
     nodes.forEach(function (n) {
       io.observe(n);
@@ -861,24 +917,32 @@
             1,
           );
     }
+    var lastP = -1;
     function render() {
       var p = progress();
+      if (Math.abs(p - lastP) < 0.002) return;
+      lastP = p;
       steps.forEach(function (s, i) {
         var at = steps.length > 1 ? i / (steps.length - 1) : 0;
         s.classList.toggle("bloom", p >= at - 0.02 && p > 0.02);
       });
-      if (!single) return;
+      if (!single || !len) return;
       live.style.strokeDashoffset = len * (1 - p);
-      var pt = live.getPointAtLength(len * p);
-      dot.setAttribute("cx", pt.x);
-      dot.setAttribute("cy", pt.y);
-      dot.style.opacity = p > 0.02 && p < 0.995 ? 1 : 0;
+      if (p > 0.02 && p < 0.995) {
+        var pt = live.getPointAtLength(len * p);
+        dot.setAttribute("cx", pt.x);
+        dot.setAttribute("cy", pt.y);
+        dot.style.opacity = 1;
+      } else {
+        dot.style.opacity = 0;
+      }
     }
+    watchPause(track);
     var ticking = false;
     window.addEventListener(
       "scroll",
       function () {
-        if (!ticking) {
+        if (!ticking && !track.classList.contains("paused")) {
           ticking = true;
           requestAnimationFrame(function () {
             render();

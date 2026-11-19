@@ -25,6 +25,19 @@ require_login();
 ensure_order_payment_schema($pdo);
 $userId = $_SESSION['user_id'];
 
+// Require email account activation before allowing repair booking
+$activeStmt = $pdo->prepare('SELECT is_active FROM users WHERE id = ?');
+$activeStmt->execute([$userId]);
+$userRow = $activeStmt->fetch();
+if (!$userRow || (int)($userRow['is_active'] ?? 0) !== 1) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email và kích hoạt tài khoản trước khi đặt lịch sửa chữa!',
+    ]);
+    exit;
+}
+
 $deviceType      = trim($_POST['device'] ?? '');
 $brand           = trim($_POST['brand'] ?? '');
 $model           = trim($_POST['model'] ?? '');

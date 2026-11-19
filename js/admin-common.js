@@ -65,7 +65,11 @@
   TF.get = async function (url) {
     var cacheKey = "tf_api_cache_" + url;
     try {
-      var parsed = TF.tryExtractJson(await (await fetch(url)).text());
+      var res = await fetch(url, {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      var parsed = TF.tryExtractJson(await res.text());
       if (parsed && parsed.success) {
         try {
           localStorage.setItem(cacheKey, JSON.stringify(parsed));
@@ -87,7 +91,13 @@
     });
     try {
       var r = TF.tryExtractJson(
-        await (await fetch(url, { method: "POST", body: fd })).text(),
+        await (
+          await fetch(url, {
+            method: "POST",
+            body: fd,
+            credentials: "same-origin",
+          })
+        ).text(),
       );
       return (
         r || {

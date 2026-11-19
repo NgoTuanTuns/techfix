@@ -1707,17 +1707,15 @@ section.alt::before {
 .cta-pulse {
   fill: none;
   stroke: var(--persimmon-lt);
-  stroke-width: 3;
+  stroke-width: 3.2;
   stroke-linecap: round;
   stroke-dasharray: 6 94;
   stroke-dashoffset: 100;
-  filter: drop-shadow(0 0 6px rgba(240, 163, 94, 0.9));
   animation: cta-current linear infinite;
 }
 .cta-pulse.is-frame {
   stroke: var(--moon);
   stroke-dasharray: 4 96;
-  filter: drop-shadow(0 0 6px rgba(255, 244, 184, 0.9));
 }
 @keyframes cta-current {
   to {
@@ -2103,7 +2101,6 @@ section.browse {
   font-weight: 700;
   font-size: 1.15rem;
   transform: rotate(-8deg);
-  filter: url(#ink-edge);
 }
 .deal-mini-row {
   display: grid;
@@ -2586,101 +2583,116 @@ section.browse {
 }
 
 /* --- Scroll-Triggered Reveal Animations (.rv & .in toggled by motion.js) --- */
-/* Device cards unfold upward from the bottom edge */
+/* GPU-accelerated opacity + translate reveals (avoids main-thread clip-path repaint jank) */
 .js .browse-list > li.rv:not(.in) {
-  clip-path: inset(100% 0 0 0);
+  opacity: 0;
+  translate: 0 18px;
 }
 .js .browse-list > li.rv {
-  transition: clip-path 0.8s var(--ease-leaf) calc(var(--i, 0) * 90ms);
+  transition:
+    opacity 0.55s var(--ease-leaf) calc(var(--i, 0) * 65ms),
+    translate 0.55s var(--ease-leaf) calc(var(--i, 0) * 65ms);
 }
 .js .browse-list > li.rv.in {
-  clip-path: inset(-20px);
+  opacity: 1;
+  translate: 0 0;
 }
-/* Promo banners wipe in from the left; compact cards slide in from the right */
+/* Promo banners slide in from the left; compact cards slide in from the right */
 .js .deal-feature.rv:not(.in) {
-  clip-path: inset(0 100% 0 0 round var(--r-card));
+  opacity: 0;
+  translate: -18px 0;
 }
 .js .deal-mini.rv:not(.in) {
-  clip-path: inset(0 0 0 100% round var(--r-card));
+  opacity: 0;
+  translate: 18px 0;
 }
 .js .deal-feature.rv,
 .js .deal-mini.rv {
-  transition: clip-path 1s var(--ease-leaf) calc(var(--i, 0) * 160ms);
+  transition:
+    opacity 0.65s var(--ease-leaf) calc(var(--i, 0) * 110ms),
+    translate 0.65s var(--ease-leaf) calc(var(--i, 0) * 110ms);
 }
 .js .deal-feature.rv.in,
 .js .deal-mini.rv.in {
-  clip-path: inset(-20px);
+  opacity: 1;
+  translate: 0 0;
 }
 /* Seal badge stamps down after the banner reveal completes */
 .js .deal-feature.rv:not(.in) .deal-stamp {
   opacity: 0;
 }
 .js .deal-feature.rv.in .deal-stamp {
-  animation: deal-stamp 0.55s var(--ease-spring)
-    calc(0.75s + var(--i, 0) * 160ms) both;
+  animation: deal-stamp 0.5s var(--ease-spring)
+    calc(0.45s + var(--i, 0) * 110ms) both;
 }
 @keyframes deal-stamp {
   from {
     opacity: 0;
-    transform: scale(1.6) rotate(20deg);
+    transform: scale(1.4) rotate(14deg);
   }
   to {
     opacity: 1;
     transform: scale(1) rotate(-8deg);
   }
 }
-/* Featured package unfolds upward, vine grows down the list, and items cascade in */
+/* Featured package rises smoothly, vine grows down the list, and items cascade in */
 .js .svc-feature.rv:not(.in) {
-  clip-path: inset(100% 0 0 0);
+  opacity: 0;
+  translate: 0 20px;
 }
 .js .svc-feature.rv {
-  transition: clip-path 0.9s var(--ease-leaf);
+  transition:
+    opacity 0.65s var(--ease-leaf),
+    translate 0.65s var(--ease-leaf);
 }
 .js .svc-feature.rv.in {
-  clip-path: inset(-20px);
+  opacity: 1;
+  translate: 0 0;
 }
 .js .svc-rows.rv::before {
-  transition: transform 1.2s var(--ease-leaf) 0.2s;
+  transition: transform 0.9s var(--ease-leaf) 0.15s;
 }
 .js .svc-rows.rv:not(.in)::before {
   transform: scaleY(0);
 }
 .js .svc-rows.rv .svc-row {
   transition:
-    opacity 0.6s var(--ease-leaf),
-    translate 0.6s var(--ease-leaf);
+    opacity 0.55s var(--ease-leaf),
+    translate 0.55s var(--ease-leaf);
 }
 .js .svc-rows.rv .svc-row:nth-child(2) {
-  transition-delay: 0.35s;
+  transition-delay: 0.2s;
 }
 .js .svc-rows.rv .svc-row:nth-child(3) {
-  transition-delay: 0.7s;
+  transition-delay: 0.4s;
 }
 .js .svc-rows.rv:not(.in) .svc-row {
   opacity: 0;
-  translate: 18px 0;
+  translate: 14px 0;
 }
-/* Phone cards drift downward like falling leaves */
+/* Phone cards drift into place */
 .js .rail-card.rv:not(.in) {
   opacity: 0;
-  rotate: -4deg;
-  translate: 0 22px;
+  translate: 0 18px;
 }
 .js .rail-card.rv {
   transition:
-    opacity 0.6s var(--ease-leaf) calc(var(--i, 0) * 110ms),
-    rotate 0.8s var(--ease-spring) calc(var(--i, 0) * 110ms),
-    translate 0.8s var(--ease-spring) calc(var(--i, 0) * 110ms);
+    opacity 0.55s var(--ease-leaf) calc(var(--i, 0) * 80ms),
+    translate 0.6s var(--ease-leaf) calc(var(--i, 0) * 80ms);
 }
-/* Tablet showcase expands radially while dotted price leaders draw across */
+/* Tablet showcase rises in while dotted price leaders draw across */
 .js .tablet-art.rv:not(.in) {
-  clip-path: circle(0% at 75% 20%);
+  opacity: 0;
+  translate: 0 20px;
 }
 .js .tablet-art.rv {
-  transition: clip-path 1.4s var(--ease-leaf);
+  transition:
+    opacity 0.7s var(--ease-leaf),
+    translate 0.7s var(--ease-leaf);
 }
 .js .tablet-art.rv.in {
-  clip-path: circle(150% at 75% 20%);
+  opacity: 1;
+  translate: 0 0;
 }
 .js .price-menu li.rv .pm-dots {
   transition: transform 0.7s var(--ease-leaf) calc(var(--i, 0) * 140ms);
@@ -3704,35 +3716,128 @@ section.browse {
   margin-bottom: 28px;
 }
 .stat-box {
-  background: var(--card-matcha);
-  border-radius: var(--r-card);
-  padding: 22px;
+  --stat-accent: var(--persimmon);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--stat-accent) 13%, var(--surface)) 0%,
+    var(--surface) 78%
+  );
+  border: 1px solid color-mix(in srgb, var(--stat-accent) 28%, var(--line));
+  border-radius: 0;
+  padding: 22px 24px 20px 26px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-1);
+  transition:
+    transform 0.25s var(--ease-leaf),
+    box-shadow 0.25s var(--ease-leaf),
+    border-color 0.25s ease;
+}
+.stat-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--stat-accent);
+}
+.stat-box::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  border-top: 2px solid var(--stat-accent);
+  border-right: 2px solid var(--stat-accent);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.stat-box:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+  border-color: color-mix(in srgb, var(--stat-accent) 65%, var(--line));
 }
 .stat-box:nth-child(1) {
-  background: var(--card-peach);
-  border-radius: var(--r-leaf);
+  --stat-accent: #f59e0b;
+  border-radius: 0;
 }
 .stat-box:nth-child(2) {
-  background: var(--card-mist);
+  --stat-accent: #38bdf8;
 }
 .stat-box:nth-child(3) {
-  background: var(--card-matcha);
+  --stat-accent: #10b981;
 }
 .stat-box:nth-child(4) {
-  background: var(--card-wisteria);
+  --stat-accent: #a78bfa;
+}
+[data-theme="dark"] .stat-box {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--stat-accent) 18%, #162447) 0%,
+    #121e3a 82%
+  );
+  border-color: color-mix(in srgb, var(--stat-accent) 34%, #263861);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 24px -8px rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] .stat-box:hover {
+  border-color: color-mix(in srgb, var(--stat-accent) 75%, #263861);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 32px -10px rgba(0, 0, 0, 0.65);
 }
 .stat-box .n {
   font-family: var(--font-display);
-  font-size: 2.6rem;
-  font-weight: 600;
+  font-size: 2.75rem;
+  font-weight: 700;
   line-height: 1;
+  color: var(--moss-ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  display: inline-block;
+  transform-origin: left bottom;
+}
+.stat-box .n.is-counting {
+  animation: stat-num-pop 0.78s var(--ease-spring) both;
+}
+@keyframes stat-num-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.84);
+    color: var(--stat-accent);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.06);
+    color: var(--stat-accent);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    color: var(--moss-ink);
+  }
 }
 .stat-box .l {
-  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--ink-soft);
-  margin-top: 8px;
+  margin-top: 12px;
+}
+.stat-box .l::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--stat-accent);
+  display: inline-block;
+  flex-shrink: 0;
 }
 .table-scroll {
   overflow-x: auto;
@@ -4679,49 +4784,62 @@ table.orders tbody tr:hover td {
   }
 }
 
-/* Section-specific scroll reveal variants */
+/* Section-specific scroll reveal variants (GPU-accelerated opacity + translate) */
 .js .rv {
   transition: opacity 0.01s;
 }
 .js .order-card.rv:not(.in),
 .js .stat-box.rv:not(.in),
 .js .banner.rv:not(.in) img {
-  clip-path: inset(100% 0 0 0);
+  opacity: 0;
+  translate: 0 16px;
 }
 .js .order-card.rv,
 .js .stat-box.rv {
   transition:
-    clip-path 0.9s var(--ease-leaf) calc(var(--i, 0) * 110ms),
+    opacity 0.6s var(--ease-leaf) calc(var(--i, 0) * 80ms),
+    translate 0.6s var(--ease-leaf) calc(var(--i, 0) * 80ms),
     box-shadow var(--t-base),
     transform var(--t-base) var(--ease-leaf);
 }
 .js .order-card.rv.in,
 .js .stat-box.rv.in {
-  clip-path: inset(-20px -20px -20px -20px);
+  opacity: 1;
+  translate: 0 0;
 }
 .js .banner.rv img {
-  transition: clip-path 1.1s var(--ease-leaf);
+  transition:
+    opacity 0.65s var(--ease-leaf),
+    translate 0.65s var(--ease-leaf);
 }
 .js .banner.rv.in img {
-  clip-path: inset(0 round var(--r-card));
+  opacity: 1;
+  translate: 0 0;
 }
 .js .review-card.rv:not(.in) {
-  clip-path: circle(0% at 50% 40%);
+  opacity: 0;
+  translate: 0 18px;
 }
 .js .review-card.rv {
-  transition: clip-path 1s var(--ease-leaf) calc(var(--i, 0) * 140ms);
+  transition:
+    opacity 0.6s var(--ease-leaf) calc(var(--i, 0) * 90ms),
+    translate 0.6s var(--ease-leaf) calc(var(--i, 0) * 90ms),
+    transform 0.3s var(--ease-leaf),
+    box-shadow 0.3s var(--ease-leaf),
+    border-color 0.3s ease;
 }
 .js .review-card.rv.in {
-  clip-path: circle(150% at 50% 40%);
+  opacity: 1;
+  translate: 0 0;
 }
 .js .process-step.rv:not(.in) {
   opacity: 0;
-  translate: 0 24px;
+  translate: 0 20px;
 }
 .js .process-step.rv {
   transition:
-    opacity 0.7s var(--ease-leaf) calc(var(--i, 0) * 140ms),
-    translate 0.7s var(--ease-leaf) calc(var(--i, 0) * 140ms);
+    opacity 0.6s var(--ease-leaf) calc(var(--i, 0) * 110ms),
+    translate 0.6s var(--ease-leaf) calc(var(--i, 0) * 110ms);
 }
 .js .process-step.rv.in {
   opacity: 1;
@@ -4729,16 +4847,20 @@ table.orders tbody tr:hover td {
 }
 .js .section-head.rv:not(.in) h2,
 .js .device-section-head.rv:not(.in) h2 {
-  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  translate: 0 12px;
 }
 .js .section-head.rv h2,
 .js .device-section-head.rv h2 {
-  transition: clip-path 1.1s var(--ease-leaf);
+  transition:
+    opacity 0.6s var(--ease-leaf),
+    translate 0.6s var(--ease-leaf);
   padding-bottom: 0.1em;
 }
 .js .section-head.rv.in h2,
 .js .device-section-head.rv.in h2 {
-  clip-path: inset(0 -4px -0.2em 0);
+  opacity: 1;
+  translate: 0 0;
 }
 .js .section-head.rv:not(.in) p,
 .js .device-section-head.rv:not(.in) a {
@@ -4747,7 +4869,7 @@ table.orders tbody tr:hover td {
 .js .section-head.rv p,
 .js .device-section-head.rv a {
   transition:
-    opacity 0.8s ease 0.5s,
+    opacity 0.6s ease 0.2s,
     background var(--t-base),
     color var(--t-base);
 }
@@ -4800,13 +4922,17 @@ table.orders tbody tr:hover td {
     translate 0.7s var(--ease-leaf) calc(var(--i, 0) * 120ms);
 }
 .js .map-box.rv:not(.in) {
-  clip-path: inset(0 0 100% 0 round var(--r-card));
+  opacity: 0;
+  translate: 0 18px;
 }
 .js .map-box.rv {
-  transition: clip-path 1s var(--ease-leaf) 0.3s;
+  transition:
+    opacity 0.65s var(--ease-leaf) 0.15s,
+    translate 0.65s var(--ease-leaf) 0.15s;
 }
 .js .map-box.rv.in {
-  clip-path: inset(0 round var(--r-card));
+  opacity: 1;
+  translate: 0 0;
 }
 
 /* ---------- Reduced Motion Preferences ---------- */

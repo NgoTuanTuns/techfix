@@ -20,9 +20,19 @@ function ensure_order_payment_schema(PDO $pdo): void
     $checked = true;
 
     try {
-        // 1. Check if `customer_email` column exists in `repair_orders`
-        $colStmt = $pdo->query("SHOW COLUMNS FROM repair_orders LIKE 'customer_email'");
-        if (!$colStmt->fetch()) {
+        // 1. Ensure delivery_address, delivery_phone, and customer_email columns exist in `repair_orders`
+        $orderCols = [];
+        $oStmt = $pdo->query("SHOW COLUMNS FROM repair_orders");
+        while ($row = $oStmt->fetch(PDO::FETCH_ASSOC)) {
+            $orderCols[strtolower($row['Field'])] = true;
+        }
+        if (empty($orderCols['delivery_address'])) {
+            $pdo->exec("ALTER TABLE repair_orders ADD COLUMN delivery_address VARCHAR(255) NULL AFTER delivery_method");
+        }
+        if (empty($orderCols['delivery_phone'])) {
+            $pdo->exec("ALTER TABLE repair_orders ADD COLUMN delivery_phone VARCHAR(15) NULL AFTER delivery_address");
+        }
+        if (empty($orderCols['customer_email'])) {
             $pdo->exec("ALTER TABLE repair_orders ADD COLUMN customer_email VARCHAR(100) NULL AFTER delivery_phone");
         }
 

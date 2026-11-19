@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../css/style.css?v=20261107-5" />
+    <link rel="stylesheet" href="../css/style.css?v=20261119-num" />
     <link rel="stylesheet" href="../css/admin-extra.css?v=20261107-2" />
     <script>
       (function () {
@@ -23,7 +23,7 @@
         document.documentElement.classList.add("js");
       })();
     </script>
-    <script src="../js/motion.js" defer></script>
+    <script src="../js/motion.js?v=20261119-num" defer></script>
   </head>
   <body>
     <header class="site-header">
@@ -145,7 +145,7 @@
     </section>
 
     <!-- Shared admin utilities -->
-    <script src="../js/admin-common.js?v=20261114"></script>
+    <script src="../js/admin-common.js?v=20261119"></script>
     <script>
       var allOrders = [];
       var technicians = [];
@@ -1033,8 +1033,12 @@
         var techRes = results[1];
 
         if (!ordersRes || !ordersRes.success) {
+          var errMsg =
+            (ordersRes && ordersRes.message) || "Không tải được danh sách đơn.";
           document.getElementById("orders-tbody").innerHTML =
-            '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:24px;">Không tải được danh sách đơn.</td></tr>';
+            '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:24px;">' +
+            TF.esc(errMsg) +
+            "</td></tr>";
           return;
         }
 

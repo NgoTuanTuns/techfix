@@ -32,6 +32,11 @@ try {
 
     $user['is_active'] = (int)($user['is_active'] ?? 0);
 
+    // Keep session state synchronized with the latest database record (e.g. if role or active status changed in DB)
+    $_SESSION['role']      = $user['role'];
+    $_SESSION['full_name'] = $user['full_name'];
+    $_SESSION['is_active'] = $user['is_active'];
+
     echo json_encode(['success' => true, 'data' => $user]);
 
 } catch (PDOException $e) {
