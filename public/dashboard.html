@@ -298,8 +298,6 @@
           };
           reader.readAsDataURL(file);
         });
-      if (false) {
-      }
 
       function formatDate(mysqlDatetime) {
         if (!mysqlDatetime) return "—";
@@ -824,9 +822,6 @@
           document.getElementById("profile-phone").textContent =
             currentUser.phone;
           renderUserAvatar(currentUser);
-          if (false) document.getElementById("avatar").textContent = getInitials(
-            currentUser.full_name,
-          );
           if (["admin", "technician"].includes(currentUser.role)) {
             document.getElementById("admin-panel-link").style.display = "";
           }
@@ -856,13 +851,6 @@
             return;
           }
         }
-        if (false) try {
-          document.getElementById("acc-name").value = currentUser.full_name;
-          document.getElementById("acc-phone").value = currentUser.phone;
-        } catch (err) {
-          window.location.href = "login.html?next=dashboard.html";
-          return;
-        }
 
         await loadOrders();
       })();
@@ -875,26 +863,6 @@
           var ordersResult = tryExtractJson(ordersRaw);
 
           if (!ordersResult || !ordersResult.success) {
-              var cachedOrders = null;
-            try {
-              cachedOrders = JSON.parse(localStorage.getItem("tf_cached_orders") || "null");
-            } catch (e) {}
-            if (Array.isArray(cachedOrders)) {
-              renderOrders(cachedOrders);
-              showToast("Đang hiển thị danh sách đơn lưu ngoại tuyến.", false);
-              return;
-            }
-            document.getElementById("orders-container").innerHTML =
-              '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không kết nối được tới máy chủ.</p></div>';
-          if (false) document.getElementById("orders-container").innerHTML =
-              '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không tải được danh sách đơn. Vui lòng thử lại sau.</p></div>';
-            return;
-          }
-          try {
-            localStorage.setItem("tf_cached_orders", JSON.stringify(ordersResult.data));
-          } catch (e) {}
-          renderOrders(ordersResult.data);
-        } catch (err) {
             var cachedOrders = null;
             try {
               cachedOrders = JSON.parse(localStorage.getItem("tf_cached_orders") || "null");
@@ -905,8 +873,24 @@
               return;
             }
             document.getElementById("orders-container").innerHTML =
-              '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không kết nối được tới máy chủ.</p></div>';
-          if (false) document.getElementById("orders-container").innerHTML =
+              '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không tải được danh sách đơn. Vui lòng thử lại sau.</p></div>';
+            return;
+          }
+          try {
+            localStorage.setItem("tf_cached_orders", JSON.stringify(ordersResult.data));
+          } catch (e) {}
+          renderOrders(ordersResult.data);
+        } catch (err) {
+          var cachedOrders = null;
+          try {
+            cachedOrders = JSON.parse(localStorage.getItem("tf_cached_orders") || "null");
+          } catch (e) {}
+          if (Array.isArray(cachedOrders)) {
+            renderOrders(cachedOrders);
+            showToast("Đang hiển thị danh sách đơn lưu ngoại tuyến.", false);
+            return;
+          }
+          document.getElementById("orders-container").innerHTML =
             '<div class="order-card"><p style="color:var(--ink-soft);font-size:0.9rem;">Không kết nối được tới máy chủ.</p></div>';
         }
       }
@@ -960,11 +944,10 @@
             }
 
             if (result.success) {
-            if (result.success) showToast("Đã lưu thông tin tài khoản.");
+              showToast("Đã lưu thông tin tài khoản.");
               if (result.data && result.data.avatar !== undefined) {
                 currentUser.avatar = result.data.avatar;
               }
-              if (false) alert("Đã lưu thay đổi.");
               currentUser.full_name = result.data.full_name;
               currentUser.phone = result.data.phone;
               document.getElementById("greeting").textContent =
@@ -974,9 +957,6 @@
               document.getElementById("profile-phone").textContent =
                 currentUser.phone;
               renderUserAvatar(currentUser);
-          if (false) document.getElementById("avatar").textContent = getInitials(
-                currentUser.full_name,
-              );
               document.getElementById("acc-current-pass").value = "";
               document.getElementById("acc-new-pass").value = "";
               document.getElementById("acc-new-pass2").value = "";
@@ -984,7 +964,6 @@
               try {
                 localStorage.setItem("tf_cached_user", JSON.stringify(currentUser));
               } catch (e) {}
-              renderUserAvatar(currentUser);
             } else {
               alert(result.message || "Cập nhật thất bại, vui lòng thử lại.");
             }

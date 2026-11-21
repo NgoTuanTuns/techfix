@@ -38,8 +38,8 @@ Step 4: Configure Environment Variables (Optional - for SMTP Email):
   - Database connection settings in `config/database.php` default to standard
     XAMPP credentials (`host=localhost`, `dbname=techfix`, `user=root`, `pass=""`).
   - For SMTP email notifications (`includes/mailer.php`), copy `.env.example`
-    to `.env` and fill in `SMTP_USER` and `SMTP_PASS` (16-character Gmail App
-    Password).
+    to `.env` and fill in `TECHFIX_SMTP_USER` and `TECHFIX_SMTP_PASS`
+    (16-character Gmail App Password).
 
 4. PRE-CONFIGURED TEST ACCOUNTS FOR EVALUATION
 ------------------------------------------------------------------------
@@ -66,8 +66,10 @@ All seeded accounts below use the password:  admin123
   + Registration with valid email address, bcrypt password hashing, double
     password confirmation, and automatic login after sign-up (`api/register.php`).
   + Account activation via email verification link with a persistent notification
-    banner on the dashboard until verified, plus a resend option (`api/activate_account.php`,
-    `api/resend_activation.php`, `public/dashboard.html`).
+    banner on the dashboard and booking page until verified (account activation
+    is required before booking a repair order), plus a resend option
+    (`api/activate_account.php`, `api/resend_activation.php`, `public/dashboard.html`,
+    `public/booking.html`, `api/create_order.php`).
   + Password recovery via time-limited secure email link (30 min expiration),
     dedicated reset password screen with double confirmation (`api/forgot_password.php`,
     `public/reset-password.html`, `api/reset_password.php`).
