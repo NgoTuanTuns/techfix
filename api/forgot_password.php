@@ -54,9 +54,8 @@ try {
     }
 
     echo json_encode([
-        'success'      => true,
-        'message'      => $message,
-        'preview_file' => $previewFile,
+        'success' => true,
+        'message' => $message,
     ]);
 
 } catch (PDOException $e) {

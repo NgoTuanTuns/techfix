@@ -57,15 +57,8 @@ try {
     }
 
     $isFutureSql = !empty($user['is_future_sql']);
-    $isFuturePhp = false;
-    if (!empty($user['reset_token_expires_at'])) {
-        $expTime = strtotime($user['reset_token_expires_at']);
-        if ($expTime > (time() - 300) || abs(time() - $expTime) < 3600) {
-            $isFuturePhp = true;
-        }
-    }
 
-    if (!$isFutureSql && !$isFuturePhp) {
+    if (!$isFutureSql) {
         http_response_code(400);
         echo json_encode([
             'success' => false,

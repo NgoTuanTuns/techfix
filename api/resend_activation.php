@@ -61,14 +61,10 @@ try {
     $mailRes = send_activation_email($user['email'], $user['full_name'], $token);
 
     $msg = 'Đã gửi lại email kích hoạt tới ' . $user['email'] . '. Vui lòng kiểm tra hộp thư đến (hoặc thư mục Thư rác / Spam).';
-    if (!empty($mailRes['preview_file']) && empty($mailRes['sent']) && ($mailRes['mode'] ?? '') === 'preview_saved') {
-        $msg .= ' (Bản xem trước: ' . $mailRes['preview_file'] . ')';
-    }
 
     echo json_encode([
-        'success'      => true,
-        'message'      => $msg,
-        'preview_file' => $mailRes['preview_file'] ?? null,
+        'success' => true,
+        'message' => $msg,
     ]);
 
 } catch (PDOException $e) {
