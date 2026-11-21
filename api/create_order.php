@@ -102,34 +102,6 @@ if ($time !== '') {
     $preferredTime = $normalized;
 }
 
-// ---------- Optional Photo Upload ----------
-$uploadedPath = null;
-if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-    $allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
-    $mime = mime_content_type($_FILES['photo']['tmp_name']);
-
-    if (!in_array($mime, $allowedMime, true)) {
-        echo json_encode(['success' => false, 'message' => 'Ảnh phải ở định dạng JPG, PNG hoặc WEBP']);
-        exit;
-    }
-    if ($_FILES['photo']['size'] > 5 * 1024 * 1024) {
-        echo json_encode(['success' => false, 'message' => 'Ảnh không được vượt quá 5MB']);
-        exit;
-    }
-
-    $uploadDir = __DIR__ . '/../uploads/orders/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
-
-    $ext = $mime === 'image/png' ? 'png' : ($mime === 'image/webp' ? 'webp' : 'jpg');
-    $fileName = uniqid('order_', true) . '.' . $ext;
-
-    if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $fileName)) {
-        $uploadedPath = 'uploads/orders/' . $fileName;
-    }
-}
-
 // ---------- Create Order in Transaction ----------
 try {
     $pdo->beginTransaction();
@@ -202,13 +174,7 @@ try {
         }
     }
 
-    // 4. Save attachment record if a photo was uploaded
-    if ($uploadedPath !== null) {
-        $pdo->prepare('INSERT INTO order_attachments (order_id, file_path) VALUES (?, ?)')
-            ->execute([$orderId, $uploadedPath]);
-    }
-
-    // 5. Record initial status history entry
+    // 4. Record initial status history entry
     $pdo->prepare(
         'INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, "pending_receipt", ?, ?)'
     )->execute([$orderId, 'Khách đặt lịch online (Chưa tiếp nhận máy)', $userId]);
